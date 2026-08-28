@@ -1,4 +1,6 @@
-﻿namespace CloudShopping.Application.Abstractions.Data
+﻿using CloudShopping.Domain.Entities.Tenants;
+
+namespace CloudShopping.Application.Abstractions.Data
 {
     public interface IUnitOfWork
     {

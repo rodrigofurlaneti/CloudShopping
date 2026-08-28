@@ -9,6 +9,10 @@ namespace CloudShopping.Domain.Entities.Carts
         private readonly List<CartItem> _items = new();
         public IReadOnlyCollection<CartItem> Items => _items.AsReadOnly();
         private Cart() { }
+        public static Cart Create(int customerId) => new()
+        {
+            CustomerId = customerId
+        };
         public void AddOrUpdateItem(int productId, int quantity, decimal unitPrice)
         {
             var existing = _items.FirstOrDefault(i => i.ProductId == productId);
