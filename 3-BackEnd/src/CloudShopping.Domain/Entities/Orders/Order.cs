@@ -16,7 +16,6 @@ namespace CloudShopping.Domain.Entities.Orders
         public decimal TotalAmount { get; private set; }
         public OrderStatus OrderStatusId { get; private set; }
         public OrderAddress? OrderAddress { get; private set; }
-
         private readonly List<OrderItem> _orderItems = new();
         public IReadOnlyCollection<OrderItem> OrderItems => _orderItems.AsReadOnly();
         private readonly List<Payment> _payments = new();
@@ -25,6 +24,7 @@ namespace CloudShopping.Domain.Entities.Orders
         public static Order Checkout(int tenantId, int customerId, Cart cart, Address deliveryAddress)
         {
             if (!cart.Items.Any()) throw new InvalidOperationException("Carrinho vazio.");
+
             var order = new Order
             {
                 TenantId = tenantId,
@@ -47,7 +47,6 @@ namespace CloudShopping.Domain.Entities.Orders
             _payments.Add(Payment.CreatePending(Id, method, amount));
             UpdateTimestamp();
         }
-
         public void UpdatePaymentApproved(int paymentId)
         {
             var payment = _payments.FirstOrDefault(p => p.Id == paymentId);
@@ -67,24 +66,42 @@ namespace CloudShopping.Domain.Entities.Orders
         {
             var payment = _payments.FirstOrDefault(p => p.Id == paymentId);
             if (payment is null) throw new InvalidOperationException("Pagamento não encontrado.");
-
             payment.Refund();
             OrderStatusId = OrderStatus.Canceled;
             UpdateTimestamp();
         }
-        public void ShipOrder()
+        public void StartProcessing()
         {
             if (OrderStatusId != OrderStatus.Paid)
-                throw new InvalidOperationException("O pedido precisa estar pago para ser enviado.");
-
+                throw new InvalidOperationException("O pedido precisa estar pago para iniciar a separação.");
+            OrderStatusId = OrderStatus.Processing;
+            UpdateTimestamp();
+        }
+        public void MarkAsReadyToShip()
+        {
+            if (OrderStatusId != OrderStatus.Processing)
+                throw new InvalidOperationException("O pedido precisa estar em separação/processamento para ser marcado como pronto.");
+            OrderStatusId = OrderStatus.ReadyToShip;
+            UpdateTimestamp();
+        }
+        public void ShipOrder()
+        {
+            if (OrderStatusId != OrderStatus.ReadyToShip && OrderStatusId != OrderStatus.Paid)
+                throw new InvalidOperationException("O pedido precisa estar pronto para envio ou pago.");
             OrderStatusId = OrderStatus.Shipped;
+            UpdateTimestamp();
+        }
+        public void MarkAsDelivered()
+        {
+            if (OrderStatusId != OrderStatus.Shipped)
+                throw new InvalidOperationException("O pedido precisa estar em trânsito (postado) para ser marcado como entregue.");
+            OrderStatusId = OrderStatus.Delivered;
             UpdateTimestamp();
         }
         public void CancelOrder()
         {
-            if (OrderStatusId == OrderStatus.Shipped)
-                throw new InvalidOperationException("Pedido em trânsito não pode ser cancelado.");
-
+            if (OrderStatusId == OrderStatus.Shipped || OrderStatusId == OrderStatus.Delivered)
+                throw new InvalidOperationException("Pedido em trânsito ou já entregue não pode ser cancelado.");
             OrderStatusId = OrderStatus.Canceled;
             UpdateTimestamp();
         }
