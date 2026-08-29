@@ -2,12 +2,21 @@
 {
     public enum OrderStatus
     {
-        Pending = 1,      // Aguardando pagamento
-        Paid = 2,         // Pago (Gatilho para iniciar a separação/picking)
-        Processing = 3,   // Em separação / Embalagem
-        ReadyToShip = 4,  // Etiqueta gerada / Pronto para postagem ou coleta
-        Shipped = 5,      // Postado / Em trânsito (Com código de rastreio)
-        Delivered = 6,    // Entregue ao cliente
-        Canceled = 7      // Cancelado
+        Pending = 1,         // Aguardando pagamento
+        Paid = 2,            // Pago
+        Invoiced = 3,        // Nota Fiscal Emitida (Faturado)
+        Processing = 4,      // Processando / Liberado para o estoque
+        Separating = 5,      // Separando (Picking)
+        Packing = 6,         // Embalando (Packing)
+        GenerateLabel = 7,   // Gerar etiqueta
+        ReadyToShip = 8,     // Pronto para postagem ou coleta
+        Shipped = 9,         // Postado
+        TrackingNumber = 10, // Código de rastreio
+        Intransit = 11,      // Em trânsito 
+        Delivered = 12,      // Entregue ao cliente
+        DeliveryFailed = 13, // Problemas na Entrega
+        Returning = 14,      // Solicitação de Troca/Devolução
+        Refunded = 15,       // Reembolsado
+        Canceled = 16        // Cancelado
     }
 }
