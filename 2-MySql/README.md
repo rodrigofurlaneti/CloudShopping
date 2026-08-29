@@ -4,47 +4,36 @@ Abaixo está o diagrama Entidade-Relacionamento do nosso E-commerce:
 
 ```mermaid
 erDiagram
-    %% ==========================================
     %% RELACIONAMENTOS
-    %% ==========================================
+    Tenants ||--o{ Customers : "tem"
+    Tenants ||--o{ Products : "tem"
+    Tenants ||--o{ Orders : "tem"
 
-    %% Multi-Tenant
-    Tenants ||--o{ Customers : "has (1:N)"
-    Tenants ||--o{ Products : "has (1:N)"
-    Tenants ||--o{ Orders : "has (1:N)"
+    OrderSectors ||--o{ OrderStatus : "agrupa"
+    OrderStatus ||--o{ Orders : "define"
+    OrderStatus ||--o{ OrderStateHistory : "registra"
+    CustomerTypes ||--o{ Customers : "categoriza"
+    AddressTypes ||--o{ Addresses : "categoriza"
+    AddressTypes ||--o{ OrderAddresses : "categoriza"
+    PaymentStatus ||--o{ Payments : "define"
 
-    %% Lookups / Domínios
-    OrderSectors ||--o{ OrderStatus : "groups (1:N)"
-    OrderStatus ||--o{ Orders : "defines (1:N)"
-    OrderStatus ||--o{ OrderStateHistory : "records (1:N)"
-    CustomerTypes ||--o{ Customers : "categorizes (1:N)"
-    AddressTypes ||--o{ Addresses : "categorizes (1:N)"
-    AddressTypes ||--o{ OrderAddresses : "categorizes (1:N)"
-    PaymentStatus ||--o{ Payments : "defines (1:N)"
+    Customers ||--|| Individuals : "eh"
+    Customers ||--|| Companies : "eh"
+    Customers ||--o{ Addresses : "possui"
+    Customers ||--o{ Contacts : "tem"
+    Customers ||--|| Carts : "possui"
+    Customers ||--o{ Orders : "realiza"
 
-    %% Clientes
-    Customers ||--|| Individuals : "is (1:1)"
-    Customers ||--|| Companies : "is (1:1)"
-    Customers ||--o{ Addresses : "owns (1:N)"
-    Customers ||--o{ Contacts : "has (1:N)"
-    Customers ||--|| Carts : "owns (1:1)"
-    Customers ||--o{ Orders : "places (1:N)"
+    Products ||--o{ CartItems : "adicionado em"
+    Products ||--o{ OrderItems : "pedido em"
+    Carts ||--o{ CartItems : "contem"
 
-    %% Produtos & Carrinho
-    Products ||--o{ CartItems : "added to (1:N)"
-    Products ||--o{ OrderItems : "ordered in (1:N)"
-    Carts ||--o{ CartItems : "contains (1:N)"
+    Orders ||--o{ OrderStateHistory : "rastreia"
+    Orders ||--|| OrderAddresses : "enviado para"
+    Orders ||--o{ OrderItems : "contem"
+    Orders ||--o{ Payments : "pago via"
 
-    %% Pedidos
-    Orders ||--o{ OrderStateHistory : "tracks timeline (1:N)"
-    Orders ||--|| OrderAddresses : "ships to (1:1)"
-    Orders ||--o{ OrderItems : "contains (1:N)"
-    Orders ||--o{ Payments : "paid via (1:N)"
-
-    %% ==========================================
     %% ESTRUTURA DAS TABELAS
-    %% ==========================================
-
     Tenants {
         int Id PK
         varchar CompanyName
@@ -70,14 +59,14 @@ erDiagram
     }
 
     Individuals {
-        int CustomerId PK, FK
-        char TaxId "CPF"
+        int CustomerId PK
+        char TaxId
         varchar FullName
     }
 
     Companies {
-        int CustomerId PK, FK
-        char BusinessTaxId "CNPJ"
+        int CustomerId PK
+        char BusinessTaxId
         varchar CompanyName
     }
 
@@ -121,11 +110,11 @@ erDiagram
         int Id PK
         int OrderId FK
         int OrderStatusId FK
-        datetime CreatedAt "Timestamp exato"
+        datetime CreatedAt
     }
 
     OrderAddresses {
-        int OrderId PK, FK
+        int OrderId PK
         int AddressTypeId FK
         varchar ZipCode
     }
