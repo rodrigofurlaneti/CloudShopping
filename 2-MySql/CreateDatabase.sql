@@ -36,33 +36,6 @@ CREATE TABLE AddressTypes (
 );
 INSERT INTO AddressTypes (Id, Name) VALUES (1, 'Shipping'), (2, 'Billing');
 
-CREATE TABLE OrderStatus (
-    Id INT AUTO_INCREMENT PRIMARY KEY,
-    Name VARCHAR(50) NOT NULL UNIQUE,
-    IsActive BOOLEAN DEFAULT TRUE,
-    CreatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
-    UpdatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)
-);
-
--- Inserção completa com os 16 status do fluxo logístico e fiscal
-INSERT INTO OrderStatus (Id, Name) VALUES 
-(1, 'Pending'),
-(2, 'Paid'),
-(3, 'Invoiced'),
-(4, 'Processing'),
-(5, 'Separating'),
-(6, 'Packing'),
-(7, 'GenerateLabel'),
-(8, 'ReadyToShip'),
-(9, 'Shipped'),
-(10, 'TrackingNumber'),
-(11, 'Intransit'),
-(12, 'Delivered'),
-(13, 'DeliveryFailed'),
-(14, 'Returning'),
-(15, 'Refunded'),
-(16, 'Canceled');
-
 CREATE TABLE PaymentStatus (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     Name VARCHAR(50) NOT NULL UNIQUE,
@@ -72,6 +45,53 @@ CREATE TABLE PaymentStatus (
 );
 INSERT INTO PaymentStatus (Id, Name) VALUES (1, 'Processing'), (2, 'Approved'), (3, 'Declined'), (4, 'Refunded');
 
+-- 1.1 SETORES DO KANBAN (Criar antes de OrderStatus)
+CREATE TABLE OrderSectors (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(100) NOT NULL UNIQUE,
+    IsActive BOOLEAN DEFAULT TRUE,
+    CreatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
+    UpdatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)
+);
+
+INSERT INTO OrderSectors (Id, Name) VALUES 
+(1, 'Novos / Faturamento'),
+(2, 'Armazém (Separação/Embalagem)'),
+(3, 'Expedição'),
+(4, 'Em Trânsito'),
+(5, 'Concluídos'),
+(6, 'Exceções / Pós-Venda');
+
+-- 1.2 STATUS DO PEDIDO (Agora vinculada ao Setor)
+CREATE TABLE OrderStatus (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    OrderSectorId INT NOT NULL, 
+    Name VARCHAR(50) NOT NULL UNIQUE,
+    
+    IsActive BOOLEAN DEFAULT TRUE,
+    CreatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
+    UpdatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    
+    FOREIGN KEY (OrderSectorId) REFERENCES OrderSectors(Id) ON DELETE RESTRICT
+);
+
+INSERT INTO OrderStatus (Id, OrderSectorId, Name) VALUES 
+(1, 1, 'Pending'),
+(2, 1, 'Paid'),
+(3, 1, 'Invoiced'),
+(4, 2, 'Processing'),
+(5, 2, 'Separating'),
+(6, 2, 'Packing'),
+(7, 3, 'GenerateLabel'),
+(8, 3, 'ReadyToShip'),
+(9, 3, 'Shipped'),
+(10, 4, 'TrackingNumber'),
+(11, 4, 'Intransit'),
+(12, 5, 'Delivered'),
+(13, 6, 'DeliveryFailed'),
+(14, 6, 'Returning'),
+(15, 6, 'Refunded'),
+(16, 6, 'Canceled');
 
 -------------------------------------------------------------------------------
 -- 2. BASE TABLES (CLIENTES & PRODUTOS)
@@ -81,7 +101,7 @@ CREATE TABLE Customers (
     TenantId INT NOT NULL,
     Email VARCHAR(100) NULL, 
     PasswordHash VARCHAR(255) NULL, 
-    CustomerTypeId INT NOT NULL DEFAULT 1, -- 1 = Guest
+    CustomerTypeId INT NOT NULL DEFAULT 1, 
     SessionToken CHAR(36) DEFAULT (UUID()), 
     
     IsActive BOOLEAN DEFAULT TRUE,
@@ -208,7 +228,7 @@ CREATE TABLE Orders (
     CustomerId INT NOT NULL,
     OrderDate DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6), 
     TotalAmount DECIMAL(12,2) NOT NULL,
-    OrderStatusId INT NOT NULL DEFAULT 1, -- 1 = Pending
+    OrderStatusId INT NOT NULL DEFAULT 1, 
     
     IsActive BOOLEAN DEFAULT TRUE,
     CreatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
@@ -219,12 +239,11 @@ CREATE TABLE Orders (
     FOREIGN KEY (OrderStatusId) REFERENCES OrderStatus(Id) ON DELETE RESTRICT
 );
 
--- Tabela de Histórico de Status (Timeline do Pedido)
 CREATE TABLE OrderStateHistory (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     OrderId INT NOT NULL,
     OrderStatusId INT NOT NULL,
-    Notes VARCHAR(255) NULL, -- Observação ou gatilho da mudança
+    Notes VARCHAR(255) NULL, 
     
     IsActive BOOLEAN DEFAULT TRUE,
     CreatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
@@ -234,12 +253,11 @@ CREATE TABLE OrderStateHistory (
     FOREIGN KEY (OrderStatusId) REFERENCES OrderStatus(Id) ON DELETE RESTRICT
 );
 
--- Índice para busca rápida da timeline de um pedido
 CREATE INDEX idx_orderstatehistory_orderid ON OrderStateHistory(OrderId);
 
 CREATE TABLE OrderAddresses (
     OrderId INT PRIMARY KEY,
-    AddressTypeId INT NOT NULL DEFAULT 1, -- 1 = Shipping
+    AddressTypeId INT NOT NULL DEFAULT 1, 
     Street VARCHAR(150) NOT NULL, 
     Number VARCHAR(10) NOT NULL,
     Neighborhood VARCHAR(50), 
@@ -275,7 +293,7 @@ CREATE TABLE Payments (
     OrderId INT NOT NULL,
     PaymentMethod VARCHAR(50) NOT NULL, 
     Amount DECIMAL(12,2) NOT NULL, 
-    PaymentStatusId INT NOT NULL DEFAULT 1, -- 1 = Processing
+    PaymentStatusId INT NOT NULL DEFAULT 1, 
     
     IsActive BOOLEAN DEFAULT TRUE,
     CreatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
