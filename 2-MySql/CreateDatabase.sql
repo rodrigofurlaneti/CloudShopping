@@ -43,7 +43,25 @@ CREATE TABLE OrderStatus (
     CreatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
     UpdatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)
 );
-INSERT INTO OrderStatus (Id, Name) VALUES (1, 'Pending'), (2, 'Paid'), (3, 'Shipped'), (4, 'Canceled');
+
+-- Inserção completa com os 16 status do fluxo logístico e fiscal
+INSERT INTO OrderStatus (Id, Name) VALUES 
+(1, 'Pending'),
+(2, 'Paid'),
+(3, 'Invoiced'),
+(4, 'Processing'),
+(5, 'Separating'),
+(6, 'Packing'),
+(7, 'GenerateLabel'),
+(8, 'ReadyToShip'),
+(9, 'Shipped'),
+(10, 'TrackingNumber'),
+(11, 'Intransit'),
+(12, 'Delivered'),
+(13, 'DeliveryFailed'),
+(14, 'Returning'),
+(15, 'Refunded'),
+(16, 'Canceled');
 
 CREATE TABLE PaymentStatus (
     Id INT AUTO_INCREMENT PRIMARY KEY,
@@ -200,6 +218,24 @@ CREATE TABLE Orders (
     FOREIGN KEY (CustomerId) REFERENCES Customers(Id),
     FOREIGN KEY (OrderStatusId) REFERENCES OrderStatus(Id) ON DELETE RESTRICT
 );
+
+-- Tabela de Histórico de Status (Timeline do Pedido)
+CREATE TABLE OrderStateHistory (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    OrderId INT NOT NULL,
+    OrderStatusId INT NOT NULL,
+    Notes VARCHAR(255) NULL, -- Observação ou gatilho da mudança
+    
+    IsActive BOOLEAN DEFAULT TRUE,
+    CreatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
+    UpdatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    
+    FOREIGN KEY (OrderId) REFERENCES Orders(Id) ON DELETE CASCADE,
+    FOREIGN KEY (OrderStatusId) REFERENCES OrderStatus(Id) ON DELETE RESTRICT
+);
+
+-- Índice para busca rápida da timeline de um pedido
+CREATE INDEX idx_orderstatehistory_orderid ON OrderStateHistory(OrderId);
 
 CREATE TABLE OrderAddresses (
     OrderId INT PRIMARY KEY,
