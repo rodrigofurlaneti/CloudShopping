@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using CloudShopping.Domain.Entities.Carts;
 using CloudShopping.Domain.Entities.Customers;
 using CloudShopping.Domain.Enums;
 using CloudShopping.Domain.Primitives;
+using CloudShopping.Domain.Events; // Certifique-se de ter o namespace do OrderCanceledDomainEvent
 
 namespace CloudShopping.Domain.Entities.Orders
 {
@@ -23,11 +23,19 @@ namespace CloudShopping.Domain.Entities.Orders
         private readonly List<Payment> _payments = new();
         public IReadOnlyCollection<Payment> Payments => _payments.AsReadOnly();
 
+        // Construtor vazio para o EF Core
         private Order() { }
 
-        public static Order Checkout(int tenantId, int customerId, Cart cart, Address deliveryAddress)
+        // MÉTODO ALTERADO: Recebe a Tupla de itens em vez da entidade Cart
+        public static Order Checkout(
+            int tenantId,
+            int customerId,
+            IEnumerable<(int ProductId, int Quantity, decimal UnitPrice)> items,
+            Address deliveryAddress)
         {
-            if (!cart.Items.Any()) throw new InvalidOperationException("Carrinho vazio.");
+            var itemList = items?.ToList() ?? new List<(int, int, decimal)>();
+            if (!itemList.Any())
+                throw new InvalidOperationException("O pedido deve conter ao menos um item.");
 
             var order = new Order
             {
@@ -35,20 +43,27 @@ namespace CloudShopping.Domain.Entities.Orders
                 CustomerId = customerId,
                 OrderDate = DateTime.UtcNow,
                 OrderStatusId = OrderStatus.Pending,
-                TotalAmount = cart.Items.Sum(i => i.UnitPrice * i.Quantity)
+                TotalAmount = itemList.Sum(i => i.UnitPrice * i.Quantity)
             };
 
             order.OrderAddress = OrderAddress.Create(
-                deliveryAddress.AddressTypeId, deliveryAddress.Street, deliveryAddress.Number,
-                deliveryAddress.Neighborhood, deliveryAddress.City, deliveryAddress.State, deliveryAddress.ZipCode);
+                deliveryAddress.AddressTypeId,
+                deliveryAddress.Street,
+                deliveryAddress.Number,
+                deliveryAddress.Neighborhood,
+                deliveryAddress.City,
+                deliveryAddress.State,
+                deliveryAddress.ZipCode);
 
-            foreach (var item in cart.Items)
+            foreach (var item in itemList)
             {
                 order._orderItems.Add(OrderItem.Create(item.ProductId, item.Quantity, item.UnitPrice));
             }
 
             return order;
         }
+
+        // --- FLUXO DE PAGAMENTOS ---
 
         public void AddPendingPayment(string method, decimal amount)
         {
@@ -199,12 +214,14 @@ namespace CloudShopping.Domain.Entities.Orders
 
         public void CancelOrder()
         {
-            // Pedidos que já saíram para entrega ou foram entregues não podem ser cancelados diretamente (exigem devolução/estorno)
             if (OrderStatusId >= OrderStatus.Shipped && OrderStatusId <= OrderStatus.Delivered)
                 throw new InvalidOperationException("Pedido despachado ou entregue não pode ser cancelado diretamente.");
 
             OrderStatusId = OrderStatus.Canceled;
             UpdateTimestamp();
+
+            // Dispara o evento de domínio para estornar o estoque e registrar o histórico em background
+            RaiseDomainEvent(new OrderCanceledDomainEvent(Id, TenantId));
         }
     }
 }

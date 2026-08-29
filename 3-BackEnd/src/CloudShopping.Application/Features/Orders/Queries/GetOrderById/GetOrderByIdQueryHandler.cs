@@ -1,8 +1,9 @@
 ﻿using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Application.Abstractions.Services;
+using CloudShopping.Application.Features.Orders.DTO;
 using CloudShopping.Domain.Primitives.Results;
 using MediatR;
-namespace CloudShopping.Application.Features.Orders.Queries
+namespace CloudShopping.Application.Features.Orders.Queries.GetOrderById
 {
     public sealed class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Result<OrderDetailsResponse>>
     {

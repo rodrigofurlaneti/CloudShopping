@@ -1,5 +1,6 @@
 ﻿using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Application.Abstractions.Services;
+using CloudShopping.Application.Features.Orders.DTO;
 using CloudShopping.Domain.Primitives.Results;
 using MediatR;
 using System;
@@ -8,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CloudShopping.Application.Features.Orders.Queries
+namespace CloudShopping.Application.Features.Orders.Queries.GetPaginatedTenantOrders
 {
     public sealed class GetPaginatedTenantOrdersQueryHandler
         : IRequestHandler<GetPaginatedTenantOrdersQuery, Result<PagedResult<OrderSummaryResponse>>>
