@@ -1,10 +1,14 @@
 ﻿using MediatR;
-using FluentValidation;
 using CloudShopping.Domain.Primitives.Results;
 using CloudShopping.Domain.Entities.Orders;
 using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Application.Abstractions.Services;
 using Microsoft.Extensions.Logging;
+using System.Linq;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using System;
 
 namespace CloudShopping.Application.Features.Orders.Commands.Checkout
 {
@@ -17,6 +21,7 @@ namespace CloudShopping.Application.Features.Orders.Commands.Checkout
         private readonly IOrderRepository _orderRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<CheckoutCommandHandler> _logger;
+
         public CheckoutCommandHandler(
             ITenantProvider tenantProvider,
             ICartRepository cartRepository,
@@ -34,6 +39,7 @@ namespace CloudShopping.Application.Features.Orders.Commands.Checkout
             _unitOfWork = unitOfWork;
             _logger = logger;
         }
+
         public async Task<Result<int>> Handle(CheckoutCommand request, CancellationToken cancellationToken)
         {
             var tenantId = _tenantProvider.GetTenantId();
@@ -51,6 +57,7 @@ namespace CloudShopping.Application.Features.Orders.Commands.Checkout
                 return Result.Failure<int>(new Error("Address.NotFound", "Endereço de entrega inválido."));
             var productIds = cart.Items.Select(i => i.ProductId).ToList();
             var products = await _productRepository.GetByIdsAsync(productIds, cancellationToken);
+            var itemsForOrder = new List<(int ProductId, int Quantity, decimal UnitPrice)>();
             foreach (var cartItem in cart.Items)
             {
                 var product = products.FirstOrDefault(p => p.Id == cartItem.ProductId);
@@ -60,25 +67,25 @@ namespace CloudShopping.Application.Features.Orders.Commands.Checkout
                 {
                     product.ReserveStock(cartItem.Quantity);
                     _productRepository.Update(product);
+                    itemsForOrder.Add((product.Id, cartItem.Quantity, product.Price));
                 }
                 catch (InvalidOperationException ex)
                 {
                     return Result.Failure<int>(new Error("Product.OutOfStock", ex.Message));
                 }
             }
-            var cartItemData = cart.Items.Select(i => (i.ProductId, i.Quantity, i.UnitPrice));
             Order order;
             try
             {
-                order = Order.Checkout(tenantId, customer.Id, cartItemData, address);
+                order = Order.Checkout(tenantId, customer.Id, itemsForOrder, address);
             }
             catch (InvalidOperationException ex)
             {
                 return Result.Failure<int>(new Error("Order.Validation", ex.Message));
             }
             cart.Clear();
-            await _orderRepository.AddAsync(order, cancellationToken);
             _cartRepository.Update(cart);
+            await _orderRepository.AddAsync(order, cancellationToken);
             await _unitOfWork.CommitAsync(cancellationToken);
             _logger.LogInformation("Checkout realizado com sucesso. OrderId: {OrderId}", order.Id);
             return Result.Success(order.Id);

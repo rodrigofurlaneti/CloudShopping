@@ -1,64 +1,74 @@
-﻿using CloudShopping.Application.Features.Orders.ViewModels;
-using CloudShopping.Domain.Primitives.Results;
+﻿using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Dapper;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using CloudShopping.Application.Abstractions.Data; // Para a ISqlConnectionFactory
+using CloudShopping.Application.Abstractions.Services; // Para o ITenantProvider
+using CloudShopping.Application.Features.Orders.ViewModels;
+using CloudShopping.Domain.Primitives.Results;
 
 namespace CloudShopping.Application.Features.Orders.Queries.GetTenantOrders
 {
     public sealed class GetTenantOrdersQueryHandler : IRequestHandler<GetTenantOrdersQuery, Result<PagedList<OrderAdminViewModel>>>
     {
-        private readonly IDbConnection _dbConnection;
+        private readonly ISqlConnectionFactory _sqlConnectionFactory;
+        private readonly ITenantProvider _tenantProvider;
         private readonly ILogger<GetTenantOrdersQueryHandler> _logger;
 
-        public GetTenantOrdersQueryHandler(IDbConnection dbConnection, ILogger<GetTenantOrdersQueryHandler> logger)
+        public GetTenantOrdersQueryHandler(
+            ISqlConnectionFactory sqlConnectionFactory,
+            ITenantProvider tenantProvider,
+            ILogger<GetTenantOrdersQueryHandler> logger)
         {
-            _dbConnection = dbConnection;
+            _sqlConnectionFactory = sqlConnectionFactory;
+            _tenantProvider = tenantProvider;
             _logger = logger;
         }
 
         public async Task<Result<PagedList<OrderAdminViewModel>>> Handle(GetTenantOrdersQuery request, CancellationToken cancellationToken)
         {
+            var tenantId = _tenantProvider.GetTenantId();
             var offset = (request.Page - 1) * request.PageSize;
-
             const string sql = @"
-                -- 1. Conta o total de registros (considerando o filtro dinâmico de Status)
+                -- Conta o total de registros para a paginação
                 SELECT COUNT(1) 
-                FROM Orders o
-                WHERE o.TenantId = @TenantId 
-                  AND o.IsActive = 1
-                  AND (@OrderStatusId IS NULL OR o.OrderStatusId = @OrderStatusId);
+                FROM Orders 
+                WHERE TenantId = @TenantId 
+                  AND IsActive = 1
+                  AND (@OrderStatusId IS NULL OR OrderStatusId = @OrderStatusId);
 
-                -- 2. Busca a página específica
+                -- Busca os dados paginados com o total de itens somados diretamente no banco
                 SELECT 
                     o.Id AS OrderId,
-                    COALESCE(i.FullName, c.CompanyName, cust.Email) AS CustomerName,
+                    o.CustomerId,
                     o.OrderDate,
                     o.TotalAmount,
-                    os.Name AS StatusName
+                    o.OrderStatusId,
+                    os.Name AS StatusName,
+                    COALESCE(SUM(oi.Quantity), 0) AS TotalItems
                 FROM Orders o
                 INNER JOIN OrderStatus os ON o.OrderStatusId = os.Id
-                INNER JOIN Customers cust ON o.CustomerId = cust.Id
-                LEFT JOIN Individuals i ON cust.Id = i.CustomerId
-                LEFT JOIN Companies c ON cust.Id = c.CustomerId
+                LEFT JOIN OrderItems oi ON o.Id = oi.OrderId
                 WHERE o.TenantId = @TenantId 
                   AND o.IsActive = 1
                   AND (@OrderStatusId IS NULL OR o.OrderStatusId = @OrderStatusId)
+                GROUP BY 
+                    o.Id, o.CustomerId, o.OrderDate, o.TotalAmount, o.OrderStatusId, os.Name
                 ORDER BY o.OrderDate DESC
                 LIMIT @PageSize OFFSET @Offset;
             ";
 
             try
             {
-                using var multi = await _dbConnection.QueryMultipleAsync(sql, new
+                using var connection = _sqlConnectionFactory.CreateConnection();
+
+                using var multi = await connection.QueryMultipleAsync(sql, new
                 {
-                    TenantId = request.TenantId,
-                    OrderStatusId = request.OrderStatusId, // Dapper lida perfeitamente com nulos
+                    TenantId = tenantId,
+                    OrderStatusId = request.OrderStatusId,
                     PageSize = request.PageSize,
                     Offset = offset
                 });
@@ -72,8 +82,8 @@ namespace CloudShopping.Application.Features.Orders.Queries.GetTenantOrders
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao buscar lista de pedidos para o painel do lojista {TenantId}.", request.TenantId);
-                return Result.Failure<PagedList<OrderAdminViewModel>>(new Error("Database.QueryFailed", "Ocorreu um erro ao buscar os pedidos do painel."));
+                _logger.LogError(ex, "Erro ao buscar listagem administrativa de pedidos para o Tenant {TenantId}", tenantId);
+                return Result.Failure<PagedList<OrderAdminViewModel>>(new Error("Database.QueryFailed", "Ocorreu um erro ao buscar os pedidos da loja."));
             }
         }
     }

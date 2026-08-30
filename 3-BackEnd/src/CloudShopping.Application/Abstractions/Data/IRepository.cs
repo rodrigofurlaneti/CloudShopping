@@ -1,4 +1,7 @@
 ﻿using CloudShopping.Domain.Primitives;
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace CloudShopping.Application.Abstractions.Data
 {
     public interface IRepository<TEntity, TId> where TEntity : AggregateRoot<TId>

@@ -6,8 +6,8 @@ using MediatR;
 namespace CloudShopping.Application.Features.Orders.Queries.GetPaginatedTenantOrders
 {
     public sealed record GetPaginatedTenantOrdersQuery(
-        int Page = 1,
-        int PageSize = 10,
-        OrderStatus? StatusFilter = null
-    ) : IRequest<Result<PagedResult<OrderSummaryResponse>>>;
+            int Page = 1,
+            int PageSize = 10,
+            OrderStatus? StatusFilter = null
+        ) : IRequest<Result<PagedResult<OrderSummaryResponse>>>;
 }

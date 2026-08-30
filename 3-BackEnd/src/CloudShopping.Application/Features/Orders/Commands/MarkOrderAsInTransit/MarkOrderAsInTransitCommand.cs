@@ -2,5 +2,5 @@
 using MediatR;
 namespace CloudShopping.Application.Features.Orders.Commands.MarkOrderAsInTransit
 {
-    public sealed record MarkOrderAsInTransitCommand(int OrderId, int TenantId) : IRequest<Result>;
+    public sealed record MarkOrderAsInTransitCommand(int OrderId) : IRequest<Result>;
 }

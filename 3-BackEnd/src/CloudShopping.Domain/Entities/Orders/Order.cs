@@ -222,14 +222,13 @@ namespace CloudShopping.Domain.Entities.Orders
             AddHistory("Falha na entrega registrada.");
         }
 
-        public void RequestReturn()
+        public void RequestReturn(string reason) 
         {
             if (OrderStatusId != OrderStatus.Delivered)
                 throw new InvalidOperationException("Apenas pedidos entregues podem solicitar troca ou devolução.");
-
             OrderStatusId = OrderStatus.Returning;
             UpdateTimestamp();
-            AddHistory("Solicitação de devolução/troca iniciada.");
+            AddHistory($"Solicitação de devolução/troca iniciada. Motivo: {reason}");
         }
 
         public void CancelOrder()
@@ -242,6 +241,17 @@ namespace CloudShopping.Domain.Entities.Orders
             AddHistory("Pedido cancelado.");
 
             RaiseDomainEvent(new OrderCanceledDomainEvent(Id, TenantId));
+        }
+        public void AddApprovedPayment(string method, decimal amount)
+        {
+            if (OrderStatusId >= OrderStatus.Paid && OrderStatusId != OrderStatus.Pending)
+                throw new InvalidOperationException("Este pedido já foi pago ou não está aguardando pagamento.");
+            var payment = Payment.CreatePending(Id, method, amount);
+            payment.Approve();
+            _payments.Add(payment);
+            OrderStatusId = OrderStatus.Paid;
+            UpdateTimestamp();
+            AddHistory($"Pagamento direto de {amount:C} via {method} aprovado.");
         }
 
         // --- MÉTODOS AUXILIARES ---

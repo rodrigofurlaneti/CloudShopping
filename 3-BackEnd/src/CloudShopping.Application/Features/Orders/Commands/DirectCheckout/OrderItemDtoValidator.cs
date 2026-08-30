@@ -6,9 +6,8 @@ namespace CloudShopping.Application.Features.Orders.Commands.DirectCheckout
     {
         public OrderItemDtoValidator()
         {
-            RuleFor(x => x.ProductId).GreaterThan(0);
-            RuleFor(x => x.Quantity).GreaterThan(0);
-            RuleFor(x => x.UnitPrice).GreaterThan(0);
+            RuleFor(x => x.ProductId).GreaterThan(0).WithMessage("Produto inválido.");
+            RuleFor(x => x.Quantity).GreaterThan(0).WithMessage("A quantidade deve ser maior que zero.");
         }
     }
 }

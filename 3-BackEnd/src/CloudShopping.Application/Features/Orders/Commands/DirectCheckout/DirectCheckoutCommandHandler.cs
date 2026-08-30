@@ -1,19 +1,21 @@
-﻿using CloudShopping.Application.Abstractions.Data;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using MediatR;
+using Microsoft.Extensions.Logging;
+using CloudShopping.Application.Abstractions.Data;
+using CloudShopping.Application.Abstractions.Services; // Para o ITenantProvider
 using CloudShopping.Domain.Entities.Customers;
 using CloudShopping.Domain.Entities.Orders;
 using CloudShopping.Domain.Primitives.Results;
-using MediatR;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CloudShopping.Application.Features.Orders.Commands.DirectCheckout
 {
     public sealed class DirectCheckoutCommandHandler : IRequestHandler<DirectCheckoutCommand, Result<int>>
     {
+        private readonly ITenantProvider _tenantProvider;
         private readonly ICustomerRepository _customerRepository;
         private readonly IProductRepository _productRepository;
         private readonly IOrderRepository _orderRepository;
@@ -21,12 +23,14 @@ namespace CloudShopping.Application.Features.Orders.Commands.DirectCheckout
         private readonly ILogger<DirectCheckoutCommandHandler> _logger;
 
         public DirectCheckoutCommandHandler(
+            ITenantProvider tenantProvider,
             ICustomerRepository customerRepository,
             IProductRepository productRepository,
             IOrderRepository orderRepository,
             IUnitOfWork unitOfWork,
             ILogger<DirectCheckoutCommandHandler> logger)
         {
+            _tenantProvider = tenantProvider;
             _customerRepository = customerRepository;
             _productRepository = productRepository;
             _orderRepository = orderRepository;
@@ -36,11 +40,13 @@ namespace CloudShopping.Application.Features.Orders.Commands.DirectCheckout
 
         public async Task<Result<int>> Handle(DirectCheckoutCommand request, CancellationToken cancellationToken)
         {
+            var tenantId = _tenantProvider.GetTenantId();
             var customer = await _customerRepository.GetByIdAsync(request.CustomerId, cancellationToken);
             if (customer is null)
                 return Result.Failure<int>(new Error("Customer.NotFound", "Cliente não encontrado."));
             var productIds = request.Items.Select(i => i.ProductId).ToList();
             var products = await _productRepository.GetByIdsAsync(productIds, cancellationToken);
+            var itemsForOrder = new List<(int ProductId, int Quantity, decimal UnitPrice)>();
             foreach (var itemDto in request.Items)
             {
                 var product = products.FirstOrDefault(p => p.Id == itemDto.ProductId);
@@ -49,7 +55,8 @@ namespace CloudShopping.Application.Features.Orders.Commands.DirectCheckout
                 try
                 {
                     product.ReserveStock(itemDto.Quantity);
-                    _productRepository.Update(product); // Marca o produto como modificado no EF
+                    _productRepository.Update(product);
+                    itemsForOrder.Add((product.Id, itemDto.Quantity, product.Price));
                 }
                 catch (InvalidOperationException ex)
                 {
@@ -66,11 +73,10 @@ namespace CloudShopping.Application.Features.Orders.Commands.DirectCheckout
                 State = request.DeliveryAddress.State,
                 ZipCode = request.DeliveryAddress.ZipCode
             };
-            var cartItemData = request.Items.Select(i => (i.ProductId, i.Quantity, i.UnitPrice));
             Order order;
             try
             {
-                order = Order.Checkout(request.TenantId, customer.Id, cartItemData, address);
+                order = Order.Checkout(tenantId, customer.Id, itemsForOrder, address);
             }
             catch (InvalidOperationException ex)
             {

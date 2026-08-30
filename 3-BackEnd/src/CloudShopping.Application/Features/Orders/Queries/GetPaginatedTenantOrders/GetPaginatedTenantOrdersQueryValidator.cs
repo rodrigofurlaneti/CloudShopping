@@ -1,10 +1,9 @@
 ﻿using FluentValidation;
-
-namespace CloudShopping.Application.Features.Orders.Queries.GetTenantOrders
+namespace CloudShopping.Application.Features.Orders.Queries.GetPaginatedTenantOrders
 {
-    public sealed class GetTenantOrdersQueryValidator : AbstractValidator<GetTenantOrdersQuery>
+    public sealed class GetPaginatedTenantOrdersQueryValidator : AbstractValidator<GetPaginatedTenantOrdersQuery>
     {
-        public GetTenantOrdersQueryValidator()
+        public GetPaginatedTenantOrdersQueryValidator()
         {
             RuleFor(x => x.Page)
                 .GreaterThan(0).WithMessage("A página deve ser maior que zero.");

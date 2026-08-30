@@ -1,15 +1,12 @@
 ﻿using CloudShopping.Domain.Entities.Orders;
-using CloudShopping.Domain.Enums;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace CloudShopping.Application.Abstractions.Data;
-
-public interface IOrderRepository : IRepository<Order, int>
+namespace CloudShopping.Application.Abstractions.Data
 {
-    Task<IEnumerable<Order>> GetOrdersByCustomerAsync(int customerId, CancellationToken cancellationToken = default);
-    Task<(IEnumerable<Order> Items, int TotalCount)> GetPaginatedByTenantAsync(
-        int tenantId,
-        int page,
-        int pageSize,
-        OrderStatus? statusFilter,
-        CancellationToken cancellationToken = default);
+    public interface IOrderRepository : IRepository<Order, int>
+    {
+        Task<IEnumerable<Order>> GetOrdersByCustomerAsync(int customerId, CancellationToken cancellationToken = default);
+    }
 }

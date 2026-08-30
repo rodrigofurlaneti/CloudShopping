@@ -7,7 +7,6 @@ namespace CloudShopping.Domain.Entities.Products
         public string Rack { get; }       // Estante
         public string Level { get; }      // Nível / Prateleira
         public string Position { get; }   // Posição / Vão
-
         private StockLocation(string aisle, string rack, string level, string position)
         {
             Aisle = aisle;
@@ -23,13 +22,9 @@ namespace CloudShopping.Domain.Entities.Products
             {
                 throw new ArgumentException("Todos os níveis de endereçamento logístico são obrigatórios.");
             }
-
             return new StockLocation(aisle.Trim().ToUpper(), rack.Trim().ToUpper(), level.Trim().ToUpper(), position.Trim().ToUpper());
         }
-
-        // Retorna o código formatado (Ex: A-10-03-05) para imprimir na etiqueta de separação
         public override string ToString() => $"{Aisle}-{Rack}-{Level}-{Position}";
-
         protected override IEnumerable<object> GetAtomicValues()
         {
             yield return Aisle;

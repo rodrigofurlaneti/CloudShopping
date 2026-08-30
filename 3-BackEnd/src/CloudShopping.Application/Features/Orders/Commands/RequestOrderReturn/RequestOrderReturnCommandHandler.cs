@@ -1,12 +1,10 @@
-﻿using CloudShopping.Application.Abstractions.Data;
-using CloudShopping.Domain.Primitives.Results;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using CloudShopping.Application.Abstractions.Data;
+using CloudShopping.Domain.Primitives.Results;
 
 namespace CloudShopping.Application.Features.Orders.Commands.RequestOrderReturn
 {
@@ -29,14 +27,20 @@ namespace CloudShopping.Application.Features.Orders.Commands.RequestOrderReturn
         public async Task<Result> Handle(RequestOrderReturnCommand request, CancellationToken cancellationToken)
         {
             var order = await _orderRepository.GetByIdAsync(request.OrderId, cancellationToken);
-            if (order is null || order.CustomerId != request.CustomerId)
+            if (order is null)
             {
-                _logger.LogWarning("Tentativa inválida de solicitar devolução. OrderId: {OrderId}, CustomerId: {CustomerId}", request.OrderId, request.CustomerId);
-                return Result.Failure(new Error("Order.Invalid", "Pedido não encontrado ou não pertence a este cliente."));
+                _logger.LogWarning("Tentativa de devolução falhou. Pedido {OrderId} não encontrado.", request.OrderId);
+                return Result.Failure(new Error("Order.NotFound", "Pedido não encontrado."));
+            }
+            if (order.CustomerId != request.CustomerId)
+            {
+                _logger.LogWarning("Devolução não autorizada. Cliente {CustomerId} tentou devolver o pedido {OrderId} do cliente {OwnerId}.",
+                    request.CustomerId, request.OrderId, order.CustomerId);
+                return Result.Failure(new Error("Order.Unauthorized", "Este pedido não pertence a você."));
             }
             try
             {
-                order.RequestReturn();
+                order.RequestReturn(request.Reason);
             }
             catch (InvalidOperationException ex)
             {
@@ -45,7 +49,7 @@ namespace CloudShopping.Application.Features.Orders.Commands.RequestOrderReturn
             }
             _orderRepository.Update(order);
             await _unitOfWork.CommitAsync(cancellationToken);
-            _logger.LogInformation("Solicitação de devolução efetuada com sucesso para o pedido {OrderId}. Motivo: {Reason}", request.OrderId, request.Reason);
+            _logger.LogInformation("Solicitação de devolução efetuada com sucesso (Pedido {OrderId}). Motivo: {Reason}", request.OrderId, request.Reason);
             return Result.Success();
         }
     }

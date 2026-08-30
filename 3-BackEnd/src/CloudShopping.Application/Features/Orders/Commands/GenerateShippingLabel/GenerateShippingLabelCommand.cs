@@ -2,5 +2,5 @@
 using MediatR;
 namespace CloudShopping.Application.Features.Orders.Commands.GenerateShippingLabel
 {
-    public sealed record GenerateShippingLabelCommand(int OrderId, int TenantId) : IRequest<Result>;
+    public sealed record GenerateShippingLabelCommand(int OrderId) : IRequest<Result>;
 }

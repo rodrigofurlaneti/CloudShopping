@@ -1,32 +1,61 @@
-﻿using CloudShopping.Application.Abstractions.Data;
-using CloudShopping.Domain.Primitives.Results;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using MediatR;
+using Microsoft.Extensions.Logging;
+using CloudShopping.Application.Abstractions.Data;
+using CloudShopping.Application.Abstractions.Services; // Para o ITenantProvider
+using CloudShopping.Domain.Primitives.Results;
+
 namespace CloudShopping.Application.Features.Orders.Commands.UpdatePaymentApproved
 {
     public sealed class UpdatePaymentApprovedCommandHandler : IRequestHandler<UpdatePaymentApprovedCommand, Result>
     {
         private readonly IOrderRepository _orderRepository;
+        private readonly ITenantProvider _tenantProvider;
         private readonly IUnitOfWork _unitOfWork;
-        public UpdatePaymentApprovedCommandHandler(IOrderRepository orderRepository, IUnitOfWork unitOfWork)
+        private readonly ILogger<UpdatePaymentApprovedCommandHandler> _logger;
+
+        public UpdatePaymentApprovedCommandHandler(
+            IOrderRepository orderRepository,
+            ITenantProvider tenantProvider,
+            IUnitOfWork unitOfWork,
+            ILogger<UpdatePaymentApprovedCommandHandler> logger)
         {
             _orderRepository = orderRepository;
+            _tenantProvider = tenantProvider;
             _unitOfWork = unitOfWork;
+            _logger = logger;
         }
+
         public async Task<Result> Handle(UpdatePaymentApprovedCommand request, CancellationToken cancellationToken)
         {
+            var tenantId = _tenantProvider.GetTenantId();
             var order = await _orderRepository.GetByIdAsync(request.OrderId, cancellationToken);
             if (order is null)
+            {
+                _logger.LogWarning("Tentativa de aprovar pagamento falhou. Pedido {OrderId} não encontrado.", request.OrderId);
                 return Result.Failure(new Error("Order.NotFound", "Pedido não encontrado."));
+            }
+            if (order.TenantId != tenantId)
+            {
+                _logger.LogWarning("Tentativa não autorizada. OrderId: {OrderId}, Lojista Esperado: {TenantId}, Lojista Real: {OrderTenantId}",
+                    request.OrderId, tenantId, order.TenantId);
+                return Result.Failure(new Error("Order.Unauthorized", "Este pedido não pertence à sua loja."));
+            }
             try
             {
                 order.UpdatePaymentApproved(request.PaymentId);
             }
             catch (InvalidOperationException ex)
             {
-                return Result.Failure(new Error("Order.InvalidPayment", ex.Message));
+                _logger.LogWarning(ex, "Erro de validação ao aprovar pagamento {PaymentId} do pedido {OrderId}.", request.PaymentId, request.OrderId);
+                return Result.Failure(new Error("Order.PaymentApprovalFailed", ex.Message));
             }
             _orderRepository.Update(order);
             await _unitOfWork.CommitAsync(cancellationToken);
+            _logger.LogInformation("Pagamento {PaymentId} do pedido {OrderId} aprovado com sucesso (Tenant: {TenantId}).",
+                request.PaymentId, request.OrderId, tenantId);
             return Result.Success();
         }
     }

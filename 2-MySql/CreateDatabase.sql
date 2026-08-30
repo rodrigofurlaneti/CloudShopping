@@ -1,4 +1,4 @@
--- Criação do Banco de Dados
+﻿-- Criação do Banco de Dados
 CREATE DATABASE IF NOT EXISTS ECommerceDB;
 USE ECommerceDB;
 
@@ -184,11 +184,14 @@ CREATE TABLE Products (
     ReservedStock INT NOT NULL DEFAULT 0,
     AvailableStock INT GENERATED ALWAYS AS (PhysicalStock - ReservedStock) VIRTUAL, 
     
-    -- NOVO: Endereçamento Logístico (Value Object StockLocation)
+    -- Endereçamento Logístico (Value Object StockLocation)
     Location_Aisle VARCHAR(10) NULL,
     Location_Rack VARCHAR(10) NULL,
     Location_Level VARCHAR(10) NULL,
     Location_Position VARCHAR(10) NULL,
+    
+    -- NOVO: Versão para Controle de Concorrência Otimista
+    Version INT NOT NULL DEFAULT 1,
     
     IsActive BOOLEAN DEFAULT TRUE,
     CreatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
@@ -198,10 +201,14 @@ CREATE TABLE Products (
     UNIQUE KEY uk_tenant_sku (TenantId, SKU) 
 );
 
--- NOVO: Tabela para Auditoria de Movimentação/Inventário de Estoque
+-- Tabela para Auditoria de Movimentação/Inventário de Estoque
 CREATE TABLE StockMovements (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     ProductId INT NOT NULL,
+    
+    -- NOVO: Categoria/Tipo da movimentação (ex: 'Sale', 'Return', 'Adjustment')
+    MovementType VARCHAR(30) NOT NULL,
+    
     QuantityChanged INT NOT NULL,
     BalanceAfterMovement INT NOT NULL,
     Reason VARCHAR(150) NOT NULL,

@@ -1,33 +1,44 @@
-﻿using CloudShopping.Domain.Primitives.Results;
+﻿using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Dapper;
-using CloudShopping.Application.Features.Orders.ViewModels;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System.Data;
+using CloudShopping.Application.Abstractions.Data; // Para a ISqlConnectionFactory
+using CloudShopping.Application.Abstractions.Services; // Para o ITenantProvider
+using CloudShopping.Application.Features.Orders.ViewModels;
+using CloudShopping.Domain.Primitives.Results;
 
 namespace CloudShopping.Application.Features.Orders.Queries.GetCustomerOrders
 {
     public sealed class GetCustomerOrdersQueryHandler : IRequestHandler<GetCustomerOrdersQuery, Result<PagedList<OrderSummaryViewModel>>>
     {
-        private readonly IDbConnection _dbConnection;
+        private readonly ISqlConnectionFactory _sqlConnectionFactory;
+        private readonly ITenantProvider _tenantProvider;
         private readonly ILogger<GetCustomerOrdersQueryHandler> _logger;
 
-        public GetCustomerOrdersQueryHandler(IDbConnection dbConnection, ILogger<GetCustomerOrdersQueryHandler> logger)
+        public GetCustomerOrdersQueryHandler(
+            ISqlConnectionFactory sqlConnectionFactory,
+            ITenantProvider tenantProvider,
+            ILogger<GetCustomerOrdersQueryHandler> logger)
         {
-            _dbConnection = dbConnection;
+            _sqlConnectionFactory = sqlConnectionFactory;
+            _tenantProvider = tenantProvider;
             _logger = logger;
         }
 
         public async Task<Result<PagedList<OrderSummaryViewModel>>> Handle(GetCustomerOrdersQuery request, CancellationToken cancellationToken)
         {
+            var tenantId = _tenantProvider.GetTenantId();
             var offset = (request.Page - 1) * request.PageSize;
             const string sql = @"
-                -- 1. Conta o total de pedidos do cliente (para saber o TotalPages)
+                -- Conta o total de pedidos do cliente na loja atual
                 SELECT COUNT(1) 
                 FROM Orders 
-                WHERE CustomerId = @CustomerId AND IsActive = 1;
+                WHERE CustomerId = @CustomerId AND TenantId = @TenantId AND IsActive = 1;
 
-                -- 2. Busca a página específica de pedidos
+                -- Busca a página específica de pedidos
                 SELECT 
                     o.Id AS OrderId,
                     o.OrderDate,
@@ -35,30 +46,29 @@ namespace CloudShopping.Application.Features.Orders.Queries.GetCustomerOrders
                     os.Name AS StatusName
                 FROM Orders o
                 INNER JOIN OrderStatus os ON o.OrderStatusId = os.Id
-                WHERE o.CustomerId = @CustomerId AND o.IsActive = 1
+                WHERE o.CustomerId = @CustomerId AND o.TenantId = @TenantId AND o.IsActive = 1
                 ORDER BY o.OrderDate DESC
                 LIMIT @PageSize OFFSET @Offset;
             ";
 
             try
             {
-                using var multi = await _dbConnection.QueryMultipleAsync(sql, new
+                using var connection = _sqlConnectionFactory.CreateConnection();
+                using var multi = await connection.QueryMultipleAsync(sql, new
                 {
                     CustomerId = request.CustomerId,
+                    TenantId = tenantId,
                     PageSize = request.PageSize,
                     Offset = offset
                 });
-
                 var totalCount = await multi.ReadFirstAsync<int>();
                 var items = (await multi.ReadAsync<OrderSummaryViewModel>()).ToList();
-
                 var pagedList = new PagedList<OrderSummaryViewModel>(items, totalCount, request.Page, request.PageSize);
-
                 return Result.Success(pagedList);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao buscar histórico de pedidos do cliente {CustomerId}", request.CustomerId);
+                _logger.LogError(ex, "Erro ao buscar histórico de pedidos do cliente {CustomerId} para a loja {TenantId}", request.CustomerId, tenantId);
                 return Result.Failure<PagedList<OrderSummaryViewModel>>(new Error("Database.QueryFailed", "Ocorreu um erro ao buscar os pedidos."));
             }
         }

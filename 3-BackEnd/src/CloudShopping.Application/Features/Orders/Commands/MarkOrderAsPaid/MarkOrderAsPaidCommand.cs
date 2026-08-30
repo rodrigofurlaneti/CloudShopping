@@ -1,5 +1,6 @@
 ﻿using CloudShopping.Domain.Primitives.Results;
 using MediatR;
+
 namespace CloudShopping.Application.Features.Orders.Commands.MarkOrderAsPaid
 {
     public sealed record MarkOrderAsPaidCommand(
