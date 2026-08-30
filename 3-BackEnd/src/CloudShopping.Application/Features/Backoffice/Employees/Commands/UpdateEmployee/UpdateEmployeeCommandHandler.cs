@@ -1,9 +1,8 @@
-﻿using CloudShopping.Application.Abstractions.Data;
+using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Domain.Primitives.Results;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
-
 namespace CloudShopping.Application.Features.Backoffice.Employees.Commands.UpdateEmployee
 {
     public sealed class UpdateEmployeeCommandHandler : IRequestHandler<UpdateEmployeeCommand, Result>
@@ -21,7 +20,6 @@ namespace CloudShopping.Application.Features.Backoffice.Employees.Commands.Updat
             if (employee is null || employee.TenantId != request.TenantId)
             {
                 return Result.Failure(new Error("Employee.NotFound", "Funcionário não encontrado."));
-
             }
             var existingWithCpf = await _employeeRepository.GetByCpfAsync(request.TenantId, request.Cpf, cancellationToken);
             if (existingWithCpf is not null && existingWithCpf.Id != request.Id)
@@ -39,9 +37,8 @@ namespace CloudShopping.Application.Features.Backoffice.Employees.Commands.Updat
                 request.CommissionPercent,
                 request.IsActive
             );
-            await _employeeRepository.Update(employee);
+            _employeeRepository.Update(employee);
             await _unitOfWork.CommitAsync(cancellationToken);
-
             return Result.Success();
         }
     }
