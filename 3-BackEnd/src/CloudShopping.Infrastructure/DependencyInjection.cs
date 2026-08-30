@@ -1,11 +1,14 @@
-using CloudShopping.Application.Abstractions.Data;
+﻿using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Application.Abstractions.Services;
 using CloudShopping.Infrastructure.Persistence;
 using CloudShopping.Infrastructure.Repositories;
 using CloudShopping.Infrastructure.Services;
+// using CloudShopping.Infrastructure.Data; // Adicione o namespace onde está a sua SqlConnectionFactory se necessário
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MySqlConnector;
+using System.Data;
 
 namespace CloudShopping.Infrastructure;
 
@@ -16,10 +19,10 @@ public static class DependencyInjection
         var connectionString = configuration.GetConnectionString("DefaultConnection");
         services.AddDbContext<AppDbContext>(options =>
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
-
+        services.AddScoped<IDbConnection>(sp => new MySqlConnection(connectionString));
+        services.AddScoped<ISqlConnectionFactory>(sp => new SqlConnectionFactory(connectionString));
         services.AddHttpContextAccessor();
         services.AddScoped<ITenantProvider, TenantProvider>();
-
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
