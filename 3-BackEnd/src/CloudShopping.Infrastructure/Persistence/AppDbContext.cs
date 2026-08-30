@@ -1,4 +1,4 @@
-using CloudShopping.Application.Abstractions.Services;
+﻿using CloudShopping.Application.Abstractions.Services;
 using CloudShopping.Domain.Entities.Carts;
 using CloudShopping.Domain.Entities.Customers;
 using CloudShopping.Domain.Entities.Orders;
@@ -33,6 +33,9 @@ namespace CloudShopping.Infrastructure.Persistence
         public DbSet<Address> Addresses => Set<Address>();
         public DbSet<Contact> Contacts => Set<Contact>();
 
+        // Nova tabela de Departamentos
+        public DbSet<Department> Departments => Set<Department>();
+
         public DbSet<Product> Products => Set<Product>();
         public DbSet<ProductImage> ProductImages => Set<ProductImage>();
         public DbSet<StockMovement> StockMovements => Set<StockMovement>();
@@ -57,6 +60,9 @@ namespace CloudShopping.Infrastructure.Persistence
             modelBuilder.Entity<Customer>().HasQueryFilter(c => c.IsActive && c.TenantId == _currentTenantId);
             modelBuilder.Entity<Order>().HasQueryFilter(o => o.IsActive && o.TenantId == _currentTenantId);
             modelBuilder.Entity<Product>().HasQueryFilter(p => p.IsActive && p.TenantId == _currentTenantId);
+
+            // Filtro de Departamento: Retorna os do Tenant atual OU os globais do sistema (null)
+            modelBuilder.Entity<Department>().HasQueryFilter(d => d.IsActive && (d.TenantId == _currentTenantId || d.TenantId == null));
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

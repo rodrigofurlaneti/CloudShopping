@@ -3,7 +3,7 @@ using CloudShopping.Application.Abstractions.Services;
 using CloudShopping.Infrastructure.Persistence;
 using CloudShopping.Infrastructure.Repositories;
 using CloudShopping.Infrastructure.Services;
-// using CloudShopping.Infrastructure.Data; // Adicione o namespace onde está a sua SqlConnectionFactory se necessário
+// using CloudShopping.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +23,7 @@ public static class DependencyInjection
         services.AddScoped<ISqlConnectionFactory>(sp => new SqlConnectionFactory(connectionString));
         services.AddHttpContextAccessor();
         services.AddScoped<ITenantProvider, TenantProvider>();
+
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
@@ -34,6 +35,7 @@ public static class DependencyInjection
         services.AddScoped<IOrderSectorRepository, OrderSectorRepository>();
         services.AddScoped<IOrderStateHistoryRepository, OrderStateHistoryRepository>();
         services.AddScoped<IOrderStatusRepository, OrderStatusRepository>();
+        services.AddScoped<IDepartmentRepository, DepartmentRepository>();
 
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IFileStorageService, FileStorageService>();

@@ -1,4 +1,4 @@
-using CloudShopping.Application.Abstractions.Data;
+﻿using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Application.Abstractions.Services;
 using CloudShopping.Domain.Entities.Products;
 using CloudShopping.Domain.Enums;
@@ -37,6 +37,7 @@ namespace CloudShopping.Application.Features.Products.Commands.CreateProduct
         {
             var tenantId = _tenantProvider.GetTenantId();
             StockLocation? location = null;
+
             if (!string.IsNullOrEmpty(request.Aisle) &&
                 !string.IsNullOrEmpty(request.Rack) &&
                 !string.IsNullOrEmpty(request.Level) &&
@@ -54,6 +55,7 @@ namespace CloudShopping.Application.Features.Products.Commands.CreateProduct
             {
                 product = Product.Create(
                     tenantId: tenantId,
+                    departmentId: request.DepartmentId, 
                     sku: request.Sku,
                     name: request.Name,
                     price: request.Price,

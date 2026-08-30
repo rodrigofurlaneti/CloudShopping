@@ -1,4 +1,4 @@
-using CloudShopping.Domain.Entities.Products;
+﻿using CloudShopping.Domain.Entities.Products;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -27,6 +27,8 @@ namespace CloudShopping.Infrastructure.Persistence.Configurations
                 .IsRequired();
             builder.Property(p => p.AvailableStock)
                 .HasComputedColumnSql("PhysicalStock - ReservedStock", stored: false);
+            builder.Property(p => p.DepartmentId)
+                .IsRequired();
             builder.Property(p => p.Version)
                 .IsRequired()
                 .HasDefaultValue(1);
