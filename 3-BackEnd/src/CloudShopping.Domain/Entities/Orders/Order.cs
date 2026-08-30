@@ -4,7 +4,7 @@ using System.Linq;
 using CloudShopping.Domain.Entities.Customers;
 using CloudShopping.Domain.Enums;
 using CloudShopping.Domain.Primitives;
-using CloudShopping.Domain.Events; // Certifique-se de ter o namespace do OrderCanceledDomainEvent
+using CloudShopping.Domain.Events;
 
 namespace CloudShopping.Domain.Entities.Orders
 {
@@ -23,10 +23,12 @@ namespace CloudShopping.Domain.Entities.Orders
         private readonly List<Payment> _payments = new();
         public IReadOnlyCollection<Payment> Payments => _payments.AsReadOnly();
 
-        // Construtor vazio para o EF Core
+        // Coleção de histórico embutida no Agregado
+        private readonly List<OrderStateHistory> _stateHistory = new();
+        public IReadOnlyCollection<OrderStateHistory> StateHistory => _stateHistory.AsReadOnly();
+
         private Order() { }
 
-        // MÉTODO ALTERADO: Recebe a Tupla de itens em vez da entidade Cart
         public static Order Checkout(
             int tenantId,
             int customerId,
@@ -60,6 +62,9 @@ namespace CloudShopping.Domain.Entities.Orders
                 order._orderItems.Add(OrderItem.Create(item.ProductId, item.Quantity, item.UnitPrice));
             }
 
+            // Registra o primeiro histórico
+            order.AddHistory("Pedido criado com sucesso.");
+
             return order;
         }
 
@@ -79,6 +84,7 @@ namespace CloudShopping.Domain.Entities.Orders
             payment.Approve();
             OrderStatusId = OrderStatus.Paid;
             UpdateTimestamp();
+            AddHistory($"Pagamento {paymentId} aprovado.");
         }
 
         public void UpdatePaymentDeclined(int paymentId)
@@ -88,6 +94,7 @@ namespace CloudShopping.Domain.Entities.Orders
 
             payment.Decline();
             UpdateTimestamp();
+            AddHistory($"Pagamento {paymentId} recusado.");
         }
 
         public void UpdatePaymentRefunded(int paymentId)
@@ -98,6 +105,7 @@ namespace CloudShopping.Domain.Entities.Orders
             payment.Refund();
             OrderStatusId = OrderStatus.Refunded;
             UpdateTimestamp();
+            AddHistory($"Pagamento {paymentId} estornado.");
         }
 
         // --- FLUXO OPERACIONAL E LOGÍSTICO ---
@@ -109,6 +117,7 @@ namespace CloudShopping.Domain.Entities.Orders
 
             OrderStatusId = OrderStatus.Invoiced;
             UpdateTimestamp();
+            AddHistory("Nota fiscal emitida.");
         }
 
         public void StartProcessing()
@@ -118,6 +127,7 @@ namespace CloudShopping.Domain.Entities.Orders
 
             OrderStatusId = OrderStatus.Processing;
             UpdateTimestamp();
+            AddHistory("Processamento do pedido iniciado.");
         }
 
         public void StartSeparating()
@@ -127,6 +137,7 @@ namespace CloudShopping.Domain.Entities.Orders
 
             OrderStatusId = OrderStatus.Separating;
             UpdateTimestamp();
+            AddHistory("Separação de itens iniciada.");
         }
 
         public void StartPacking()
@@ -136,6 +147,7 @@ namespace CloudShopping.Domain.Entities.Orders
 
             OrderStatusId = OrderStatus.Packing;
             UpdateTimestamp();
+            AddHistory("Embalagem do pedido iniciada.");
         }
 
         public void GenerateShippingLabel()
@@ -145,6 +157,7 @@ namespace CloudShopping.Domain.Entities.Orders
 
             OrderStatusId = OrderStatus.GenerateLabel;
             UpdateTimestamp();
+            AddHistory("Etiqueta de envio gerada.");
         }
 
         public void MarkAsReadyToShip()
@@ -154,6 +167,7 @@ namespace CloudShopping.Domain.Entities.Orders
 
             OrderStatusId = OrderStatus.ReadyToShip;
             UpdateTimestamp();
+            AddHistory("Pedido pronto para postagem.");
         }
 
         public void ShipOrder()
@@ -163,6 +177,7 @@ namespace CloudShopping.Domain.Entities.Orders
 
             OrderStatusId = OrderStatus.Shipped;
             UpdateTimestamp();
+            AddHistory("Pedido despachado.");
         }
 
         public void SetTrackingNumber()
@@ -172,6 +187,7 @@ namespace CloudShopping.Domain.Entities.Orders
 
             OrderStatusId = OrderStatus.TrackingNumber;
             UpdateTimestamp();
+            AddHistory("Código de rastreio associado.");
         }
 
         public void MarkAsIntransit()
@@ -181,6 +197,7 @@ namespace CloudShopping.Domain.Entities.Orders
 
             OrderStatusId = OrderStatus.Intransit;
             UpdateTimestamp();
+            AddHistory("Pedido em trânsito.");
         }
 
         public void MarkAsDelivered()
@@ -190,6 +207,7 @@ namespace CloudShopping.Domain.Entities.Orders
 
             OrderStatusId = OrderStatus.Delivered;
             UpdateTimestamp();
+            AddHistory("Pedido entregue ao destinatário.");
         }
 
         // --- FLUXOS DE EXCEÇÃO E PÓS-VENDA ---
@@ -201,6 +219,7 @@ namespace CloudShopping.Domain.Entities.Orders
 
             OrderStatusId = OrderStatus.DeliveryFailed;
             UpdateTimestamp();
+            AddHistory("Falha na entrega registrada.");
         }
 
         public void RequestReturn()
@@ -210,6 +229,7 @@ namespace CloudShopping.Domain.Entities.Orders
 
             OrderStatusId = OrderStatus.Returning;
             UpdateTimestamp();
+            AddHistory("Solicitação de devolução/troca iniciada.");
         }
 
         public void CancelOrder()
@@ -219,9 +239,19 @@ namespace CloudShopping.Domain.Entities.Orders
 
             OrderStatusId = OrderStatus.Canceled;
             UpdateTimestamp();
+            AddHistory("Pedido cancelado.");
 
-            // Dispara o evento de domínio para estornar o estoque e registrar o histórico em background
             RaiseDomainEvent(new OrderCanceledDomainEvent(Id, TenantId));
+        }
+
+        // --- MÉTODOS AUXILIARES ---
+
+        private void AddHistory(string notes)
+        {
+            // Se você utilizar o Factory Method OrderStateHistory.Create, certifique-se de 
+            // que a classe OrderStateHistory aceite OrderId = 0 antes da inserção no EF Core, 
+            // ou deixe o EF Core gerenciar o vínculo via objeto de navegação.
+            _stateHistory.Add(OrderStateHistory.Create(this.Id, this.OrderStatusId, notes));
         }
     }
 }
