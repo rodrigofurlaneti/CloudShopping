@@ -1,17 +1,19 @@
 ﻿using CloudShopping.Domain.Primitives;
+using System;
 namespace CloudShopping.Domain.Entities.Tenants
 {
     public sealed class Tenant : AggregateRoot<int>
     {
         public string CompanyName { get; private set; }
-        public string Domain { get; private set; }
-        private Tenant() { } // EF Core
-        public static Tenant Create(string companyName, string domain)
+        public string? Domain { get; private set; }
+        private Tenant() { }
+        public static Tenant Create(string companyName, string? domain)
         {
+            if (string.IsNullOrWhiteSpace(companyName)) throw new ArgumentException("Nome da empresa é obrigatório.");
             return new Tenant
             {
-                CompanyName = companyName,
-                Domain = domain
+                CompanyName = companyName.Trim(),
+                Domain = domain?.Trim().ToLower()
             };
         }
     }

@@ -36,7 +36,7 @@ namespace CloudShopping.Domain.Entities.Customers
             if (CustomerTypeId != CustomerType.Guest)
                 throw new InvalidOperationException("Cliente já não é um visitante.");
 
-            Email = email;
+            Email = email?.Trim().ToLower();
             CustomerTypeId = CustomerType.Lead;
             UpdateTimestamp();
         }
@@ -45,7 +45,9 @@ namespace CloudShopping.Domain.Entities.Customers
         {
             if (CustomerTypeId == CustomerType.B2B)
                 throw new InvalidOperationException("Conta já é B2B.");
-            Individual = Individual.Create(Id, taxId, fullName, birthDate);
+
+            // Utiliza a fábrica limpa (o EF Core cuida da chave estrangeira compartilhada)
+            Individual = Individual.Create(taxId, fullName, birthDate);
             CustomerTypeId = CustomerType.B2C;
             UpdateTimestamp();
         }
@@ -54,14 +56,18 @@ namespace CloudShopping.Domain.Entities.Customers
         {
             if (CustomerTypeId == CustomerType.B2C)
                 throw new InvalidOperationException("Conta já é B2C.");
-            Company = Company.Create(Id, businessTaxId, companyName, stateTaxId);
+
+            // Utiliza a fábrica limpa
+            Company = Company.Create(businessTaxId, companyName, stateTaxId);
             CustomerTypeId = CustomerType.B2B;
             UpdateTimestamp();
         }
+
         public void UpdateB2CProfile(string fullName, DateTime? birthDate)
         {
             if (CustomerTypeId != CustomerType.B2C)
                 throw new InvalidOperationException("Apenas clientes B2C podem ter o perfil pessoal atualizado.");
+
             Individual?.Update(fullName, birthDate);
             UpdateTimestamp();
         }
@@ -70,6 +76,7 @@ namespace CloudShopping.Domain.Entities.Customers
         {
             if (CustomerTypeId != CustomerType.B2B)
                 throw new InvalidOperationException("Apenas clientes B2B podem ter o perfil corporativo atualizado.");
+
             Company?.Update(companyName, stateTaxId);
             UpdateTimestamp();
         }
@@ -78,19 +85,23 @@ namespace CloudShopping.Domain.Entities.Customers
         {
             if (string.IsNullOrWhiteSpace(newEmail))
                 throw new ArgumentException("O e-mail não pode ser vazio.");
-            Email = newEmail;
+
+            Email = newEmail.Trim().ToLower();
             UpdateTimestamp();
         }
+
         public void AddAddress(AddressType type, string street, string number, string city, string state, string zipCode, bool isDefault)
         {
-            _addresses.Add(Address.Create(Id, type, street, number, city, state, zipCode, isDefault));
+            _addresses.Add(Address.Create(Id, type, street, number, null, city, state, zipCode, isDefault));
             UpdateTimestamp();
         }
+
         public void UpdateAddress(int addressId, AddressType type, string street, string number, string city, string state, string zipCode, bool isDefault)
         {
             var address = _addresses.FirstOrDefault(a => a.Id == addressId);
             if (address is null)
                 throw new InvalidOperationException("Endereço não encontrado.");
+
             address.Update(type, street, number, city, state, zipCode, isDefault);
             UpdateTimestamp();
         }
@@ -99,6 +110,7 @@ namespace CloudShopping.Domain.Entities.Customers
         {
             if (string.IsNullOrWhiteSpace(passwordHash))
                 throw new ArgumentException("O hash da senha não pode ser vazio.", nameof(passwordHash));
+
             PasswordHash = passwordHash;
             UpdateTimestamp();
         }
@@ -107,6 +119,7 @@ namespace CloudShopping.Domain.Entities.Customers
         {
             if (string.IsNullOrWhiteSpace(newPasswordHash))
                 throw new ArgumentException("O novo hash da senha não pode ser vazio.", nameof(newPasswordHash));
+
             PasswordHash = newPasswordHash;
             UpdateTimestamp();
         }

@@ -1,6 +1,7 @@
 ﻿using CloudShopping.Domain.Entities.Customers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
 namespace CloudShopping.Infrastructure.Persistence.Configurations
 {
     public sealed class CustomerConfiguration : IEntityTypeConfiguration<Customer>
@@ -12,12 +13,11 @@ namespace CloudShopping.Infrastructure.Persistence.Configurations
             builder.Property(c => c.TenantId)
                 .IsRequired();
             builder.Property(c => c.Email)
-                .HasMaxLength(256);
+                .HasMaxLength(100);
             builder.Property(c => c.PasswordHash)
-                .HasMaxLength(512);
+                .HasMaxLength(255);
             builder.HasIndex(c => new { c.TenantId, c.Email })
-                .IsUnique()
-                .HasFilter("[Email] IS NOT NULL");
+                .IsUnique();
             builder.HasOne(c => c.Individual)
                 .WithOne()
                 .HasForeignKey<Individual>(i => i.CustomerId)

@@ -190,7 +190,7 @@ CREATE TABLE Products (
     Location_Level VARCHAR(10) NULL,
     Location_Position VARCHAR(10) NULL,
     
-    -- NOVO: Versão para Controle de Concorrência Otimista
+    -- Versão para Controle de Concorrência Otimista
     Version INT NOT NULL DEFAULT 1,
     
     IsActive BOOLEAN DEFAULT TRUE,
@@ -205,10 +205,7 @@ CREATE TABLE Products (
 CREATE TABLE StockMovements (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     ProductId INT NOT NULL,
-    
-    -- NOVO: Categoria/Tipo da movimentação (ex: 'Sale', 'Return', 'Adjustment')
     MovementType VARCHAR(30) NOT NULL,
-    
     QuantityChanged INT NOT NULL,
     BalanceAfterMovement INT NOT NULL,
     Reason VARCHAR(150) NOT NULL,
@@ -217,6 +214,24 @@ CREATE TABLE StockMovements (
     
     FOREIGN KEY (ProductId) REFERENCES Products(Id) ON DELETE CASCADE
 );
+
+-- NOVA TABELA: Gerenciamento de Imagens do Produto (Vinculada ao disco wwwroot)
+CREATE TABLE ProductImages (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    ProductId INT NOT NULL,
+    FileName VARCHAR(255) NOT NULL,
+    FilePath VARCHAR(500) NOT NULL, -- Ex: uploads/1/products/45/uuid-foto.jpg
+    IsPrimary BOOLEAN DEFAULT FALSE,
+    DisplayOrder INT NOT NULL DEFAULT 0,
+    
+    IsActive BOOLEAN DEFAULT TRUE,
+    CreatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
+    UpdatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    
+    FOREIGN KEY (ProductId) REFERENCES Products(Id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_productimages_productid ON ProductImages(ProductId);
 
 -------------------------------------------------------------------------------
 -- 3. TRANSACTIONAL TABLES (CARTS & ORDERS)

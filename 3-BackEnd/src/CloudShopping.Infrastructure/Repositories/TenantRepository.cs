@@ -1,10 +1,8 @@
 ﻿using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Domain.Entities.Tenants;
 using CloudShopping.Infrastructure.Persistence;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Microsoft.EntityFrameworkCore;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CloudShopping.Infrastructure.Repositories

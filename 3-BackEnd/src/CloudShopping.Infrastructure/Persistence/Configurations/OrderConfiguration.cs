@@ -1,9 +1,6 @@
 ﻿using CloudShopping.Domain.Entities.Orders;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace CloudShopping.Infrastructure.Persistence.Configurations
 {
@@ -16,12 +13,12 @@ namespace CloudShopping.Infrastructure.Persistence.Configurations
             builder.Property(o => o.TenantId)
                 .IsRequired();
             builder.Property(o => o.TotalAmount)
-                .HasColumnType("decimal(18,2)")
+                .HasColumnType("decimal(12,2)")
                 .IsRequired();
             builder.Property(o => o.DiscountAmount)
-                .HasColumnType("decimal(18,2)");
+                .HasColumnType("decimal(12,2)");
             builder.Property(o => o.ShippingAmount)
-                .HasColumnType("decimal(18,2)");
+                .HasColumnType("decimal(12,2)");
             builder.HasMany(o => o.OrderItems)
                 .WithOne()
                 .HasForeignKey(oi => oi.OrderId)

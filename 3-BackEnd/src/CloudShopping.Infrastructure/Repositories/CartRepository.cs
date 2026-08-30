@@ -2,6 +2,9 @@
 using CloudShopping.Domain.Entities.Carts;
 using CloudShopping.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace CloudShopping.Infrastructure.Repositories
 {
@@ -45,9 +48,16 @@ namespace CloudShopping.Infrastructure.Repositories
 
         public async Task<Cart?> GetBySessionTokenAsync(Guid sessionToken, CancellationToken cancellationToken = default)
         {
+            // Busca o carrinho associado ao cliente que possui o SessionToken correspondente
             return await _context.Carts
                 .Include(c => c.Items)
-                .FirstOrDefaultAsync(c => c.SessionToken == sessionToken, cancellationToken);
+                .Join(_context.Customers,
+                    cart => cart.CustomerId,
+                    customer => customer.Id,
+                    (cart, customer) => new { Cart = cart, Customer = customer })
+                .Where(x => x.Customer.SessionToken == sessionToken)
+                .Select(x => x.Cart)
+                .FirstOrDefaultAsync(cancellationToken);
         }
     }
 }

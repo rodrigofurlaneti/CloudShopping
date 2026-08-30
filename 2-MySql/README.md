@@ -1,4 +1,4 @@
-# Arquitetura do Banco de Dados
+﻿# Arquitetura do Banco de Dados
 
 Abaixo está o diagrama Entidade-Relacionamento do nosso E-commerce:
 
@@ -27,6 +27,7 @@ erDiagram
     Products ||--o{ CartItems : "adicionado em"
     Products ||--o{ OrderItems : "pedido em"
     Products ||--o{ StockMovements : "audita"
+    Products ||--o{ ProductImages : "possui"
     Carts ||--o{ CartItems : "contem"
 
     Orders ||--o{ OrderStateHistory : "rastreia"
@@ -90,14 +91,25 @@ erDiagram
         varchar Location_Rack
         varchar Location_Level
         varchar Location_Position
+        int Version
     }
 
     StockMovements {
         int Id PK
         int ProductId FK
+        varchar MovementType
         int QuantityChanged
         int BalanceAfterMovement
         varchar Reason
+    }
+
+    ProductImages {
+        int Id PK
+        int ProductId FK
+        varchar FileName
+        varchar FilePath
+        boolean IsPrimary
+        int DisplayOrder
     }
 
     Carts {
