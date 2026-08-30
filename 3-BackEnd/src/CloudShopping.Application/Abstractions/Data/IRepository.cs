@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace CloudShopping.Application.Abstractions.Data
 {
-    public interface IRepository<TEntity, TId> where TEntity : AggregateRoot<TId>
+    public interface IRepository<TEntity, TId> where TEntity : Entity<TId>
     {
         Task<TEntity?> GetByIdAsync(TId id, CancellationToken cancellationToken = default);
         Task AddAsync(TEntity entity, CancellationToken cancellationToken = default);

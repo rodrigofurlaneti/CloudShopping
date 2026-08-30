@@ -45,7 +45,9 @@ namespace CloudShopping.Application.Features.Orders.Commands.SetOrderTrackingNum
             }
             try
             {
-                order.SetTrackingNumber(request.TrackingNumber);
+                // NOTA: o modelo de domínio atual não persiste o código de rastreio em si,
+                // apenas a transição de status. O valor recebido fica registrado apenas no log.
+                order.SetTrackingNumber();
             }
             catch (InvalidOperationException ex)
             {

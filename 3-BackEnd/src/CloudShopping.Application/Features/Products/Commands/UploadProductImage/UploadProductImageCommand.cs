@@ -1,5 +1,6 @@
 ﻿using CloudShopping.Domain.Primitives.Results;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 namespace CloudShopping.Application.Features.Products.Commands.UploadProductImage
 {
     public sealed record UploadProductImageCommand(

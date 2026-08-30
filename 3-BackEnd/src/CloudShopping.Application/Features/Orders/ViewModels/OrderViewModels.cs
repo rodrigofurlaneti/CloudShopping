@@ -20,39 +20,7 @@ namespace CloudShopping.Application.Features.Orders.ViewModels
         }
     }
 
-    public sealed record OrderSummaryViewModel(
-        int Id,
-        DateTime OrderDate,
-        decimal TotalAmount,
-        int OrderStatusId,
-        int ItemCount);
-
-    public sealed record OrderItemViewModel(
-        int ProductId,
-        int Quantity,
-        decimal UnitPrice);
-
-    public sealed record OrderPaymentViewModel(
-        int Id,
-        string PaymentMethod,
-        decimal Amount,
-        string Status);
-
-    public sealed record OrderAddressViewModel(
-        string Street,
-        string Number,
-        string? Neighborhood,
-        string City,
-        string State,
-        string ZipCode);
-
-    public sealed record OrderDetailsViewModel(
-        int Id,
-        int CustomerId,
-        DateTime OrderDate,
-        decimal TotalAmount,
-        int OrderStatusId,
-        OrderAddressViewModel? Address,
-        IReadOnlyCollection<OrderItemViewModel> Items,
-        IReadOnlyCollection<OrderPaymentViewModel> Payments);
+    // OrderSummaryViewModel, OrderItemViewModel, OrderPaymentViewModel, OrderAddressViewModel e
+    // OrderDetailsViewModel já existem em arquivos próprios nesta mesma pasta/namespace
+    // (criados anteriormente). Mantemos aqui somente o PagedList<T>, que é exclusivo deste arquivo.
 }

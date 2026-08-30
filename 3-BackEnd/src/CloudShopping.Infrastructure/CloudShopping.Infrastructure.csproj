@@ -16,5 +16,6 @@
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\CloudShopping.Application\CloudShopping.Application.csproj" />
+		<ProjectReference Include="..\CloudShopping.Domain\CloudShopping.Domain.csproj" />
 	</ItemGroup>
 </Project>

@@ -1,5 +1,6 @@
 ﻿using CloudShopping.Application.Features.OrderSector.ViewModels;
 using CloudShopping.Domain.Primitives.Results;
+using Dapper;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;

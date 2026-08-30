@@ -37,7 +37,7 @@ namespace CloudShopping.Application.Features.Customers.Commands.AddCustomerAddre
             try
             {
                 customer.AddAddress(
-                    request.AddressType,
+                    request.AddressTypeId,
                     request.Street,
                     request.Number,
                     request.City,

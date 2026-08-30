@@ -6,7 +6,7 @@ namespace CloudShopping.Application.Features.Orders.DTO
         int CustomerId,
         DateTime OrderDate,
         decimal TotalAmount,
-        OrderStatus OrderStatus,
+        OrderStatusEnum OrderStatus,
         OrderAddressResponse? Address,
         IReadOnlyCollection<OrderItemResponse> Items,
         IReadOnlyCollection<PaymentResponse> Payments

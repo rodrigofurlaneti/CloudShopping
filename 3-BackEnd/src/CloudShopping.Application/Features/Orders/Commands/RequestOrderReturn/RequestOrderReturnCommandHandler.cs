@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using CloudShopping.Application.Abstractions.Data;
+using CloudShopping.Application.Abstractions.Services;
 using CloudShopping.Domain.Primitives.Results;
 
 namespace CloudShopping.Application.Features.Orders.Commands.RequestOrderReturn
@@ -11,32 +12,36 @@ namespace CloudShopping.Application.Features.Orders.Commands.RequestOrderReturn
     public sealed class RequestOrderReturnCommandHandler : IRequestHandler<RequestOrderReturnCommand, Result>
     {
         private readonly IOrderRepository _orderRepository;
+        private readonly ITenantProvider _tenantProvider;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<RequestOrderReturnCommandHandler> _logger;
 
         public RequestOrderReturnCommandHandler(
             IOrderRepository orderRepository,
+            ITenantProvider tenantProvider,
             IUnitOfWork unitOfWork,
             ILogger<RequestOrderReturnCommandHandler> logger)
         {
             _orderRepository = orderRepository;
+            _tenantProvider = tenantProvider;
             _unitOfWork = unitOfWork;
             _logger = logger;
         }
 
         public async Task<Result> Handle(RequestOrderReturnCommand request, CancellationToken cancellationToken)
         {
+            var tenantId = _tenantProvider.GetTenantId();
             var order = await _orderRepository.GetByIdAsync(request.OrderId, cancellationToken);
             if (order is null)
             {
                 _logger.LogWarning("Tentativa de devolução falhou. Pedido {OrderId} não encontrado.", request.OrderId);
                 return Result.Failure(new Error("Order.NotFound", "Pedido não encontrado."));
             }
-            if (order.CustomerId != request.CustomerId)
+            if (order.TenantId != tenantId)
             {
-                _logger.LogWarning("Devolução não autorizada. Cliente {CustomerId} tentou devolver o pedido {OrderId} do cliente {OwnerId}.",
-                    request.CustomerId, request.OrderId, order.CustomerId);
-                return Result.Failure(new Error("Order.Unauthorized", "Este pedido não pertence a você."));
+                _logger.LogWarning("Devolução não autorizada. OrderId: {OrderId}, Lojista Esperado: {TenantId}, Lojista Real: {OrderTenantId}",
+                    request.OrderId, tenantId, order.TenantId);
+                return Result.Failure(new Error("Order.Unauthorized", "Este pedido não pertence à sua loja."));
             }
             try
             {

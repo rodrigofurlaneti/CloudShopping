@@ -1,6 +1,6 @@
 ﻿using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Application.Abstractions.Services;
-using CloudShopping.Domain.Entities.Products.CloudShopping.Domain.Entities.Products;
+using CloudShopping.Domain.Entities.Products;
 using CloudShopping.Domain.Enums;
 using CloudShopping.Domain.Primitives.Results;
 using MediatR;
@@ -53,7 +53,7 @@ namespace CloudShopping.Application.Features.Products.Commands.AddProductStock
             }
             var movement = StockMovement.Create(
                 productId: product.Id,
-                movementType: StockMovementType.Purchase,
+                movementType: StockMovementType.PurchaseReceipt,
                 quantityChanged: request.Quantity,
                 balanceAfter: product.PhysicalStock,
                 reason: request.Reason

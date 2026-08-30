@@ -27,6 +27,7 @@ namespace CloudShopping.Application.Features.Customers.Commands.UpdateCustomerAd
             {
                 customer.UpdateAddress(
                     request.AddressId,
+                    request.AddressTypeId,
                     request.Street,
                     request.Number,
                     request.City,

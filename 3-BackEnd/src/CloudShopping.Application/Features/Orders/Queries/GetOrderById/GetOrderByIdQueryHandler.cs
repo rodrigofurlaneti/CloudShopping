@@ -41,7 +41,7 @@ namespace CloudShopping.Application.Features.Orders.Queries.GetOrderById
                 order.OrderStatusId,
                 addressViewModel,
                 order.OrderItems.Select(i => new OrderItemViewModel(i.ProductId, i.Quantity, i.UnitPrice)).ToList(),
-                order.Payments.Select(p => new OrderPaymentViewModel(p.Id, p.PaymentMethod, p.Amount, p.PaymentStatusId.ToString())).ToList());
+                order.Payments.Select(p => new OrderPaymentViewModel(p.PaymentMethod, p.Amount, (int)p.PaymentStatusId)).ToList());
 
             return Result.Success(viewModel);
         }

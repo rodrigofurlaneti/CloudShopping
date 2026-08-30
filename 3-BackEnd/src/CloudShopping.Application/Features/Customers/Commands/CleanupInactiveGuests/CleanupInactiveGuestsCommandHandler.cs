@@ -21,7 +21,7 @@ namespace CloudShopping.Application.Features.Customers.Commands.CleanupInactiveG
         }
         public async Task<Result<int>> Handle(CleanupInactiveGuestsCommand request, CancellationToken cancellationToken)
         {
-            var inactiveGuests = await _customerRepository.GetInactiveGuestsAsync(days: 30, cancellationToken);
+            var inactiveGuests = await _customerRepository.GetInactiveGuestsAsync(daysInactive: 30, cancellationToken);
             int count = 0;
             foreach (var guest in inactiveGuests)
             {

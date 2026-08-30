@@ -10,18 +10,15 @@ namespace CloudShopping.Application.Features.Customers.Commands.RegisterLead
         private readonly ICustomerRepository _customerRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ITenantProvider _tenantProvider;
-        private readonly IPasswordHasher _passwordHasher;
 
         public RegisterLeadCommandHandler(
             ICustomerRepository customerRepository,
             IUnitOfWork unitOfWork,
-            ITenantProvider tenantProvider,
-            IPasswordHasher passwordHasher)
+            ITenantProvider tenantProvider)
         {
             _customerRepository = customerRepository;
             _unitOfWork = unitOfWork;
             _tenantProvider = tenantProvider;
-            _passwordHasher = passwordHasher;
         }
 
         public async Task<Result> Handle(RegisterLeadCommand request, CancellationToken cancellationToken)
@@ -38,8 +35,6 @@ namespace CloudShopping.Application.Features.Customers.Commands.RegisterLead
             try
             {
                 customer.ConvertToLead(request.Email);
-                string passwordHash = _passwordHasher.Hash(request.Password);
-                customer.SetPassword(passwordHash);
             }
             catch (InvalidOperationException ex)
             {

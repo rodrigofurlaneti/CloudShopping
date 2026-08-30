@@ -8,6 +8,6 @@ namespace CloudShopping.Application.Features.Orders.Queries.GetPaginatedTenantOr
     public sealed record GetPaginatedTenantOrdersQuery(
             int Page = 1,
             int PageSize = 10,
-            OrderStatus? StatusFilter = null
+            OrderStatusEnum? StatusFilter = null
         ) : IRequest<Result<PagedResult<OrderSummaryResponse>>>;
 }

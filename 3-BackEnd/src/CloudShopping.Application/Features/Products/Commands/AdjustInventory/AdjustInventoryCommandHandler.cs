@@ -1,6 +1,6 @@
 ﻿using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Application.Abstractions.Services;
-using CloudShopping.Domain.Entities.Products.CloudShopping.Domain.Entities.Products;
+using CloudShopping.Domain.Entities.Products;
 using CloudShopping.Domain.Enums;
 using CloudShopping.Domain.Primitives.Results;
 using MediatR;

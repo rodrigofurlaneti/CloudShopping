@@ -45,7 +45,7 @@ namespace CloudShopping.Application.Features.Orders.Commands.MarkDeliveryFailed
             }
             try
             {
-                order.MarkAsDeliveryFailed(request.Reason);
+                order.MarkAsDeliveryFailed();
             }
             catch (InvalidOperationException ex)
             {

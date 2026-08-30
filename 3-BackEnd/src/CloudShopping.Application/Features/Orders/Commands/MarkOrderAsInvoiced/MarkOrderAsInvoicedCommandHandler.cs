@@ -45,7 +45,7 @@ namespace CloudShopping.Application.Features.Orders.Commands.MarkOrderAsInvoiced
             }
             try
             {
-                order.MarkAsInvoiced(request.InvoiceKey);
+                order.MarkAsInvoiced();
             }
             catch (InvalidOperationException ex)
             {

@@ -1,5 +1,6 @@
 using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Application.Features.Orders.ViewModels;
+using CloudShopping.Domain.Enums;
 using CloudShopping.Domain.Primitives.Results;
 using MediatR;
 using System.Linq;
@@ -29,7 +30,7 @@ namespace CloudShopping.Application.Features.Orders.Queries.GetCustomerOrders
                 .OrderByDescending(o => o.OrderDate)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .Select(o => new OrderSummaryViewModel(o.Id, o.OrderDate, o.TotalAmount, o.OrderStatusId, o.OrderItems.Count))
+                .Select(o => new OrderSummaryViewModel(o.Id, o.OrderDate, o.TotalAmount, ((OrderStatusEnum)o.OrderStatusId).ToString()))
                 .ToList();
 
             var result = new PagedList<OrderSummaryViewModel>(pageItems, totalCount, page, pageSize);

@@ -102,7 +102,7 @@ namespace CloudShopping.Domain.Entities.Customers
             if (address is null)
                 throw new InvalidOperationException("Endereço não encontrado.");
 
-            address.Update(type, street, number, city, state, zipCode, isDefault);
+            address.Update(type, street, number, null, city, state, zipCode, isDefault);
             UpdateTimestamp();
         }
 

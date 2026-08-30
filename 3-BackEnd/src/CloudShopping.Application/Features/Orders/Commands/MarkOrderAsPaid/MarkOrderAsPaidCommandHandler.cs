@@ -42,9 +42,10 @@ namespace CloudShopping.Application.Features.Orders.Commands.MarkOrderAsPaid
                 _logger.LogWarning("Acesso negado. OrderId: {OrderId}, Lojista: {TenantId}", request.OrderId, tenantId);
                 return Result.Failure(new Error("Order.Unauthorized", "Este pedido não pertence à sua loja."));
             }
+            var amount = request.Amount >= 0 ? request.Amount : order.TotalAmount;
             try
             {
-                order.AddApprovedPayment(request.PaymentMethod, request.Amount);
+                order.AddApprovedPayment(request.PaymentMethod, amount);
             }
             catch (InvalidOperationException ex)
             {
@@ -54,7 +55,7 @@ namespace CloudShopping.Application.Features.Orders.Commands.MarkOrderAsPaid
             _orderRepository.Update(order);
             await _unitOfWork.CommitAsync(cancellationToken);
             _logger.LogInformation("Pedido {OrderId} marcado como pago. Valor: {Amount}, Método: {PaymentMethod}",
-                request.OrderId, request.Amount, request.PaymentMethod);
+                request.OrderId, amount, request.PaymentMethod);
             return Result.Success();
         }
     }

@@ -1,6 +1,6 @@
 ﻿namespace CloudShopping.Application.Features.Orders.DTO
 {
-    private class OrderHeaderDto
+    public sealed class OrderHeaderDto
     {
         public int Id { get; set; }
         public int CustomerId { get; set; }

@@ -1,7 +1,6 @@
 ﻿using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Application.Abstractions.Services; // Para o ITenantProvider
 using CloudShopping.Domain.Entities.Products; // Para o StockMovement
-using CloudShopping.Domain.Entities.Products.CloudShopping.Domain.Entities.Products;
 using CloudShopping.Domain.Enums; // Para o StockMovementType
 using CloudShopping.Domain.Primitives.Results;
 using MediatR;
