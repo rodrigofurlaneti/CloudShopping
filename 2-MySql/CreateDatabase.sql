@@ -373,7 +373,76 @@ CREATE TABLE Payments (
 );
 
 -------------------------------------------------------------------------------
--- 5. POPULANDO DADOS INICIAIS
+-- 5. BACKOFFICE (FUNCIONÁRIOS, USUÁRIOS E PERMISSÕES)
+-------------------------------------------------------------------------------
+CREATE TABLE Employees (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    TenantId INT NOT NULL,
+    Name VARCHAR(150) NOT NULL,
+    Cpf CHAR(11) NOT NULL,
+    Email VARCHAR(150) NULL,
+    Phone VARCHAR(20) NULL,
+    HiredAt DATETIME(6) NOT NULL,
+    DismissedAt DATETIME(6) NULL,
+    Salary DECIMAL(12,2) NULL,
+    CommissionPercent DECIMAL(5,2) NULL,
+    
+    IsActive BOOLEAN DEFAULT TRUE,
+    CreatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
+    UpdatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+
+    FOREIGN KEY (TenantId) REFERENCES Tenants(Id) ON DELETE CASCADE,
+    CONSTRAINT CK_Employee_CommissionPercent CHECK ((CommissionPercent IS NULL) OR (CommissionPercent >= 0 AND CommissionPercent <= 100)),
+    UNIQUE KEY uk_tenant_cpf (TenantId, Cpf)
+);
+
+CREATE TABLE EmployeeUsers (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    TenantId INT NOT NULL,
+    EmployeeId INT NOT NULL,
+    Username VARCHAR(100) NOT NULL,
+    PasswordHash VARCHAR(255) NOT NULL,
+    
+    IsActive BOOLEAN DEFAULT TRUE,
+    CreatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
+    UpdatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+
+    FOREIGN KEY (TenantId) REFERENCES Tenants(Id) ON DELETE CASCADE,
+    FOREIGN KEY (EmployeeId) REFERENCES Employees(Id) ON DELETE CASCADE,
+    UNIQUE KEY uk_tenant_username (TenantId, Username)
+);
+
+CREATE TABLE Profiles (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    TenantId INT NOT NULL,
+    Name VARCHAR(100) NOT NULL,
+    
+    IsActive BOOLEAN DEFAULT TRUE,
+    CreatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
+    UpdatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+
+    FOREIGN KEY (TenantId) REFERENCES Tenants(Id) ON DELETE CASCADE,
+    UNIQUE KEY uk_tenant_profile_name (TenantId, Name)
+);
+
+CREATE TABLE ProfileUsers (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    TenantId INT NOT NULL,
+    ProfileId INT NOT NULL,
+    EmployeeUserId INT NOT NULL,
+    
+    IsActive BOOLEAN DEFAULT TRUE,
+    CreatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
+    UpdatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+
+    FOREIGN KEY (TenantId) REFERENCES Tenants(Id) ON DELETE CASCADE,
+    FOREIGN KEY (ProfileId) REFERENCES Profiles(Id) ON DELETE CASCADE,
+    FOREIGN KEY (EmployeeUserId) REFERENCES EmployeeUsers(Id) ON DELETE CASCADE,
+    UNIQUE KEY uk_profile_user (ProfileId, EmployeeUserId)
+);
+
+-------------------------------------------------------------------------------
+-- 6. POPULANDO DADOS INICIAIS
 -------------------------------------------------------------------------------
 
 -- Criar o primeiro lojista (Tenant) de testes
@@ -394,7 +463,7 @@ INSERT INTO Departments (TenantId, Name, Slug, IsSystemDefault) VALUES
 (NULL, 'Automotivo', 'automotivo', TRUE);
 
 -------------------------------------------------------------------------------
--- 3.1 BANNERS DA VITRINE (CUSTOMIZÁVEL POR TENANT OU PADRÃO DO SISTEMA)
+-- 6.1 BANNERS DA VITRINE (CUSTOMIZÁVEL POR TENANT OU PADRÃO DO SISTEMA)
 -------------------------------------------------------------------------------
 CREATE TABLE StoreBanners (
     Id INT AUTO_INCREMENT PRIMARY KEY,
@@ -424,3 +493,12 @@ INSERT INTO StoreBanners (TenantId, Title, Subtitle, DiscountPercentage, ButtonT
 (NULL, 'Tecnologia para o seu dia a dia', 'Smartphones, notebooks e muito mais', NULL, 'Ver ofertas >', '#', '#16a34a', 2, TRUE),
 (NULL, 'Casa e Cozinha', 'Tudo para o seu lar', NULL, 'Ver produtos >', '#', '#1d4ed8', 3, TRUE),
 (NULL, 'Beleza e Cuidados', 'Produtos para você se sentir ainda melhor', NULL, 'Ver ofertas >', '#', '#5b21b6', 4, TRUE);
+
+USE ECommerceDB;
+
+-- Cadastrando perfis padrão globais ou para o Tenant de demonstração (TenantId = 1)
+INSERT INTO Profiles (TenantId, Name, IsActive) VALUES 
+(1, 'Administrador Geral', TRUE),
+(1, 'Gerente de Vendas', TRUE),
+(1, 'Operador de Expedição', TRUE),
+(1, 'Atendente de Suporte', TRUE);

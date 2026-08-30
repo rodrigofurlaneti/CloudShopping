@@ -38,7 +38,10 @@ public static class DependencyInjection
         services.AddScoped<IStoreBannerRepository, StoreBannerRepository>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IFileStorageService, FileStorageService>();
-
+        services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+        services.AddScoped<IEmployeeUserRepository, EmployeeUserRepository>();
+        services.AddScoped<IProfileRepository, ProfileRepository>();
+        services.AddScoped<IProfileUserRepository, ProfileUserRepository>();
         return services;
     }
 }

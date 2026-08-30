@@ -10,6 +10,12 @@ erDiagram
     Tenants ||--o{ Orders : "tem"
     Tenants ||--o{ OrderSectors : "possui customizações"
     Tenants ||--o{ OrderStatus : "possui customizações"
+    Tenants ||--o{ Departments : "possui customizações"
+    Tenants ||--o{ StoreBanners : "possui"
+    Tenants ||--o{ Employees : "emprega"
+    Tenants ||--o{ EmployeeUsers : "possui acessos"
+    Tenants ||--o{ Profiles : "define"
+    Tenants ||--o{ ProfileUsers : "vincula"
 
     OrderSectors ||--o{ OrderStatus : "agrupa"
     OrderStatus ||--o{ Orders : "define"
@@ -27,6 +33,7 @@ erDiagram
     Customers ||--|| Carts : "possui"
     Customers ||--o{ Orders : "realiza"
 
+    Departments ||--o{ Products : "classifica"
     Products ||--o{ CartItems : "adicionado em"
     Products ||--o{ OrderItems : "pedido em"
     Products ||--o{ StockMovements : "audita"
@@ -38,7 +45,11 @@ erDiagram
     Orders ||--o{ OrderItems : "contem"
     Orders ||--o{ Payments : "pago via"
 
-    %% ESTRUTURA DAS TABELAS ATUALIZADA (HÍBRIDA)
+    Employees ||--o{ EmployeeUsers : "possui login"
+    Profiles ||--o{ ProfileUsers : "concede"
+    EmployeeUsers ||--o{ ProfileUsers : "possui"
+
+    %% ESTRUTURA DAS TABELAS ATUALIZADA (HÍBRIDA + BACKOFFICE)
     Tenants {
         int Id PK
         varchar CompanyName
@@ -47,15 +58,32 @@ erDiagram
 
     OrderSectors {
         int Id PK
-        int TenantId "FK (Nullable - Null é padrão global)"
+        int TenantId "FK (Nullable - Padrão Global)"
         varchar Name
     }
 
     OrderStatus {
         int Id PK
-        int TenantId "FK (Nullable - Null é padrão global)"
+        int TenantId "FK (Nullable - Padrão Global)"
         int OrderSectorId FK
         varchar Name
+        boolean IsSystemDefault
+    }
+
+    Departments {
+        int Id PK
+        int TenantId "FK (Nullable - Padrão Global)"
+        varchar Name
+        varchar Slug
+        boolean IsSystemDefault
+    }
+
+    StoreBanners {
+        int Id PK
+        int TenantId "FK (Nullable - Padrão Global)"
+        varchar Title
+        varchar Subtitle
+        int DisplayOrder
         boolean IsSystemDefault
     }
 
@@ -88,6 +116,7 @@ erDiagram
     Products {
         int Id PK
         int TenantId FK
+        int DepartmentId FK
         varchar SKU
         decimal Price
         int PhysicalStock
@@ -161,5 +190,34 @@ erDiagram
         int OrderId FK
         int PaymentStatusId FK
         decimal Amount
+    }
+
+    Employees {
+        int Id PK
+        int TenantId FK
+        varchar Name
+        char Cpf
+        decimal Salary
+    }
+
+    EmployeeUsers {
+        int Id PK
+        int TenantId FK
+        int EmployeeId FK
+        varchar Username
+        varchar PasswordHash
+    }
+
+    Profiles {
+        int Id PK
+        int TenantId FK
+        varchar Name
+    }
+
+    ProfileUsers {
+        int Id PK
+        int TenantId FK
+        int ProfileId FK
+        int EmployeeUserId FK
     }
 ```
