@@ -1,5 +1,5 @@
-﻿using CloudShopping.Application.OrderStateHistories.Commands.DeactivateOrderHistory;
-using CloudShopping.Application.OrderStateHistories.Commands.UpdateOrderHistoryNote;
+using CloudShopping.Application.Features.OrderStateHistories.Commands.DeactivateOrderHistory;
+using CloudShopping.Application.Features.OrderStateHistories.Commands.UpdateOrderHistoryNote;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
@@ -24,8 +24,9 @@ namespace CloudShopping.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateNote(int id, [FromBody] UpdateOrderHistoryNoteCommand command, CancellationToken cancellationToken)
         {
-            var cmd = command with { Id = id };
-            await _mediator.Send(cmd, cancellationToken);
+            var cmd = command with { HistoryId = id };
+            var result = await _mediator.Send(cmd, cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
 
             return NoContent();
         }
@@ -36,7 +37,8 @@ namespace CloudShopping.Api.Controllers
         public async Task<IActionResult> Deactivate(int id, CancellationToken cancellationToken)
         {
             var command = new DeactivateOrderHistoryCommand(id);
-            await _mediator.Send(command, cancellationToken);
+            var result = await _mediator.Send(command, cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
 
             return NoContent();
         }

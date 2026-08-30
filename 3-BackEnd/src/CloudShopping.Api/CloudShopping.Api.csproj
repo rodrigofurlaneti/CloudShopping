@@ -8,6 +8,13 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.18" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CloudShopping.Domain\CloudShopping.Domain.csproj" />
+    <ProjectReference Include="..\CloudShopping.Application\CloudShopping.Application.csproj" />
+    <ProjectReference Include="..\CloudShopping.Infrastructure\CloudShopping.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

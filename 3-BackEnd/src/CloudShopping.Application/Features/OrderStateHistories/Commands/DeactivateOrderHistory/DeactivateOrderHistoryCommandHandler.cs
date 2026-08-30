@@ -1,48 +1,41 @@
-﻿using CloudShopping.Application.Abstractions.Data;
+using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Domain.Primitives.Results;
 using MediatR;
-using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CloudShopping.Application.Features.OrderStateHistories.Commands.DeactivateOrderHistory
 {
     public sealed class DeactivateOrderHistoryCommandHandler : IRequestHandler<DeactivateOrderHistoryCommand, Result>
     {
-        private readonly IOrderStateHistoryRepository _historyRepository;
+        private readonly IOrderStateHistoryRepository _repository;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ILogger<DeactivateOrderHistoryCommandHandler> _logger;
 
-        public DeactivateOrderHistoryCommandHandler(
-            IOrderStateHistoryRepository historyRepository,
-            IUnitOfWork unitOfWork,
-            ILogger<DeactivateOrderHistoryCommandHandler> logger)
+        public DeactivateOrderHistoryCommandHandler(IOrderStateHistoryRepository repository, IUnitOfWork unitOfWork)
         {
-            _historyRepository = historyRepository;
+            _repository = repository;
             _unitOfWork = unitOfWork;
-            _logger = logger;
         }
 
         public async Task<Result> Handle(DeactivateOrderHistoryCommand request, CancellationToken cancellationToken)
         {
-            var historyRecord = await _historyRepository.GetByIdAsync(request.HistoryId, cancellationToken);
-            if (historyRecord is null)
-                return Result.Failure(new Error("OrderHistory.NotFound", "Registro de histórico não encontrado."));
+            var history = await _repository.GetByIdAsync(request.HistoryId, cancellationToken);
+            if (history is null)
+                return Result.Failure(new Error("OrderStateHistory.NotFound", "Registro de histórico não encontrado."));
 
             try
             {
-                historyRecord.Deactivate();
+                history.Deactivate();
             }
             catch (InvalidOperationException ex)
             {
-                return Result.Failure(new Error("OrderHistory.StatusError", ex.Message));
+                return Result.Failure(new Error("OrderStateHistory.InvalidOperation", ex.Message));
             }
-            _historyRepository.Update(historyRecord);
+
+            _repository.Update(history);
             await _unitOfWork.CommitAsync(cancellationToken);
-            _logger.LogWarning("Registro de histórico {HistoryId} foi inativado (Soft Delete) pelo Administrador.", request.HistoryId);
+
             return Result.Success();
         }
     }

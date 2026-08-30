@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+using MySqlConnector;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CloudShopping.Application.Abstractions.Data
 {
@@ -18,7 +14,7 @@ namespace CloudShopping.Application.Abstractions.Data
 
         public IDbConnection CreateConnection()
         {
-            var connection = new SqlConnection(_connectionString);
+            var connection = new MySqlConnection(_connectionString);
             connection.Open();
             return connection;
         }

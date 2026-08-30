@@ -1,39 +1,42 @@
-﻿using CloudShopping.Application.Abstractions.Data;
-using CloudShopping.Application.Features.Carts.Commands;
-using CloudShopping.Domain.Entities.Carts;
+using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Domain.Primitives.Results;
 using MediatR;
+using System.Threading;
+using System.Threading.Tasks;
 
-public sealed class AddCartItemCommandHandler : IRequestHandler<AddCartItemCommand, Result>
+namespace CloudShopping.Application.Features.Carts.Commands
 {
-    private readonly ICartRepository _cartRepository;
-    private readonly IProductRepository _productRepository;
-    private readonly IUnitOfWork _unitOfWork;
-
-    public AddCartItemCommandHandler(
-        ICartRepository cartRepository,
-        IProductRepository productRepository,
-        IUnitOfWork unitOfWork)
+    public sealed class AddCartItemCommandHandler : IRequestHandler<AddCartItemCommand, Result>
     {
-        _cartRepository = cartRepository;
-        _productRepository = productRepository;
-        _unitOfWork = unitOfWork;
-    }
+        private readonly ICartRepository _cartRepository;
+        private readonly IProductRepository _productRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-    public async Task<Result> Handle(AddCartItemCommand request, CancellationToken cancellationToken)
-    {
-        var product = await _productRepository.GetByIdAsync(request.ProductId, cancellationToken);
-        if (product is null)
-            return Result.Failure(new Error("Product.NotFound", "Produto não encontrado."));
-        var cart = await _cartRepository.GetByCustomerIdAsync(request.CustomerId, cancellationToken);
-        if (cart is null)
+        public AddCartItemCommandHandler(ICartRepository cartRepository, IProductRepository productRepository, IUnitOfWork unitOfWork)
         {
-            cart = Cart.Create(request.CustomerId);
-            await _cartRepository.AddAsync(cart, cancellationToken);
+            _cartRepository = cartRepository;
+            _productRepository = productRepository;
+            _unitOfWork = unitOfWork;
         }
-        cart.AddItem(product.Id, request.Quantity, product.Price);
-        _cartRepository.Update(cart);
-        await _unitOfWork.CommitAsync(cancellationToken);
-        return Result.Success();
+
+        public async Task<Result> Handle(AddCartItemCommand request, CancellationToken cancellationToken)
+        {
+            var cart = await _cartRepository.GetByIdAsync(request.CartId, cancellationToken);
+            if (cart is null)
+                return Result.Failure(new Error("Cart.NotFound", "Carrinho não encontrado."));
+
+            var product = await _productRepository.GetByIdAsync(request.ProductId, cancellationToken);
+            if (product is null)
+                return Result.Failure(new Error("Product.NotFound", "Produto não encontrado."));
+
+            if (request.Quantity <= 0)
+                return Result.Failure(new Error("Cart.InvalidQuantity", "A quantidade deve ser maior que zero."));
+
+            cart.AddOrUpdateItem(product.Id, request.Quantity, product.Price);
+            _cartRepository.Update(cart);
+            await _unitOfWork.CommitAsync(cancellationToken);
+
+            return Result.Success();
+        }
     }
 }

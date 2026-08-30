@@ -1,5 +1,3 @@
-﻿using CloudShopping.Domain.Entities.Products.CloudShopping.Domain.Entities.Products;
-using System;
 using CloudShopping.Domain.Entities.Products;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -15,7 +13,7 @@ namespace CloudShopping.Infrastructure.Persistence.Configurations
             builder.Property(sm => sm.ProductId)
                 .IsRequired();
             builder.Property(sm => sm.MovementType)
-                .HasConversion<string>() // Salva o enum como string no banco se desejar, ou int
+                .HasConversion<string>()
                 .HasMaxLength(30)
                 .IsRequired();
             builder.Property(sm => sm.QuantityChanged)

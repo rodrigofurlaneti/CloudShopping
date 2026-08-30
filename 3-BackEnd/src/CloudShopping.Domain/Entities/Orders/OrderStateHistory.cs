@@ -1,31 +1,23 @@
-﻿using CloudShopping.Domain.Enums;
 using CloudShopping.Domain.Primitives;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CloudShopping.Domain.Entities.Orders
 {
     public sealed class OrderStateHistory : Entity<int>
     {
         public int OrderId { get; private set; }
-        public OrderStatus OrderStatusId { get; private set; }
+        public int OrderStatusId { get; private set; }
         public string? Notes { get; private set; }
 
         public bool IsActive { get; private set; }
         public DateTime CreatedAt { get; private set; }
         public DateTime UpdatedAt { get; private set; }
 
-        // Propriedade de navegação (Opcional, dependendo de como você mapeia no EF Core)
-        // public Order Order { get; private set; }
-
         // Construtor vazio para o EF Core
         private OrderStateHistory() { }
 
         // Factory Method: Única forma de instanciar o histórico
-        public static OrderStateHistory Create(int orderId, OrderStatus orderStatus, string? notes = null)
+        public static OrderStateHistory Create(int orderId, int orderStatusId, string? notes = null)
         {
             if (orderId <= 0)
                 throw new ArgumentException("O ID do pedido é inválido.");
@@ -36,7 +28,7 @@ namespace CloudShopping.Domain.Entities.Orders
             return new OrderStateHistory
             {
                 OrderId = orderId,
-                OrderStatusId = orderStatus,
+                OrderStatusId = orderStatusId,
                 Notes = notes,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
@@ -51,7 +43,6 @@ namespace CloudShopping.Domain.Entities.Orders
 
         public void UpdateNotes(string newNotes)
         {
-            // Opcional: Você pode permitir atualizar apenas a nota explicativa caso alguém tenha digitado errado
             if (newNotes != null && newNotes.Length > 255)
                 throw new ArgumentException("As anotações não podem exceder 255 caracteres.");
 

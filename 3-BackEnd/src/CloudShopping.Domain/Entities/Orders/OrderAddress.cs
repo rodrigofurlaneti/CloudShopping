@@ -1,10 +1,11 @@
-﻿using CloudShopping.Domain.Enums;
+using CloudShopping.Domain.Enums;
 using CloudShopping.Domain.Primitives;
 
 namespace CloudShopping.Domain.Entities.Orders
 {
     public sealed class OrderAddress : AuditableEntity<int>
     {
+        public int OrderId { get; private set; }
         public AddressType AddressTypeId { get; private set; }
         public string Street { get; private set; }
         public string Number { get; private set; }

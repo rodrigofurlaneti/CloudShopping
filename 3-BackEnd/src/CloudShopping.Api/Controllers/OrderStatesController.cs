@@ -1,5 +1,5 @@
-﻿using CloudShopping.Application.OrderStatus.Commands.CreateOrderStatus;
-using CloudShopping.Application.OrderStatus.Commands.UpdateOrderStatus;
+using CloudShopping.Application.Features.OrderState.Commands.CreateOrderStatus;
+using CloudShopping.Application.Features.OrderState.Commands.UpdateOrderStatus;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;

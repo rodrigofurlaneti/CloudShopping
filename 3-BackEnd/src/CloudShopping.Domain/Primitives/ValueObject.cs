@@ -1,40 +1,39 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CloudShopping.Domain.Primitives
 {
-    public abstract class ValueObject : IEquatable<ValueObject>
+    /// <summary>
+    /// Classe base para Value Objects: objetos sem identidade própria,
+    /// cuja igualdade é determinada pela igualdade de todos os seus valores atômicos.
+    /// </summary>
+    public abstract class ValueObject
     {
-        protected abstract IEnumerable<object> GetEqualityComponents();
+        protected abstract IEnumerable<object?> GetAtomicValues();
+
         public override bool Equals(object? obj)
         {
             if (obj is null || obj.GetType() != GetType())
-            {
                 return false;
-            }
-            var valueObject = (ValueObject)obj;
-            return GetEqualityComponents().SequenceEqual(valueObject.GetEqualityComponents());
+
+            var other = (ValueObject)obj;
+            return GetAtomicValues().SequenceEqual(other.GetAtomicValues());
         }
-        public bool Equals(ValueObject? other)
-        {
-            return Equals((object?)other);
-        }
+
         public override int GetHashCode()
         {
-            return GetEqualityComponents()
+            return GetAtomicValues()
                 .Select(x => x?.GetHashCode() ?? 0)
-                .Aggregate((x, y) => x ^ y);
+                .Aggregate(17, (current, hash) => current * 31 + hash);
         }
+
         public static bool operator ==(ValueObject? left, ValueObject? right)
         {
-            return Equals(left, right);
+            if (left is null && right is null) return true;
+            if (left is null || right is null) return false;
+            return left.Equals(right);
         }
-        public static bool operator !=(ValueObject? left, ValueObject? right)
-        {
-            return !Equals(left, right);
-        }
+
+        public static bool operator !=(ValueObject? left, ValueObject? right) => !(left == right);
     }
 }

@@ -1,6 +1,8 @@
-﻿namespace CloudShopping.Domain.Primitives
+using System.Collections.Generic;
+
+namespace CloudShopping.Domain.Primitives
 {
-    public abstract class AggregateRoot<TId> : AuditableEntity<TId>
+    public abstract class AggregateRoot<TId> : AuditableEntity<TId>, IHasDomainEvents
     {
         private readonly List<IDomainEvent> _domainEvents = new();
 

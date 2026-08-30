@@ -1,36 +1,31 @@
-﻿using CloudShopping.Application.Abstractions.Data;
+using CloudShopping.Application.Abstractions.Data;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CloudShopping.Application.Features.OrderState.Commands.UpdateOrderStatus
 {
     public sealed class UpdateOrderStatusCommandHandler : IRequestHandler<UpdateOrderStatusCommand>
     {
-        private readonly AppDbContext _context;
+        private readonly IOrderStatusRepository _orderStatusRepository;
         private readonly IUnitOfWork _unitOfWork;
 
-        public UpdateOrderStatusCommandHandler(AppDbContext context, IUnitOfWork unitOfWork)
+        public UpdateOrderStatusCommandHandler(IOrderStatusRepository orderStatusRepository, IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _orderStatusRepository = orderStatusRepository;
             _unitOfWork = unitOfWork;
         }
 
-        async Task IRequestHandler<UpdateOrderStatusCommand, Unit>.Handle(UpdateOrderStatusCommand request, CancellationToken cancellationToken)
+        public async Task Handle(UpdateOrderStatusCommand request, CancellationToken cancellationToken)
         {
-            var orderStatus = await _context.Set<Domain.Entities.Orders.OrderStatus>()
-                .FirstOrDefaultAsync(os => os.Id == request.Id, cancellationToken);
-            if (orderStatus is null)
-            {
-                throw new KeyNotFoundException("Status do pedido não encontrado.");
-            }
-            orderStatus.Update(request.OrderSectorId, request.Name);
-            _context.Set<Domain.Entities.Orders.OrderStatus>().Update(orderStatus);
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-            return Unit.Value;
+            var status = await _orderStatusRepository.GetByIdAsync(request.Id, cancellationToken);
+            if (status is null)
+                throw new KeyNotFoundException($"Status de pedido {request.Id} não encontrado.");
+
+            status.Update(request.OrderSectorId, request.Name);
+
+            _orderStatusRepository.Update(status);
+            await _unitOfWork.CommitAsync(cancellationToken);
         }
     }
 }

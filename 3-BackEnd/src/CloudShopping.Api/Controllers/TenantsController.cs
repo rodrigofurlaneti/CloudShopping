@@ -1,5 +1,5 @@
-﻿using CloudShopping.Application.Tenants.Commands.CreateTenant;
-using CloudShopping.Application.Tenants.Queries.GetTenantById;
+using CloudShopping.Application.Features.Tenants.Commands.CreateTenant;
+using CloudShopping.Application.Features.Tenants.Queries.GetTenantById;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
@@ -37,8 +37,10 @@ namespace CloudShopping.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create([FromBody] CreateTenantCommand command, CancellationToken cancellationToken)
         {
-            var tenantId = await _mediator.Send(command, cancellationToken);
-            return CreatedAtAction(nameof(GetById), new { id = tenantId }, new { id = tenantId });
+            var result = await _mediator.Send(command, cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
+
+            return CreatedAtAction(nameof(GetById), new { id = result.Value }, new { id = result.Value });
         }
     }
 }

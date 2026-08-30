@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using CloudShopping.Domain.Primitives;
 
 namespace CloudShopping.Domain.Entities.Products
@@ -7,7 +8,7 @@ namespace CloudShopping.Domain.Entities.Products
     public sealed class Product : AggregateRoot<int>, IMultiTenant
     {
         public int TenantId { get; private set; }
-        public string SKU { get; private set; }
+        public string Sku { get; private set; }
         public string Name { get; private set; }
         public decimal Price { get; private set; }
         public int PhysicalStock { get; private set; }
@@ -15,6 +16,10 @@ namespace CloudShopping.Domain.Entities.Products
         public int AvailableStock => PhysicalStock - ReservedStock;
         public StockLocation? Location { get; private set; }
         public int Version { get; private set; }
+
+        private readonly List<ProductImage> _images = new();
+        public IReadOnlyCollection<ProductImage> Images => _images.AsReadOnly();
+
         private Product() { }
         public static Product Create(int tenantId, string sku, string name, decimal price, int initialStock = 0, StockLocation? location = null)
         {
@@ -25,7 +30,7 @@ namespace CloudShopping.Domain.Entities.Products
             return new Product
             {
                 TenantId = tenantId,
-                SKU = sku,
+                Sku = sku,
                 Name = name,
                 Price = price,
                 PhysicalStock = initialStock,
@@ -85,6 +90,26 @@ namespace CloudShopping.Domain.Entities.Products
             if (actualPhysicalQuantity < ReservedStock)
                 throw new InvalidOperationException($"Não é possível ajustar o estoque para {actualPhysicalQuantity} pois já existem {ReservedStock} unidades reservadas para clientes.");
             PhysicalStock = actualPhysicalQuantity;
+            UpdateTimestamp();
+        }
+
+        public ProductImage AddImage(string fileName, string filePath, bool isPrimary, int displayOrder)
+        {
+            if (isPrimary)
+            {
+                foreach (var img in _images) img.SetAsPrimary(false);
+            }
+            var image = ProductImage.Create(Id, fileName, filePath, isPrimary || !_images.Any(), displayOrder);
+            _images.Add(image);
+            UpdateTimestamp();
+            return image;
+        }
+
+        public void RemoveImage(int productImageId)
+        {
+            var image = _images.FirstOrDefault(i => i.Id == productImageId);
+            if (image is null) throw new InvalidOperationException("Imagem não encontrada.");
+            _images.Remove(image);
             UpdateTimestamp();
         }
     }

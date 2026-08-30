@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using CloudShopping.Application.Abstractions.Data;
-using CloudShopping.Application.Abstractions.Services; // Para o ITenantProvider
+using CloudShopping.Application.Abstractions.Services;
 using CloudShopping.Domain.Entities.Customers;
 using CloudShopping.Domain.Entities.Orders;
 using CloudShopping.Domain.Primitives.Results;
@@ -44,9 +44,11 @@ namespace CloudShopping.Application.Features.Orders.Commands.DirectCheckout
             var customer = await _customerRepository.GetByIdAsync(request.CustomerId, cancellationToken);
             if (customer is null)
                 return Result.Failure<int>(new Error("Customer.NotFound", "Cliente não encontrado."));
+
             var productIds = request.Items.Select(i => i.ProductId).ToList();
             var products = await _productRepository.GetByIdsAsync(productIds, cancellationToken);
             var itemsForOrder = new List<(int ProductId, int Quantity, decimal UnitPrice)>();
+
             foreach (var itemDto in request.Items)
             {
                 var product = products.FirstOrDefault(p => p.Id == itemDto.ProductId);
@@ -63,25 +65,36 @@ namespace CloudShopping.Application.Features.Orders.Commands.DirectCheckout
                     return Result.Failure<int>(new Error("Product.OutOfStock", ex.Message));
                 }
             }
-            var address = new Address
+
+            Address deliveryAddress;
+            try
             {
-                AddressTypeId = request.DeliveryAddress.AddressTypeId,
-                Street = request.DeliveryAddress.Street,
-                Number = request.DeliveryAddress.Number,
-                Neighborhood = request.DeliveryAddress.Neighborhood,
-                City = request.DeliveryAddress.City,
-                State = request.DeliveryAddress.State,
-                ZipCode = request.DeliveryAddress.ZipCode
-            };
+                deliveryAddress = Address.Create(
+                    customer.Id,
+                    request.DeliveryAddress.AddressTypeId,
+                    request.DeliveryAddress.Street,
+                    request.DeliveryAddress.Number,
+                    request.DeliveryAddress.Neighborhood,
+                    request.DeliveryAddress.City,
+                    request.DeliveryAddress.State,
+                    request.DeliveryAddress.ZipCode,
+                    isDefault: false);
+            }
+            catch (ArgumentException ex)
+            {
+                return Result.Failure<int>(new Error("Address.Invalid", ex.Message));
+            }
+
             Order order;
             try
             {
-                order = Order.Checkout(tenantId, customer.Id, itemsForOrder, address);
+                order = Order.Checkout(tenantId, customer.Id, itemsForOrder, deliveryAddress);
             }
             catch (InvalidOperationException ex)
             {
                 return Result.Failure<int>(new Error("Order.Validation", ex.Message));
             }
+
             await _orderRepository.AddAsync(order, cancellationToken);
             await _unitOfWork.CommitAsync(cancellationToken);
             _logger.LogInformation("Direct Checkout realizado com sucesso. OrderId: {OrderId}", order.Id);

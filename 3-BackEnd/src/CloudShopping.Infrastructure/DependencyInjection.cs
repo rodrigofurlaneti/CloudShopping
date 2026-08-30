@@ -1,4 +1,4 @@
-﻿using CloudShopping.Application.Abstractions.Data;
+using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Application.Abstractions.Services;
 using CloudShopping.Infrastructure.Persistence;
 using CloudShopping.Infrastructure.Repositories;
@@ -16,13 +16,25 @@ public static class DependencyInjection
         var connectionString = configuration.GetConnectionString("DefaultConnection");
         services.AddDbContext<AppDbContext>(options =>
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+
+        services.AddHttpContextAccessor();
+        services.AddScoped<ITenantProvider, TenantProvider>();
+
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<ICartRepository, CartRepository>();
         services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<IProductImageRepository, ProductImageRepository>();
+        services.AddScoped<IStockMovementRepository, StockMovementRepository>();
         services.AddScoped<ITenantRepository, TenantRepository>();
+        services.AddScoped<IOrderSectorRepository, OrderSectorRepository>();
+        services.AddScoped<IOrderStateHistoryRepository, OrderStateHistoryRepository>();
+        services.AddScoped<IOrderStatusRepository, OrderStatusRepository>();
+
         services.AddScoped<IPasswordHasher, PasswordHasher>();
+        services.AddScoped<IFileStorageService, FileStorageService>();
+
         return services;
     }
 }

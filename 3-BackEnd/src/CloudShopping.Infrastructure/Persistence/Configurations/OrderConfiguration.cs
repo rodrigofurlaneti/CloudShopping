@@ -1,4 +1,4 @@
-﻿using CloudShopping.Domain.Entities.Orders;
+using CloudShopping.Domain.Entities.Orders;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -15,10 +15,6 @@ namespace CloudShopping.Infrastructure.Persistence.Configurations
             builder.Property(o => o.TotalAmount)
                 .HasColumnType("decimal(12,2)")
                 .IsRequired();
-            builder.Property(o => o.DiscountAmount)
-                .HasColumnType("decimal(12,2)");
-            builder.Property(o => o.ShippingAmount)
-                .HasColumnType("decimal(12,2)");
             builder.HasMany(o => o.OrderItems)
                 .WithOne()
                 .HasForeignKey(oi => oi.OrderId)
@@ -26,6 +22,10 @@ namespace CloudShopping.Infrastructure.Persistence.Configurations
             builder.HasMany(o => o.Payments)
                 .WithOne()
                 .HasForeignKey(p => p.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+            builder.HasMany(o => o.StateHistory)
+                .WithOne()
+                .HasForeignKey(sh => sh.OrderId)
                 .OnDelete(DeleteBehavior.Cascade);
             builder.HasOne(o => o.OrderAddress)
                 .WithOne()

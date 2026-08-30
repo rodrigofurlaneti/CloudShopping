@@ -1,9 +1,6 @@
-﻿using CloudShopping.Domain.Entities.Carts;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using CloudShopping.Domain.Entities.Carts;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace CloudShopping.Infrastructure.Persistence.Configurations
 {

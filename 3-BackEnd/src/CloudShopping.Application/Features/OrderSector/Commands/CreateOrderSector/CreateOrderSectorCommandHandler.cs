@@ -1,45 +1,45 @@
-﻿using CloudShopping.Application.Abstractions.Data;
+using CloudShopping.Application.Abstractions.Data;
+using CloudShopping.Application.Abstractions.Services;
 using CloudShopping.Domain.Primitives.Results;
 using MediatR;
-using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using DomainOrderSector = CloudShopping.Domain.Entities.Orders.OrderSector;
 
 namespace CloudShopping.Application.Features.OrderSector.Commands.CreateOrderSector
 {
     public sealed class CreateOrderSectorCommandHandler : IRequestHandler<CreateOrderSectorCommand, Result<int>>
     {
         private readonly IOrderSectorRepository _orderSectorRepository;
+        private readonly ITenantProvider _tenantProvider;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ILogger<CreateOrderSectorCommandHandler> _logger;
 
-        public CreateOrderSectorCommandHandler(
-            IOrderSectorRepository orderSectorRepository,
-            IUnitOfWork unitOfWork,
-            ILogger<CreateOrderSectorCommandHandler> logger)
+        public CreateOrderSectorCommandHandler(IOrderSectorRepository orderSectorRepository, ITenantProvider tenantProvider, IUnitOfWork unitOfWork)
         {
             _orderSectorRepository = orderSectorRepository;
+            _tenantProvider = tenantProvider;
             _unitOfWork = unitOfWork;
-            _logger = logger;
         }
 
         public async Task<Result<int>> Handle(CreateOrderSectorCommand request, CancellationToken cancellationToken)
         {
+            var tenantId = _tenantProvider.GetTenantId();
+
+            DomainOrderSector sector;
             try
             {
-                var sector = OrderSector.Create(request.Name);
-                await _orderSectorRepository.AddAsync(sector, cancellationToken);
-                await _unitOfWork.CommitAsync(cancellationToken);
-                _logger.LogInformation("Novo setor de Kanban criado: {SectorName} (Id: {SectorId})", sector.Name, sector.Id);
-                return Result.Success(sector.Id);
+                sector = DomainOrderSector.Create(tenantId, request.Name);
             }
             catch (ArgumentException ex)
             {
-                return Result.Failure<int>(new Error("OrderSector.Invalid", ex.Message));
+                return Result.Failure<int>(new Error("OrderSector.InvalidData", ex.Message));
             }
+
+            await _orderSectorRepository.AddAsync(sector, cancellationToken);
+            await _unitOfWork.CommitAsync(cancellationToken);
+
+            return Result.Success(sector.Id);
         }
     }
 }

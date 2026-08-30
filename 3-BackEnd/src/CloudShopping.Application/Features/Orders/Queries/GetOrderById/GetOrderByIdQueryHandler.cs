@@ -1,96 +1,49 @@
-﻿using System;
+using CloudShopping.Application.Abstractions.Data;
+using CloudShopping.Application.Features.Orders.ViewModels;
+using CloudShopping.Domain.Primitives.Results;
+using MediatR;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dapper;
-using MediatR;
-using Microsoft.Extensions.Logging;
-using CloudShopping.Application.Abstractions.Data;
-using CloudShopping.Application.Abstractions.Services;
-using CloudShopping.Application.Features.Orders.ViewModels;
-using CloudShopping.Domain.Primitives.Results;
 
 namespace CloudShopping.Application.Features.Orders.Queries.GetOrderById
 {
     public sealed class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Result<OrderDetailsViewModel>>
     {
-        private readonly ISqlConnectionFactory _sqlConnectionFactory;
-        private readonly ITenantProvider _tenantProvider;
-        private readonly ILogger<GetOrderByIdQueryHandler> _logger;
+        private readonly IOrderRepository _orderRepository;
 
-        public GetOrderByIdQueryHandler(
-            ISqlConnectionFactory sqlConnectionFactory,
-            ITenantProvider tenantProvider,
-            ILogger<GetOrderByIdQueryHandler> logger)
+        public GetOrderByIdQueryHandler(IOrderRepository orderRepository)
         {
-            _sqlConnectionFactory = sqlConnectionFactory;
-            _tenantProvider = tenantProvider;
-            _logger = logger;
+            _orderRepository = orderRepository;
         }
 
         public async Task<Result<OrderDetailsViewModel>> Handle(GetOrderByIdQuery request, CancellationToken cancellationToken)
         {
-            var tenantId = _tenantProvider.GetTenantId();
-            const string sql = @"
-                -- 1. Cabecalho do Pedido + Endereco
-                SELECT 
-                    o.Id, o.CustomerId, o.OrderDate, o.TotalAmount, o.OrderStatusId,
-                    a.Street, a.Number, a.Neighborhood, a.City, a.State, a.ZipCode
-                FROM Orders o
-                LEFT JOIN OrderAddresses a ON o.Id = a.OrderId
-                WHERE o.Id = @OrderId AND o.CustomerId = @CustomerId AND o.TenantId = @TenantId;
+            var order = await _orderRepository.GetByIdAsync(request.OrderId, cancellationToken);
+            if (order is null || order.CustomerId != request.CustomerId)
+                return Result.Failure<OrderDetailsViewModel>(new Error("Order.NotFound", "Pedido não encontrado."));
 
-                -- 2. Itens do Pedido
-                SELECT ProductId, Quantity, UnitPrice
-                FROM OrderItems
-                WHERE OrderId = @OrderId;
+            var addressViewModel = order.OrderAddress is null
+                ? null
+                : new OrderAddressViewModel(
+                    order.OrderAddress.Street,
+                    order.OrderAddress.Number,
+                    order.OrderAddress.Neighborhood,
+                    order.OrderAddress.City,
+                    order.OrderAddress.State,
+                    order.OrderAddress.ZipCode);
 
-                -- 3. Pagamentos do Pedido
-                SELECT PaymentMethod, Amount, PaymentStatusId
-                FROM Payments
-                WHERE OrderId = @OrderId;
-            ";
+            var viewModel = new OrderDetailsViewModel(
+                order.Id,
+                order.CustomerId,
+                order.OrderDate,
+                order.TotalAmount,
+                order.OrderStatusId,
+                addressViewModel,
+                order.OrderItems.Select(i => new OrderItemViewModel(i.ProductId, i.Quantity, i.UnitPrice)).ToList(),
+                order.Payments.Select(p => new OrderPaymentViewModel(p.Id, p.PaymentMethod, p.Amount, p.PaymentStatusId.ToString())).ToList());
 
-            try
-            {
-                using var connection = _sqlConnectionFactory.CreateConnection();
-                using var multi = await connection.QueryMultipleAsync(sql, new
-                {
-                    OrderId = request.OrderId,
-                    CustomerId = request.CustomerId,
-                    TenantId = tenantId
-                });
-                var header = await multi.ReadSingleOrDefaultAsync<OrderHeaderDto>();
-                if (header is null)
-                {
-                    _logger.LogWarning("Pedido {OrderId} não encontrado ou acesso não autorizado (Customer: {CustomerId}, Tenant: {TenantId}).",
-                        request.OrderId, request.CustomerId, tenantId);
-                    return Result.Failure<OrderDetailsViewModel>(new Error("Order.NotFoundOrUnauthorized", "Pedido não encontrado ou você não tem acesso a ele."));
-                }
-                var items = (await multi.ReadAsync<OrderItemViewModel>()).ToList().AsReadOnly();
-                var payments = (await multi.ReadAsync<OrderPaymentViewModel>()).ToList().AsReadOnly();
-                OrderAddressViewModel? addressDto = null;
-                if (!string.IsNullOrEmpty(header.Street))
-                {
-                    addressDto = new OrderAddressViewModel(header.Street, header.Number, header.Neighborhood, header.City, header.State, header.ZipCode);
-                }
-                var response = new OrderDetailsViewModel(
-                    header.Id,
-                    header.CustomerId,
-                    header.OrderDate,
-                    header.TotalAmount,
-                    header.OrderStatusId,
-                    addressDto,
-                    items,
-                    payments
-                );
-                return Result.Success(response);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao buscar detalhes do pedido {OrderId}.", request.OrderId);
-                return Result.Failure<OrderDetailsViewModel>(new Error("Database.QueryFailed", "Ocorreu um erro ao buscar os detalhes do pedido."));
-            }
+            return Result.Success(viewModel);
         }
     }
 }

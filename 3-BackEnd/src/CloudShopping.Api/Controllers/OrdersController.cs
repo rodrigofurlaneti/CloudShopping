@@ -1,25 +1,25 @@
-﻿using CloudShopping.Application.Orders.Commands.AddPendingPayment;
-using CloudShopping.Application.Orders.Commands.ApprovePayment;
-using CloudShopping.Application.Orders.Commands.CancelOrder;
-using CloudShopping.Application.Orders.Commands.Checkout;
-using CloudShopping.Application.Orders.Commands.DeclinePayment;
-using CloudShopping.Application.Orders.Commands.DirectCheckout;
-using CloudShopping.Application.Orders.Commands.GenerateShippingLabel;
-using CloudShopping.Application.Orders.Commands.MarkDeliveryFailed;
-using CloudShopping.Application.Orders.Commands.MarkOrderAsDelivered;
-using CloudShopping.Application.Orders.Commands.MarkOrderAsInTransit;
-using CloudShopping.Application.Orders.Commands.MarkOrderAsInvoiced;
-using CloudShopping.Application.Orders.Commands.MarkOrderAsPaid;
-using CloudShopping.Application.Orders.Commands.MarkOrderAsReadyToShip;
-using CloudShopping.Application.Orders.Commands.RefundPayment;
-using CloudShopping.Application.Orders.Commands.RequestOrderReturn;
-using CloudShopping.Application.Orders.Commands.SetOrderTrackingNumber;
-using CloudShopping.Application.Orders.Commands.ShipOrder;
-using CloudShopping.Application.Orders.Commands.StartOrderPacking;
-using CloudShopping.Application.Orders.Commands.StartOrderProcessing;
-using CloudShopping.Application.Orders.Commands.StartOrderSeparating;
-using CloudShopping.Application.Orders.Queries.GetOrdersByCustomer;
-using CloudShopping.Application.Orders.Queries.GetOrderById;
+using CloudShopping.Application.Features.Orders.Commands.AddPendingPayment;
+using CloudShopping.Application.Features.Orders.Commands.ApprovePayment;
+using CloudShopping.Application.Features.Orders.Commands.CancelOrder;
+using CloudShopping.Application.Features.Orders.Commands.Checkout;
+using CloudShopping.Application.Features.Orders.Commands.DeclinePayment;
+using CloudShopping.Application.Features.Orders.Commands.DirectCheckout;
+using CloudShopping.Application.Features.Orders.Commands.GenerateShippingLabel;
+using CloudShopping.Application.Features.Orders.Commands.MarkDeliveryFailed;
+using CloudShopping.Application.Features.Orders.Commands.MarkOrderAsDelivered;
+using CloudShopping.Application.Features.Orders.Commands.MarkOrderAsInTransit;
+using CloudShopping.Application.Features.Orders.Commands.MarkOrderAsInvoiced;
+using CloudShopping.Application.Features.Orders.Commands.MarkOrderAsPaid;
+using CloudShopping.Application.Features.Orders.Commands.MarkOrderAsReadyToShip;
+using CloudShopping.Application.Features.Orders.Commands.RefundPayment;
+using CloudShopping.Application.Features.Orders.Commands.RequestOrderReturn;
+using CloudShopping.Application.Features.Orders.Commands.SetOrderTrackingNumber;
+using CloudShopping.Application.Features.Orders.Commands.ShipOrder;
+using CloudShopping.Application.Features.Orders.Commands.StartOrderPacking;
+using CloudShopping.Application.Features.Orders.Commands.StartOrderProcessing;
+using CloudShopping.Application.Features.Orders.Commands.StartOrderSeparating;
+using CloudShopping.Application.Features.Orders.Queries.GetCustomerOrders;
+using CloudShopping.Application.Features.Orders.Queries.GetOrderById;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
@@ -43,25 +43,25 @@ namespace CloudShopping.Api.Controllers
         [HttpGet("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetById(int id, [FromQuery] int customerId, CancellationToken cancellationToken)
         {
-            var query = new GetOrderByIdQuery(id);
+            var query = new GetOrderByIdQuery(id, customerId);
             var result = await _mediator.Send(query, cancellationToken);
 
-            if (result is null)
-                return NotFound(new { message = "Pedido não encontrado." });
+            if (!result.IsSuccess)
+                return NotFound(new { message = result.Error.Message });
 
-            return Ok(result);
+            return Ok(result.Value);
         }
 
         [HttpGet("customer/{customerId:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetByCustomer(int customerId, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetByCustomer(int customerId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10, CancellationToken cancellationToken = default)
         {
-            var query = new GetOrdersByCustomerQuery(customerId);
+            var query = new GetCustomerOrdersQuery(customerId, page, pageSize);
             var result = await _mediator.Send(query, cancellationToken);
 
-            return Ok(result);
+            return Ok(result.Value);
         }
 
         #endregion
@@ -70,18 +70,24 @@ namespace CloudShopping.Api.Controllers
 
         [HttpPost("checkout")]
         [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Checkout([FromBody] CheckoutCommand command, CancellationToken cancellationToken)
         {
-            var orderId = await _mediator.Send(command, cancellationToken);
-            return CreatedAtAction(nameof(GetById), new { id = orderId }, new { id = orderId });
+            var result = await _mediator.Send(command, cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
+
+            return CreatedAtAction(nameof(GetById), new { id = result.Value, customerId = command.CustomerId }, new { id = result.Value });
         }
 
         [HttpPost("direct-checkout")]
         [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> DirectCheckout([FromBody] DirectCheckoutCommand command, CancellationToken cancellationToken)
         {
-            var orderId = await _mediator.Send(command, cancellationToken);
-            return CreatedAtAction(nameof(GetById), new { id = orderId }, new { id = orderId });
+            var result = await _mediator.Send(command, cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
+
+            return CreatedAtAction(nameof(GetById), new { id = result.Value, customerId = command.CustomerId }, new { id = result.Value });
         }
 
         #endregion
@@ -92,7 +98,8 @@ namespace CloudShopping.Api.Controllers
         public async Task<IActionResult> AddPendingPayment(int id, [FromBody] AddPendingPaymentCommand command, CancellationToken cancellationToken)
         {
             var cmd = command with { OrderId = id };
-            await _mediator.Send(cmd, cancellationToken);
+            var result = await _mediator.Send(cmd, cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
             return NoContent();
         }
 
@@ -100,7 +107,8 @@ namespace CloudShopping.Api.Controllers
         public async Task<IActionResult> ApprovePayment(int id, [FromBody] ApprovePaymentCommand command, CancellationToken cancellationToken)
         {
             var cmd = command with { OrderId = id };
-            await _mediator.Send(cmd, cancellationToken);
+            var result = await _mediator.Send(cmd, cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
             return NoContent();
         }
 
@@ -108,7 +116,8 @@ namespace CloudShopping.Api.Controllers
         public async Task<IActionResult> DeclinePayment(int id, [FromBody] DeclinePaymentCommand command, CancellationToken cancellationToken)
         {
             var cmd = command with { OrderId = id };
-            await _mediator.Send(cmd, cancellationToken);
+            var result = await _mediator.Send(cmd, cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
             return NoContent();
         }
 
@@ -116,7 +125,8 @@ namespace CloudShopping.Api.Controllers
         public async Task<IActionResult> RefundPayment(int id, [FromBody] RefundPaymentCommand command, CancellationToken cancellationToken)
         {
             var cmd = command with { OrderId = id };
-            await _mediator.Send(cmd, cancellationToken);
+            var result = await _mediator.Send(cmd, cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
             return NoContent();
         }
 
@@ -127,64 +137,72 @@ namespace CloudShopping.Api.Controllers
         [HttpPatch("{id:int}/status/processing")]
         public async Task<IActionResult> StartProcessing(int id, CancellationToken cancellationToken)
         {
-            await _mediator.Send(new StartOrderProcessingCommand(id), cancellationToken);
+            var result = await _mediator.Send(new StartOrderProcessingCommand(id), cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
             return NoContent();
         }
 
         [HttpPatch("{id:int}/status/separating")]
         public async Task<IActionResult> StartSeparating(int id, CancellationToken cancellationToken)
         {
-            await _mediator.Send(new StartOrderSeparatingCommand(id), cancellationToken);
+            var result = await _mediator.Send(new StartOrderSeparatingCommand(id), cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
             return NoContent();
         }
 
         [HttpPatch("{id:int}/status/packing")]
         public async Task<IActionResult> StartPacking(int id, CancellationToken cancellationToken)
         {
-            await _mediator.Send(new StartOrderPackingCommand(id), cancellationToken);
+            var result = await _mediator.Send(new StartOrderPackingCommand(id), cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
             return NoContent();
         }
 
         [HttpPatch("{id:int}/status/invoiced")]
         public async Task<IActionResult> MarkAsInvoiced(int id, CancellationToken cancellationToken)
         {
-            await _mediator.Send(new MarkOrderAsInvoicedCommand(id), cancellationToken);
+            var result = await _mediator.Send(new MarkOrderAsInvoicedCommand(id), cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
             return NoContent();
         }
 
         [HttpPatch("{id:int}/status/paid")]
         public async Task<IActionResult> MarkAsPaid(int id, CancellationToken cancellationToken)
         {
-            await _mediator.Send(new MarkOrderAsPaidCommand(id), cancellationToken);
+            var result = await _mediator.Send(new MarkOrderAsPaidCommand(id), cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
             return NoContent();
         }
 
         [HttpPost("{id:int}/shipping/label")]
         public async Task<IActionResult> GenerateShippingLabel(int id, CancellationToken cancellationToken)
         {
-            await _mediator.Send(new GenerateShippingLabelCommand(id), cancellationToken);
+            var result = await _mediator.Send(new GenerateShippingLabelCommand(id), cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
             return NoContent();
         }
 
         [HttpPatch("{id:int}/status/ready-to-ship")]
         public async Task<IActionResult> MarkAsReadyToShip(int id, CancellationToken cancellationToken)
         {
-            await _mediator.Send(new MarkOrderAsReadyToShipCommand(id), cancellationToken);
+            var result = await _mediator.Send(new MarkOrderAsReadyToShipCommand(id), cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
             return NoContent();
         }
 
         [HttpPost("{id:int}/shipping/dispatch")]
-        public async Task<IActionResult> ShipOrder(int id, [FromBody] ShipOrderCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> ShipOrder(int id, CancellationToken cancellationToken)
         {
-            var cmd = command with { OrderId = id };
-            await _mediator.Send(cmd, cancellationToken);
+            var result = await _mediator.Send(new ShipOrderCommand(id), cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
             return NoContent();
         }
 
         [HttpPatch("{id:int}/status/intransit")]
         public async Task<IActionResult> MarkAsInTransit(int id, CancellationToken cancellationToken)
         {
-            await _mediator.Send(new MarkOrderAsInTransitCommand(id), cancellationToken);
+            var result = await _mediator.Send(new MarkOrderAsInTransitCommand(id), cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
             return NoContent();
         }
 
@@ -192,36 +210,40 @@ namespace CloudShopping.Api.Controllers
         public async Task<IActionResult> SetTrackingNumber(int id, [FromBody] SetOrderTrackingNumberCommand command, CancellationToken cancellationToken)
         {
             var cmd = command with { OrderId = id };
-            await _mediator.Send(cmd, cancellationToken);
+            var result = await _mediator.Send(cmd, cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
             return NoContent();
         }
 
         [HttpPatch("{id:int}/status/delivered")]
         public async Task<IActionResult> MarkAsDelivered(int id, CancellationToken cancellationToken)
         {
-            await _mediator.Send(new MarkOrderAsDeliveredCommand(id), cancellationToken);
+            var result = await _mediator.Send(new MarkOrderAsDeliveredCommand(id), cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
             return NoContent();
         }
 
         [HttpPatch("{id:int}/status/delivery-failed")]
         public async Task<IActionResult> MarkDeliveryFailed(int id, CancellationToken cancellationToken)
         {
-            await _mediator.Send(new MarkDeliveryFailedCommand(id), cancellationToken);
+            var result = await _mediator.Send(new MarkDeliveryFailedCommand(id), cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
             return NoContent();
         }
 
         [HttpPost("{id:int}/return")]
-        public async Task<IActionResult> RequestReturn(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> RequestReturn(int id, [FromQuery] string reason = "", CancellationToken cancellationToken = default)
         {
-            await _mediator.Send(new RequestOrderReturnCommand(id), cancellationToken);
+            var result = await _mediator.Send(new RequestOrderReturnCommand(id, reason), cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
             return NoContent();
         }
 
         [HttpPost("{id:int}/cancel")]
-        public async Task<IActionResult> CancelOrder(int id, [FromBody] CancelOrderCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> CancelOrder(int id, CancellationToken cancellationToken)
         {
-            var cmd = command with { OrderId = id };
-            await _mediator.Send(cmd, cancellationToken);
+            var result = await _mediator.Send(new CancelOrderCommand(id), cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
             return NoContent();
         }
 

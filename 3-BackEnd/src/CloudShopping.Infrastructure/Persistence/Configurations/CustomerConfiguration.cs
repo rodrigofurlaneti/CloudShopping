@@ -1,4 +1,4 @@
-﻿using CloudShopping.Domain.Entities.Customers;
+using CloudShopping.Domain.Entities.Customers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -20,11 +20,11 @@ namespace CloudShopping.Infrastructure.Persistence.Configurations
                 .IsUnique();
             builder.HasOne(c => c.Individual)
                 .WithOne()
-                .HasForeignKey<Individual>(i => i.CustomerId)
+                .HasForeignKey<Individual>(i => i.Id)
                 .OnDelete(DeleteBehavior.Cascade);
             builder.HasOne(c => c.Company)
                 .WithOne()
-                .HasForeignKey<Company>(cp => cp.CustomerId)
+                .HasForeignKey<Company>(cp => cp.Id)
                 .OnDelete(DeleteBehavior.Cascade);
             builder.HasMany(c => c.Addresses)
                 .WithOne()

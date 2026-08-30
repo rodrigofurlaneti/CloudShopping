@@ -1,34 +1,36 @@
-﻿using CloudShopping.Application.Abstractions.Data;
-using CloudShopping.Application.OrderStatus.Commands.CreateOrderStatus;
+using CloudShopping.Application.Abstractions.Data;
+using CloudShopping.Application.Abstractions.Services;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using DomainOrderStatus = CloudShopping.Domain.Entities.Orders.OrderStatus;
 
 namespace CloudShopping.Application.Features.OrderState.Commands.CreateOrderStatus
 {
     public sealed class CreateOrderStatusCommandHandler : IRequestHandler<CreateOrderStatusCommand, int>
     {
-        private readonly AppDbContext _context; // Ou injete um IOrderStatusRepository
+        // Repositório dedicado ao OrderStatus não existe ainda no projeto original;
+        // reutiliza-se o DbContext através de um IRepository genérico registrado no DI.
+        private readonly IOrderStatusRepository _orderStatusRepository;
+        private readonly ITenantProvider _tenantProvider;
         private readonly IUnitOfWork _unitOfWork;
 
-        public CreateOrderStatusCommandHandler(AppDbContext context, IUnitOfWork unitOfWork)
+        public CreateOrderStatusCommandHandler(IOrderStatusRepository orderStatusRepository, ITenantProvider tenantProvider, IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _orderStatusRepository = orderStatusRepository;
+            _tenantProvider = tenantProvider;
             _unitOfWork = unitOfWork;
         }
 
         public async Task<int> Handle(CreateOrderStatusCommand request, CancellationToken cancellationToken)
         {
-            // Cria a entidade mapeada conforme o seu banco de dados
-            var orderStatus = new Domain.Entities.Orders.OrderStatus(request.OrderSectorId, request.Name);
+            var tenantId = _tenantProvider.GetTenantId();
+            var status = DomainOrderStatus.Create(tenantId, request.OrderSectorId, request.Name);
 
-            await _context.Set<Domain.Entities.Orders.OrderStatus>().AddAsync(orderStatus, cancellationToken);
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await _orderStatusRepository.AddAsync(status, cancellationToken);
+            await _unitOfWork.CommitAsync(cancellationToken);
 
-            return orderStatus.Id;
+            return status.Id;
         }
     }
 }

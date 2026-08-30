@@ -1,4 +1,4 @@
-﻿using CloudShopping.Domain.Entities.Products;
+using CloudShopping.Domain.Entities.Products;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

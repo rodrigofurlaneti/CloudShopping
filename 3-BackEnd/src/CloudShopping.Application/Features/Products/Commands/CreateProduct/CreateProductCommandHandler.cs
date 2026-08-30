@@ -1,15 +1,12 @@
-﻿using CloudShopping.Application.Abstractions.Data;
+using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Application.Abstractions.Services;
 using CloudShopping.Domain.Entities.Products;
-using CloudShopping.Domain.Entities.Products.CloudShopping.Domain.Entities.Products;
 using CloudShopping.Domain.Enums;
 using CloudShopping.Domain.Primitives.Results;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CloudShopping.Application.Features.Products.Commands.CreateProduct
@@ -47,6 +44,11 @@ namespace CloudShopping.Application.Features.Products.Commands.CreateProduct
             {
                 location = StockLocation.Create(request.Aisle, request.Rack, request.Level, request.Position);
             }
+
+            var existing = await _productRepository.GetBySkuAsync(request.Sku, cancellationToken);
+            if (existing is not null)
+                return Result.Failure<int>(new Error("Product.DuplicateSku", $"Já existe um produto com o SKU '{request.Sku}'."));
+
             Product product;
             try
             {
@@ -64,20 +66,24 @@ namespace CloudShopping.Application.Features.Products.Commands.CreateProduct
                 _logger.LogWarning(ex, "Erro de validação ao criar o produto SKU: {Sku} para o Tenant: {TenantId}", request.Sku, tenantId);
                 return Result.Failure<int>(new Error("Product.InvalidData", ex.Message));
             }
+
             await _productRepository.AddAsync(product, cancellationToken);
+            await _unitOfWork.CommitAsync(cancellationToken);
+
             if (request.InitialStock > 0)
             {
                 var movement = StockMovement.Create(
-                    productId: product.Id, // Nota: Se o EF gerar o ID no Commit, certifique-se da ordem ou use ID gerado
-                    movementType: StockMovementType.Adjustment, // ou Entrada/Purchase
+                    productId: product.Id,
+                    movementType: StockMovementType.PurchaseReceipt,
                     quantityChanged: request.InitialStock,
                     balanceAfter: request.InitialStock,
                     reason: "Estoque inicial cadastrado no sistema."
                 );
                 await _stockMovementRepository.AddAsync(movement, cancellationToken);
+                await _unitOfWork.CommitAsync(cancellationToken);
             }
-            await _unitOfWork.CommitAsync(cancellationToken);
-            _logger.LogInformation("Produto criado com sucesso. ID: {ProductId}, SKU: {Sku}, Tenant: {TenantId}", product.Id, product.SKU, tenantId);
+
+            _logger.LogInformation("Produto criado com sucesso. ID: {ProductId}, SKU: {Sku}, Tenant: {TenantId}", product.Id, product.Sku, tenantId);
             return Result.Success(product.Id);
         }
     }

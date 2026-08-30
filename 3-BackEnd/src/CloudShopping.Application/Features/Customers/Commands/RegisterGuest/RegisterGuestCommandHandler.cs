@@ -1,32 +1,34 @@
-﻿using CloudShopping.Application.Abstractions.Data;
+using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Application.Abstractions.Services;
 using CloudShopping.Domain.Entities.Customers;
-using CloudShopping.Domain.Primitives.Results;
 using MediatR;
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace CloudShopping.Application.Features.Customers.Commands.RegisterGuest
 {
-    public sealed class RegisterGuestCommandHandler : IRequestHandler<RegisterGuestCommand, Result<RegisterGuestResponse>>
+    public sealed class RegisterGuestCommandHandler : IRequestHandler<RegisterGuestCommand, int>
     {
-        private readonly ITenantProvider _tenantProvider;
         private readonly ICustomerRepository _customerRepository;
+        private readonly ITenantProvider _tenantProvider;
         private readonly IUnitOfWork _unitOfWork;
-        public RegisterGuestCommandHandler(
-            ITenantProvider tenantProvider,
-            ICustomerRepository customerRepository,
-            IUnitOfWork unitOfWork)
+
+        public RegisterGuestCommandHandler(ICustomerRepository customerRepository, ITenantProvider tenantProvider, IUnitOfWork unitOfWork)
         {
-            _tenantProvider = tenantProvider;
             _customerRepository = customerRepository;
+            _tenantProvider = tenantProvider;
             _unitOfWork = unitOfWork;
         }
-        public async Task<Result<RegisterGuestResponse>> Handle(RegisterGuestCommand request, CancellationToken cancellationToken)
+
+        public async Task<int> Handle(RegisterGuestCommand request, CancellationToken cancellationToken)
         {
             var tenantId = _tenantProvider.GetTenantId();
-            var guest = Customer.CreateGuest(tenantId);
-            await _customerRepository.AddAsync(guest, cancellationToken);
+            var customer = Customer.CreateGuest(tenantId);
+
+            await _customerRepository.AddAsync(customer, cancellationToken);
             await _unitOfWork.CommitAsync(cancellationToken);
-            var response = new RegisterGuestResponse(guest.Id, guest.SessionToken);
-            return Result.Success(response);
+
+            return customer.Id;
         }
     }
 }

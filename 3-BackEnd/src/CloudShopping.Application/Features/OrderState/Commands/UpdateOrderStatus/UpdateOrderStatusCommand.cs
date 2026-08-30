@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 namespace CloudShopping.Application.Features.OrderState.Commands.UpdateOrderStatus
 {
     public sealed record UpdateOrderStatusCommand(

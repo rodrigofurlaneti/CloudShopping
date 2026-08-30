@@ -1,5 +1,7 @@
-﻿using CloudShopping.Domain.Primitives;
+using CloudShopping.Domain.Primitives;
 using CloudShopping.Domain.Primitives.Results;
+using System.Collections.Generic;
+
 namespace CloudShopping.Domain.ValueObjects
 {
     public sealed class Email : ValueObject
@@ -20,7 +22,7 @@ namespace CloudShopping.Domain.ValueObjects
                 return Result.Failure<Email>(new Error("Email.Invalid", "Formato de email inválido."));
             return Result.Success(new Email(email));
         }
-        protected override IEnumerable<object> GetEqualityComponents()
+        protected override IEnumerable<object?> GetAtomicValues()
         {
             yield return Value;
         }

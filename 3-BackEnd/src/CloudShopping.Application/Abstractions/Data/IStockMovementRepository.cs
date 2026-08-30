@@ -1,5 +1,4 @@
-﻿using CloudShopping.Domain.Entities.Products;
-using CloudShopping.Domain.Entities.Products.CloudShopping.Domain.Entities.Products;
+using CloudShopping.Domain.Entities.Products;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;

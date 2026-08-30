@@ -1,13 +1,13 @@
-﻿using CloudShopping.Application.Customers.Commands.AddCustomerAddress;
-using CloudShopping.Application.Customers.Commands.ChangeCustomerEmail;
-using CloudShopping.Application.Customers.Commands.RegisterB2B;
-using CloudShopping.Application.Customers.Commands.RegisterB2C;
-using CloudShopping.Application.Customers.Commands.RegisterGuest;
-using CloudShopping.Application.Customers.Commands.RegisterLead;
-using CloudShopping.Application.Customers.Commands.UpdateB2BProfile;
-using CloudShopping.Application.Customers.Commands.UpdateB2CProfile;
-using CloudShopping.Application.Customers.Commands.UpdateCustomerAddress;
-using CloudShopping.Application.Customers.Queries.GetCustomerById;
+using CloudShopping.Application.Features.Customers.Commands.AddCustomerAddress;
+using CloudShopping.Application.Features.Customers.Commands.ChangeCustomerEmail;
+using CloudShopping.Application.Features.Customers.Commands.RegisterB2B;
+using CloudShopping.Application.Features.Customers.Commands.RegisterB2C;
+using CloudShopping.Application.Features.Customers.Commands.RegisterGuest;
+using CloudShopping.Application.Features.Customers.Commands.RegisterLead;
+using CloudShopping.Application.Features.Customers.Commands.UpdateB2BProfile;
+using CloudShopping.Application.Features.Customers.Commands.UpdateB2CProfile;
+using CloudShopping.Application.Features.Customers.Commands.UpdateCustomerAddress;
+using CloudShopping.Application.Features.Customers.Queries.GetCustomerById;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
@@ -48,9 +48,9 @@ namespace CloudShopping.Api.Controllers
 
         [HttpPost("guest")]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        public async Task<IActionResult> RegisterGuest([FromBody] RegisterGuestCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> RegisterGuest(CancellationToken cancellationToken)
         {
-            var customerId = await _mediator.Send(command, cancellationToken);
+            var customerId = await _mediator.Send(new RegisterGuestCommand(), cancellationToken);
             return CreatedAtAction(nameof(GetById), new { id = customerId }, new { id = customerId });
         }
 
@@ -58,7 +58,8 @@ namespace CloudShopping.Api.Controllers
         public async Task<IActionResult> RegisterLead(int id, [FromBody] RegisterLeadCommand command, CancellationToken cancellationToken)
         {
             var cmd = command with { CustomerId = id };
-            await _mediator.Send(cmd, cancellationToken);
+            var result = await _mediator.Send(cmd, cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
             return NoContent();
         }
 
@@ -66,7 +67,8 @@ namespace CloudShopping.Api.Controllers
         public async Task<IActionResult> RegisterB2C(int id, [FromBody] RegisterB2CCommand command, CancellationToken cancellationToken)
         {
             var cmd = command with { CustomerId = id };
-            await _mediator.Send(cmd, cancellationToken);
+            var result = await _mediator.Send(cmd, cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
             return NoContent();
         }
 
@@ -74,7 +76,8 @@ namespace CloudShopping.Api.Controllers
         public async Task<IActionResult> RegisterB2B(int id, [FromBody] RegisterB2BCommand command, CancellationToken cancellationToken)
         {
             var cmd = command with { CustomerId = id };
-            await _mediator.Send(cmd, cancellationToken);
+            var result = await _mediator.Send(cmd, cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
             return NoContent();
         }
 
@@ -86,7 +89,8 @@ namespace CloudShopping.Api.Controllers
         public async Task<IActionResult> ChangeEmail(int id, [FromBody] ChangeCustomerEmailCommand command, CancellationToken cancellationToken)
         {
             var cmd = command with { CustomerId = id };
-            await _mediator.Send(cmd, cancellationToken);
+            var result = await _mediator.Send(cmd, cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
             return NoContent();
         }
 
@@ -94,7 +98,8 @@ namespace CloudShopping.Api.Controllers
         public async Task<IActionResult> UpdateB2CProfile(int id, [FromBody] UpdateB2CProfileCommand command, CancellationToken cancellationToken)
         {
             var cmd = command with { CustomerId = id };
-            await _mediator.Send(cmd, cancellationToken);
+            var result = await _mediator.Send(cmd, cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
             return NoContent();
         }
 
@@ -102,7 +107,8 @@ namespace CloudShopping.Api.Controllers
         public async Task<IActionResult> UpdateB2BProfile(int id, [FromBody] UpdateB2BProfileCommand command, CancellationToken cancellationToken)
         {
             var cmd = command with { CustomerId = id };
-            await _mediator.Send(cmd, cancellationToken);
+            var result = await _mediator.Send(cmd, cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
             return NoContent();
         }
 
@@ -115,7 +121,8 @@ namespace CloudShopping.Api.Controllers
         public async Task<IActionResult> AddAddress(int id, [FromBody] AddCustomerAddressCommand command, CancellationToken cancellationToken)
         {
             var cmd = command with { CustomerId = id };
-            await _mediator.Send(cmd, cancellationToken);
+            var result = await _mediator.Send(cmd, cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
             return StatusCode(StatusCodes.Status201Created);
         }
 
@@ -123,7 +130,8 @@ namespace CloudShopping.Api.Controllers
         public async Task<IActionResult> UpdateAddress(int id, int addressId, [FromBody] UpdateCustomerAddressCommand command, CancellationToken cancellationToken)
         {
             var cmd = command with { CustomerId = id, AddressId = addressId };
-            await _mediator.Send(cmd, cancellationToken);
+            var result = await _mediator.Send(cmd, cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
             return NoContent();
         }
 

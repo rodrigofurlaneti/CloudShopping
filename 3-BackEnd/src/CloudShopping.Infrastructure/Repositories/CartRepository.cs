@@ -1,8 +1,10 @@
-﻿using CloudShopping.Application.Abstractions.Data;
+using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Domain.Entities.Carts;
 using CloudShopping.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -48,7 +50,6 @@ namespace CloudShopping.Infrastructure.Repositories
 
         public async Task<Cart?> GetBySessionTokenAsync(Guid sessionToken, CancellationToken cancellationToken = default)
         {
-            // Busca o carrinho associado ao cliente que possui o SessionToken correspondente
             return await _context.Carts
                 .Include(c => c.Items)
                 .Join(_context.Customers,
@@ -58,6 +59,29 @@ namespace CloudShopping.Infrastructure.Repositories
                 .Where(x => x.Customer.SessionToken == sessionToken)
                 .Select(x => x.Cart)
                 .FirstOrDefaultAsync(cancellationToken);
+        }
+
+        public async Task<(IEnumerable<Cart> Items, int TotalCount)> GetPaginatedAsync(
+            int tenantId, int page, int pageSize, string? searchTerm, CancellationToken cancellationToken = default)
+        {
+            // Cart não possui TenantId próprio; o isolamento é feito via o Tenant do Customer associado.
+            var query = _context.Carts
+                .Join(_context.Customers,
+                    cart => cart.CustomerId,
+                    customer => customer.Id,
+                    (cart, customer) => new { Cart = cart, Customer = customer })
+                .Where(x => x.Customer.TenantId == tenantId)
+                .Select(x => x.Cart)
+                .AsQueryable();
+
+            var totalCount = await query.CountAsync(cancellationToken);
+
+            var items = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
+
+            return (items, totalCount);
         }
     }
 }

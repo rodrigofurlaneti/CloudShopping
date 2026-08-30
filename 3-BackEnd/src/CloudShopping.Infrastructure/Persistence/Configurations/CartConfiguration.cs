@@ -1,9 +1,7 @@
-﻿using CloudShopping.Domain.Entities.Carts;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using CloudShopping.Domain.Entities.Carts;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace CloudShopping.Infrastructure.Persistence.Configurations
 {
@@ -17,9 +15,7 @@ namespace CloudShopping.Infrastructure.Persistence.Configurations
                 .IsRequired();
             builder.HasIndex(c => c.CustomerId)
                 .IsUnique();
-            builder.Property(c => c.ExpiresAt)
-                .ValueGeneratedOnAddOrUpdate()
-                .Metadata.SetBeforeSaveBehavior(PropertySaveBehavior.Ignore);
+            builder.Ignore(c => c.ExpiresAt);
             builder.HasMany(c => c.Items)
                 .WithOne()
                 .HasForeignKey(ci => ci.CartId)
