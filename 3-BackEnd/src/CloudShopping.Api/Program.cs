@@ -1,5 +1,6 @@
-using CloudShopping.Application;
+﻿using CloudShopping.Application;
 using CloudShopping.Infrastructure;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,40 +11,66 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
     });
 
-// 2. Documentação da API (Swagger / OpenAPI)
+// 2. Configuração de CORS (Essencial para o Swagger e para o React/Vite)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
+// 3. Documentação da API (Swagger / OpenAPI)
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    c.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "CloudShopping API",
         Version = "v1",
         Description = "API Multi-Tenant de E-commerce baseada em Clean Architecture e DDD."
     });
 
-    c.AddSecurityDefinition("X-Tenant-Id", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    // Define o Header X-Tenant-Id
+    c.AddSecurityDefinition("X-Tenant-Id", new OpenApiSecurityScheme
     {
         Name = "X-Tenant-Id",
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        In = ParameterLocation.Header,
         Description = "Identificador do Tenant (multi-tenant). Ex: 1"
+    });
+
+    // Aplica a obrigatoriedade do Header no Swagger UI para todas as requisições
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "X-Tenant-Id"
+                }
+            },
+            Array.Empty<string>()
+        }
     });
 });
 
-// 3. Camadas da aplicação (Application + Infrastructure)
+// 4. Camadas da aplicação (Application + Infrastructure)
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
-// 4. Pipeline HTTP
+app.UseCors("AllowAll");
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

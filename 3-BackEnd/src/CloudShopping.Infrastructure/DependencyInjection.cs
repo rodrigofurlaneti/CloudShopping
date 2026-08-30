@@ -3,7 +3,6 @@ using CloudShopping.Application.Abstractions.Services;
 using CloudShopping.Infrastructure.Persistence;
 using CloudShopping.Infrastructure.Repositories;
 using CloudShopping.Infrastructure.Services;
-// using CloudShopping.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -36,7 +35,7 @@ public static class DependencyInjection
         services.AddScoped<IOrderStateHistoryRepository, OrderStateHistoryRepository>();
         services.AddScoped<IOrderStatusRepository, OrderStatusRepository>();
         services.AddScoped<IDepartmentRepository, DepartmentRepository>();
-
+        services.AddScoped<IStoreBannerRepository, StoreBannerRepository>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IFileStorageService, FileStorageService>();
 

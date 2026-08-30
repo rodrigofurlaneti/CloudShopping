@@ -3,6 +3,7 @@ using CloudShopping.Domain.Entities.Carts;
 using CloudShopping.Domain.Entities.Customers;
 using CloudShopping.Domain.Entities.Orders;
 using CloudShopping.Domain.Entities.Products;
+using CloudShopping.Domain.Entities.Store;
 using CloudShopping.Domain.Entities.Tenants;
 using CloudShopping.Domain.Primitives;
 using MediatR;
@@ -50,7 +51,7 @@ namespace CloudShopping.Infrastructure.Persistence
         public DbSet<OrderStateHistory> OrderStateHistories => Set<OrderStateHistory>();
         public DbSet<OrderSector> OrderSectors => Set<OrderSector>();
         public DbSet<OrderStatus> OrderStatuses => Set<OrderStatus>();
-
+        public DbSet<StoreBanner> StoreBanners => Set<StoreBanner>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

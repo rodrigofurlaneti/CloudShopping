@@ -1,5 +1,7 @@
 ﻿import { StoreLayout } from './layouts/StoreLayout';
 import { ProductCard } from './components/Cards/ProductCard';
+import { CategoryRow } from './components/Row/CategoryRow';
+import { BannerRow } from './components/Row/BannerRow';
 
 function App() {
     const mockProduct = {
@@ -12,22 +14,14 @@ function App() {
 
     return (
         <StoreLayout>
-            <div className="grid grid-cols-3 gap-6 mb-10">
-                <div className="bg-orange-500 h-72 rounded-2xl p-6 text-white shadow-md">
-                    <h2 className="text-4xl font-extrabold">Ofertas imperdíveis</h2>
-                    <p className="text-6xl font-black mt-4">60% OFF</p>
-                </div>
-                <div className="bg-green-500 h-72 rounded-2xl p-6 text-white shadow-md">
-                    <h2 className="text-3xl font-bold">Tecnologia para o seu dia a dia</h2>
-                </div>
-                <div className="bg-blue-600 h-72 rounded-2xl p-6 text-white shadow-md">
-                    <h2 className="text-3xl font-bold">Casa e Cozinha</h2>
-                </div>
-            </div>
+            {/* Linha de Banners totalmente dinâmica consumindo a API e o TenantId */}
+            <BannerRow />
 
-            <div className="flex justify-between items-end mb-4">
-                <h2 className="text-2xl font-black text-gray-800">Ofertas em Destaque</h2>
-                <a href="#" className="text-blue-600 font-bold text-sm">Ver mais &gt;</a>
+            <CategoryRow />
+
+            <div className="flex justify-between items-end mb-4 mt-2">
+                <h2 className="text-xl font-black text-[#0f172a]">Ofertas em Destaque</h2>
+                <a href="#" className="text-blue-600 font-bold text-[13px] hover:underline">Ver mais &gt;</a>
             </div>
 
             <div className="grid grid-cols-5 gap-4">
