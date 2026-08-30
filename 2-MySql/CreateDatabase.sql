@@ -62,7 +62,7 @@ INSERT INTO OrderSectors (Id, Name) VALUES
 (5, 'Concluídos'),
 (6, 'Exceções / Pós-Venda');
 
--- 1.2 STATUS DO PEDIDO (Agora vinculada ao Setor)
+-- 1.2 STATUS DO PEDIDO (Vinculado ao Setor)
 CREATE TABLE OrderStatus (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     OrderSectorId INT NOT NULL, 
@@ -94,7 +94,7 @@ INSERT INTO OrderStatus (Id, OrderSectorId, Name) VALUES
 (16, 6, 'Canceled');
 
 -------------------------------------------------------------------------------
--- 2. BASE TABLES (CLIENTES & PRODUTOS)
+-- 2. BASE TABLES (CLIENTES, PRODUTOS E INVENTÁRIO)
 -------------------------------------------------------------------------------
 CREATE TABLE Customers (
     Id INT AUTO_INCREMENT PRIMARY KEY,
@@ -184,12 +184,31 @@ CREATE TABLE Products (
     ReservedStock INT NOT NULL DEFAULT 0,
     AvailableStock INT GENERATED ALWAYS AS (PhysicalStock - ReservedStock) VIRTUAL, 
     
+    -- NOVO: Endereçamento Logístico (Value Object StockLocation)
+    Location_Aisle VARCHAR(10) NULL,
+    Location_Rack VARCHAR(10) NULL,
+    Location_Level VARCHAR(10) NULL,
+    Location_Position VARCHAR(10) NULL,
+    
     IsActive BOOLEAN DEFAULT TRUE,
     CreatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
     UpdatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     
     FOREIGN KEY (TenantId) REFERENCES Tenants(Id) ON DELETE RESTRICT,
     UNIQUE KEY uk_tenant_sku (TenantId, SKU) 
+);
+
+-- NOVO: Tabela para Auditoria de Movimentação/Inventário de Estoque
+CREATE TABLE StockMovements (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    ProductId INT NOT NULL,
+    QuantityChanged INT NOT NULL,
+    BalanceAfterMovement INT NOT NULL,
+    Reason VARCHAR(150) NOT NULL,
+    
+    CreatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
+    
+    FOREIGN KEY (ProductId) REFERENCES Products(Id) ON DELETE CASCADE
 );
 
 -------------------------------------------------------------------------------

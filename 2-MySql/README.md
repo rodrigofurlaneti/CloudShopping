@@ -26,6 +26,7 @@ erDiagram
 
     Products ||--o{ CartItems : "adicionado em"
     Products ||--o{ OrderItems : "pedido em"
+    Products ||--o{ StockMovements : "audita"
     Carts ||--o{ CartItems : "contem"
 
     Orders ||--o{ OrderStateHistory : "rastreia"
@@ -82,7 +83,21 @@ erDiagram
         int TenantId FK
         varchar SKU
         decimal Price
+        int PhysicalStock
+        int ReservedStock
         int AvailableStock
+        varchar Location_Aisle
+        varchar Location_Rack
+        varchar Location_Level
+        varchar Location_Position
+    }
+
+    StockMovements {
+        int Id PK
+        int ProductId FK
+        int QuantityChanged
+        int BalanceAfterMovement
+        varchar Reason
     }
 
     Carts {
