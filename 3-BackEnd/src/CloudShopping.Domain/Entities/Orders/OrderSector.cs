@@ -1,24 +1,19 @@
 ﻿using CloudShopping.Domain.Primitives;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CloudShopping.Domain.Entities.Orders
 {
     public sealed class OrderSector : Entity<int>
     {
+        public int? TenantId { get; private set; } // Nullable para suportar setores globais do sistema
         public string Name { get; private set; }
         public bool IsActive { get; private set; }
         public DateTime CreatedAt { get; private set; }
         public DateTime UpdatedAt { get; private set; }
 
-        // Construtor vazio exigido pelo Entity Framework Core
         private OrderSector() { }
 
-        // Factory Method para criação
-        public static OrderSector Create(string name)
+        public static OrderSector Create(int? tenantId, string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("O nome do setor não pode ser nulo ou vazio.");
@@ -28,14 +23,13 @@ namespace CloudShopping.Domain.Entities.Orders
 
             return new OrderSector
             {
+                TenantId = tenantId,
                 Name = name,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
         }
-
-        // --- REGRAS DE NEGÓCIO E COMPORTAMENTOS ---
 
         public void UpdateName(string newName)
         {

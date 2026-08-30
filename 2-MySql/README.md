@@ -4,14 +4,17 @@ Abaixo está o diagrama Entidade-Relacionamento do nosso E-commerce:
 
 ```mermaid
 erDiagram
-    %% RELACIONAMENTOS
+    %% RELACIONAMENTOS DO SISTEMA HÍBRIDO (GLOBAL + MULTI-TENANT)
     Tenants ||--o{ Customers : "tem"
     Tenants ||--o{ Products : "tem"
     Tenants ||--o{ Orders : "tem"
+    Tenants ||--o{ OrderSectors : "possui customizações"
+    Tenants ||--o{ OrderStatus : "possui customizações"
 
     OrderSectors ||--o{ OrderStatus : "agrupa"
     OrderStatus ||--o{ Orders : "define"
     OrderStatus ||--o{ OrderStateHistory : "registra"
+    
     CustomerTypes ||--o{ Customers : "categoriza"
     AddressTypes ||--o{ Addresses : "categoriza"
     AddressTypes ||--o{ OrderAddresses : "categoriza"
@@ -35,7 +38,7 @@ erDiagram
     Orders ||--o{ OrderItems : "contem"
     Orders ||--o{ Payments : "pago via"
 
-    %% ESTRUTURA DAS TABELAS
+    %% ESTRUTURA DAS TABELAS ATUALIZADA (HÍBRIDA)
     Tenants {
         int Id PK
         varchar CompanyName
@@ -44,13 +47,16 @@ erDiagram
 
     OrderSectors {
         int Id PK
+        int TenantId "FK (Nullable - Null é padrão global)"
         varchar Name
     }
 
     OrderStatus {
         int Id PK
+        int TenantId "FK (Nullable - Null é padrão global)"
         int OrderSectorId FK
         varchar Name
+        boolean IsSystemDefault
     }
 
     Customers {
@@ -87,10 +93,6 @@ erDiagram
         int PhysicalStock
         int ReservedStock
         int AvailableStock
-        varchar Location_Aisle
-        varchar Location_Rack
-        varchar Location_Level
-        varchar Location_Position
         int Version
     }
 
@@ -137,6 +139,7 @@ erDiagram
         int Id PK
         int OrderId FK
         int OrderStatusId FK
+        varchar Notes
         datetime CreatedAt
     }
 

@@ -1,6 +1,6 @@
 ﻿namespace CloudShopping.Domain.Enums
 {
-    public enum OrderStatus
+    public enum OrderStatusEnum
     {
         Pending = 1,         // Aguardando pagamento
         Paid = 2,            // Pago

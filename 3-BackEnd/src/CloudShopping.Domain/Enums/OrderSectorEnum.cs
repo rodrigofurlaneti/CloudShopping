@@ -1,6 +1,6 @@
 ﻿namespace CloudShopping.Domain.Enums
 {
-    public enum OrderSector
+    public enum OrderSectorEnum
     {
         New = 1,
         Warehouse = 2,

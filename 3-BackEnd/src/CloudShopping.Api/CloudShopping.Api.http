@@ -1,0 +1,6 @@
+@CloudShopping.Api_HostAddress = http://localhost:5147
+
+GET {{CloudShopping.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

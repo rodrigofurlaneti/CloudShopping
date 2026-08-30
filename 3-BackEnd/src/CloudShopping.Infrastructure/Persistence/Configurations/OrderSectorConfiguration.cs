@@ -1,0 +1,39 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace CloudShopping.Infrastructure.Persistence.Configurations
+{
+    public sealed class OrderSectorConfiguration : IEntityTypeConfiguration<OrderSector>
+    {
+        public void Configure(EntityTypeBuilder<OrderSector> builder)
+        {
+            builder.ToTable("OrderSectors");
+            builder.HasKey(os => os.Id);
+            builder.Property(os => os.Id)
+                .ValueGeneratedOnAdd();
+            builder.Property(os => os.TenantId)
+                .IsRequired();
+            builder.Property(os => os.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+            builder.Property(os => os.IsActive)
+                .HasDefaultValue(true);
+            builder.Property(os => os.CreatedAt)
+                .HasColumnType("datetime(6)")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+            builder.Property(os => os.UpdatedAt)
+                .HasColumnType("datetime(6)")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)");
+            builder.HasIndex(os => new { os.TenantId, os.Name })
+                .IsUnique()
+                .HasDatabaseName("uk_tenant_sector_name");
+            builder.HasOne<Domain.Entities.Tenants.Tenant>()
+                .WithMany()
+                .HasForeignKey(os => os.TenantId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
+    }
+}

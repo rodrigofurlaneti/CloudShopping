@@ -1,5 +1,4 @@
-﻿-- Criação do Banco de Dados
-CREATE DATABASE IF NOT EXISTS ECommerceDB;
+﻿CREATE DATABASE IF NOT EXISTS ECommerceDB;
 USE ECommerceDB;
 
 -------------------------------------------------------------------------------
@@ -16,7 +15,7 @@ CREATE TABLE Tenants (
 );
 
 -------------------------------------------------------------------------------
--- 1. LOOKUP TABLES (TABELAS DE DOMÍNIO / REFERÊNCIA)
+-- 1. LOOKUP TABLES GLOBAIS (APENAS TIPOS DE SISTEMA)
 -------------------------------------------------------------------------------
 CREATE TABLE CustomerTypes (
     Id INT AUTO_INCREMENT PRIMARY KEY,
@@ -45,53 +44,67 @@ CREATE TABLE PaymentStatus (
 );
 INSERT INTO PaymentStatus (Id, Name) VALUES (1, 'Processing'), (2, 'Approved'), (3, 'Declined'), (4, 'Refunded');
 
--- 1.1 SETORES DO KANBAN (Criar antes de OrderStatus)
+-------------------------------------------------------------------------------
+-- 1.1 SETORES DO KANBAN (PADRÃO DO SISTEMA OU CUSTOMIZADO POR TENANT)
+-------------------------------------------------------------------------------
 CREATE TABLE OrderSectors (
     Id INT AUTO_INCREMENT PRIMARY KEY,
-    Name VARCHAR(100) NOT NULL UNIQUE,
+    TenantId INT NULL, -- NULL significa que é um setor padrão global da plataforma para novos tenants
+    Name VARCHAR(100) NOT NULL,
     IsActive BOOLEAN DEFAULT TRUE,
     CreatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
-    UpdatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)
+    UpdatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    
+    FOREIGN KEY (TenantId) REFERENCES Tenants(Id) ON DELETE CASCADE,
+    UNIQUE KEY uk_tenant_sector_name (TenantId, Name)
 );
 
-INSERT INTO OrderSectors (Id, Name) VALUES 
-(1, 'Novos / Faturamento'),
-(2, 'Armazém (Separação/Embalagem)'),
-(3, 'Expedição'),
-(4, 'Em Trânsito'),
-(5, 'Concluídos'),
-(6, 'Exceções / Pós-Venda');
+-- Inserindo os Setores Padrões Globais do Sistema (TenantId = NULL)
+INSERT INTO OrderSectors (Id, TenantId, Name) VALUES 
+(1, NULL, 'Novos / Faturamento'),
+(2, NULL, 'Armazém (Separação/Embalagem)'),
+(3, NULL, 'Expedição'),
+(4, NULL, 'Em Trânsito'),
+(5, NULL, 'Concluídos'),
+(6, NULL, 'Exceções / Pós-Venda');
 
--- 1.2 STATUS DO PEDIDO (Vinculado ao Setor)
+-------------------------------------------------------------------------------
+-- 1.2 STATUS DO PEDIDO (PADRÃO DO SISTEMA OU CUSTOMIZADO POR TENANT)
+-------------------------------------------------------------------------------
 CREATE TABLE OrderStatus (
     Id INT AUTO_INCREMENT PRIMARY KEY,
+    TenantId INT NULL, -- NULL significa padrão global da plataforma
     OrderSectorId INT NOT NULL, 
-    Name VARCHAR(50) NOT NULL UNIQUE,
+    Name VARCHAR(50) NOT NULL,
+    IsSystemDefault BOOLEAN DEFAULT FALSE, -- Identifica se veio do template do sistema
     
     IsActive BOOLEAN DEFAULT TRUE,
     CreatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
     UpdatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     
-    FOREIGN KEY (OrderSectorId) REFERENCES OrderSectors(Id) ON DELETE RESTRICT
+    FOREIGN KEY (TenantId) REFERENCES Tenants(Id) ON DELETE CASCADE,
+    FOREIGN KEY (OrderSectorId) REFERENCES OrderSectors(Id) ON DELETE CASCADE,
+    UNIQUE KEY uk_tenant_status_name (TenantId, Name)
 );
 
-INSERT INTO OrderStatus (Id, OrderSectorId, Name) VALUES 
-(1, 1, 'Pending'),
-(2, 1, 'Paid'),
-(3, 1, 'Invoiced'),
-(4, 2, 'Processing'),
-(5, 2, 'Separating'),
-(6, 2, 'Packing'),
-(7, 3, 'GenerateLabel'),
-(8, 3, 'ReadyToShip'),
-(9, 3, 'Shipped'),
-(10, 4, 'TrackingNumber'),
-(11, 4, 'Intransit'),
-(12, 5, 'Delivered'),
-(13, 6, 'DeliveryFailed'),
-(14, 6, 'Returning'),
-(15, 6, 'Refunded'),
-(16, 6, 'Canceled');
+-- Inserindo os Status Padrões Globais do Sistema (TenantId = NULL, IsSystemDefault = TRUE)
+INSERT INTO OrderStatus (Id, TenantId, OrderSectorId, Name, IsSystemDefault) VALUES 
+(1, NULL, 1, 'Pending', TRUE),
+(2, NULL, 1, 'Paid', TRUE),
+(3, NULL, 1, 'Invoiced', TRUE),
+(4, NULL, 2, 'Processing', TRUE),
+(5, NULL, 2, 'Separating', TRUE),
+(6, NULL, 2, 'Packing', TRUE),
+(7, NULL, 3, 'GenerateLabel', TRUE),
+(8, NULL, 3, 'ReadyToShip', TRUE),
+(9, NULL, 3, 'Shipped', TRUE),
+(10, NULL, 4, 'TrackingNumber', TRUE),
+(11, NULL, 4, 'Intransit', TRUE),
+(12, NULL, 5, 'Delivered', TRUE),
+(13, NULL, 6, 'DeliveryFailed', TRUE),
+(14, NULL, 6, 'Returning', TRUE),
+(15, NULL, 6, 'Refunded', TRUE),
+(16, NULL, 6, 'Canceled', TRUE);
 
 -------------------------------------------------------------------------------
 -- 2. BASE TABLES (CLIENTES, PRODUTOS E INVENTÁRIO)
@@ -215,12 +228,12 @@ CREATE TABLE StockMovements (
     FOREIGN KEY (ProductId) REFERENCES Products(Id) ON DELETE CASCADE
 );
 
--- NOVA TABELA: Gerenciamento de Imagens do Produto (Vinculada ao disco wwwroot)
+-- Gerenciamento de Imagens do Produto
 CREATE TABLE ProductImages (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     ProductId INT NOT NULL,
     FileName VARCHAR(255) NOT NULL,
-    FilePath VARCHAR(500) NOT NULL, -- Ex: uploads/1/products/45/uuid-foto.jpg
+    FilePath VARCHAR(500) NOT NULL,
     IsPrimary BOOLEAN DEFAULT FALSE,
     DisplayOrder INT NOT NULL DEFAULT 0,
     
@@ -269,7 +282,7 @@ CREATE TABLE Orders (
     CustomerId INT NOT NULL,
     OrderDate DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6), 
     TotalAmount DECIMAL(12,2) NOT NULL,
-    OrderStatusId INT NOT NULL DEFAULT 1, 
+    OrderStatusId INT NOT NULL, 
     
     IsActive BOOLEAN DEFAULT TRUE,
     CreatedAt DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),

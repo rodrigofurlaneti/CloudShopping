@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using CloudShopping.Domain.Entities.Customers;
-using CloudShopping.Domain.Enums;
+using CloudShopping.Domain.Enums; // Usado para referenciar os IDs padrões (ex: Pending = 1, Paid = 2)
 using CloudShopping.Domain.Primitives;
 using CloudShopping.Domain.Events;
 
@@ -14,19 +14,14 @@ namespace CloudShopping.Domain.Entities.Orders
         public int CustomerId { get; private set; }
         public DateTime OrderDate { get; private set; }
         public decimal TotalAmount { get; private set; }
-        public OrderStatus OrderStatusId { get; private set; }
+        public int OrderStatusId { get; private set; }
         public OrderAddress? OrderAddress { get; private set; }
-
         private readonly List<OrderItem> _orderItems = new();
         public IReadOnlyCollection<OrderItem> OrderItems => _orderItems.AsReadOnly();
-
         private readonly List<Payment> _payments = new();
         public IReadOnlyCollection<Payment> Payments => _payments.AsReadOnly();
-
-        // Coleção de histórico embutida no Agregado
         private readonly List<OrderStateHistory> _stateHistory = new();
         public IReadOnlyCollection<OrderStateHistory> StateHistory => _stateHistory.AsReadOnly();
-
         private Order() { }
 
         public static Order Checkout(
@@ -44,7 +39,7 @@ namespace CloudShopping.Domain.Entities.Orders
                 TenantId = tenantId,
                 CustomerId = customerId,
                 OrderDate = DateTime.UtcNow,
-                OrderStatusId = OrderStatus.Pending,
+                OrderStatusId = (int)OrderStatusEnum.Pending, // 1 (ID padrão do status Pending no seed)
                 TotalAmount = itemList.Sum(i => i.UnitPrice * i.Quantity)
             };
 
@@ -82,7 +77,7 @@ namespace CloudShopping.Domain.Entities.Orders
             if (payment is null) throw new InvalidOperationException("Pagamento não encontrado.");
 
             payment.Approve();
-            OrderStatusId = OrderStatus.Paid;
+            OrderStatusId = (int)OrderStatusEnum.Paid; // 2
             UpdateTimestamp();
             AddHistory($"Pagamento {paymentId} aprovado.");
         }
@@ -103,7 +98,7 @@ namespace CloudShopping.Domain.Entities.Orders
             if (payment is null) throw new InvalidOperationException("Pagamento não encontrado.");
 
             payment.Refund();
-            OrderStatusId = OrderStatus.Refunded;
+            OrderStatusId = (int)OrderStatusEnum.Refunded; // 15
             UpdateTimestamp();
             AddHistory($"Pagamento {paymentId} estornado.");
         }
@@ -112,100 +107,100 @@ namespace CloudShopping.Domain.Entities.Orders
 
         public void MarkAsInvoiced()
         {
-            if (OrderStatusId != OrderStatus.Paid)
+            if (OrderStatusId != (int)OrderStatusEnum.Paid)
                 throw new InvalidOperationException("O pedido precisa estar pago para emitir a Nota Fiscal.");
 
-            OrderStatusId = OrderStatus.Invoiced;
+            OrderStatusId = (int)OrderStatusEnum.Invoiced; // 3
             UpdateTimestamp();
             AddHistory("Nota fiscal emitida.");
         }
 
         public void StartProcessing()
         {
-            if (OrderStatusId != OrderStatus.Invoiced && OrderStatusId != OrderStatus.Paid)
+            if (OrderStatusId != (int)OrderStatusEnum.Invoiced && OrderStatusId != (int)OrderStatusEnum.Paid)
                 throw new InvalidOperationException("O pedido precisa estar faturado ou pago para iniciar o processamento.");
 
-            OrderStatusId = OrderStatus.Processing;
+            OrderStatusId = (int)OrderStatusEnum.Processing; // 4
             UpdateTimestamp();
             AddHistory("Processamento do pedido iniciado.");
         }
 
         public void StartSeparating()
         {
-            if (OrderStatusId != OrderStatus.Processing)
+            if (OrderStatusId != (int)OrderStatusEnum.Processing)
                 throw new InvalidOperationException("O pedido precisa estar em processamento para iniciar a separação (picking).");
 
-            OrderStatusId = OrderStatus.Separating;
+            OrderStatusId = (int)OrderStatusEnum.Separating; // 5
             UpdateTimestamp();
             AddHistory("Separação de itens iniciada.");
         }
 
         public void StartPacking()
         {
-            if (OrderStatusId != OrderStatus.Separating)
+            if (OrderStatusId != (int)OrderStatusEnum.Separating)
                 throw new InvalidOperationException("O pedido precisa estar na etapa de separação para ser embalado (packing).");
 
-            OrderStatusId = OrderStatus.Packing;
+            OrderStatusId = (int)OrderStatusEnum.Packing; // 6
             UpdateTimestamp();
             AddHistory("Embalagem do pedido iniciada.");
         }
 
         public void GenerateShippingLabel()
         {
-            if (OrderStatusId != OrderStatus.Packing)
+            if (OrderStatusId != (int)OrderStatusEnum.Packing)
                 throw new InvalidOperationException("O pedido precisa estar embalado para gerar a etiqueta de envio.");
 
-            OrderStatusId = OrderStatus.GenerateLabel;
+            OrderStatusId = (int)OrderStatusEnum.GenerateLabel; // 7
             UpdateTimestamp();
             AddHistory("Etiqueta de envio gerada.");
         }
 
         public void MarkAsReadyToShip()
         {
-            if (OrderStatusId != OrderStatus.GenerateLabel && OrderStatusId != OrderStatus.Packing)
+            if (OrderStatusId != (int)OrderStatusEnum.GenerateLabel && OrderStatusId != (int)OrderStatusEnum.Packing)
                 throw new InvalidOperationException("O pedido precisa ter a etiqueta gerada ou estar embalado para ficar pronto para postagem.");
 
-            OrderStatusId = OrderStatus.ReadyToShip;
+            OrderStatusId = (int)OrderStatusEnum.ReadyToShip; // 8
             UpdateTimestamp();
             AddHistory("Pedido pronto para postagem.");
         }
 
         public void ShipOrder()
         {
-            if (OrderStatusId != OrderStatus.ReadyToShip)
+            if (OrderStatusId != (int)OrderStatusEnum.ReadyToShip)
                 throw new InvalidOperationException("O pedido precisa estar pronto para postagem para ser despachado.");
 
-            OrderStatusId = OrderStatus.Shipped;
+            OrderStatusId = (int)OrderStatusEnum.Shipped; // 9
             UpdateTimestamp();
             AddHistory("Pedido despachado.");
         }
 
         public void SetTrackingNumber()
         {
-            if (OrderStatusId != OrderStatus.Shipped && OrderStatusId != OrderStatus.ReadyToShip)
+            if (OrderStatusId != (int)OrderStatusEnum.Shipped && OrderStatusId != (int)OrderStatusEnum.ReadyToShip)
                 throw new InvalidOperationException("O pedido precisa estar postado ou pronto para associar o código de rastreio.");
 
-            OrderStatusId = OrderStatus.TrackingNumber;
+            OrderStatusId = (int)OrderStatusEnum.TrackingNumber; // 10
             UpdateTimestamp();
             AddHistory("Código de rastreio associado.");
         }
 
         public void MarkAsIntransit()
         {
-            if (OrderStatusId != OrderStatus.TrackingNumber && OrderStatusId != OrderStatus.Shipped)
+            if (OrderStatusId != (int)OrderStatusEnum.TrackingNumber && OrderStatusId != (int)OrderStatusEnum.Shipped)
                 throw new InvalidOperationException("O pedido precisa ter código de rastreio ou ter sido postado para entrar em trânsito.");
 
-            OrderStatusId = OrderStatus.Intransit;
+            OrderStatusId = (int)OrderStatusEnum.Intransit; // 11
             UpdateTimestamp();
             AddHistory("Pedido em trânsito.");
         }
 
         public void MarkAsDelivered()
         {
-            if (OrderStatusId != OrderStatus.Intransit && OrderStatusId != OrderStatus.Shipped)
+            if (OrderStatusId != (int)OrderStatusEnum.Intransit && OrderStatusId != (int)OrderStatusEnum.Shipped)
                 throw new InvalidOperationException("O pedido precisa estar em trânsito ou postado para ser marcado como entregue.");
 
-            OrderStatusId = OrderStatus.Delivered;
+            OrderStatusId = (int)OrderStatusEnum.Delivered; // 12
             UpdateTimestamp();
             AddHistory("Pedido entregue ao destinatário.");
         }
@@ -214,42 +209,46 @@ namespace CloudShopping.Domain.Entities.Orders
 
         public void MarkAsDeliveryFailed()
         {
-            if (OrderStatusId != OrderStatus.Intransit)
+            if (OrderStatusId != (int)OrderStatusEnum.Intransit)
                 throw new InvalidOperationException("Apenas pedidos em trânsito podem registrar falha de entrega.");
 
-            OrderStatusId = OrderStatus.DeliveryFailed;
+            OrderStatusId = (int)OrderStatusEnum.DeliveryFailed; // 13
             UpdateTimestamp();
             AddHistory("Falha na entrega registrada.");
         }
 
-        public void RequestReturn(string reason) 
+        public void RequestReturn(string reason)
         {
-            if (OrderStatusId != OrderStatus.Delivered)
+            if (OrderStatusId != (int)OrderStatusEnum.Delivered)
                 throw new InvalidOperationException("Apenas pedidos entregues podem solicitar troca ou devolução.");
-            OrderStatusId = OrderStatus.Returning;
+
+            OrderStatusId = (int)OrderStatusEnum.Returning; // 14
             UpdateTimestamp();
             AddHistory($"Solicitação de devolução/troca iniciada. Motivo: {reason}");
         }
 
         public void CancelOrder()
         {
-            if (OrderStatusId >= OrderStatus.Shipped && OrderStatusId <= OrderStatus.Delivered)
+            // Valida se o status atual está entre Shipped (9) e Delivered (12)
+            if (OrderStatusId >= (int)OrderStatusEnum.Shipped && OrderStatusId <= (int)OrderStatusEnum.Delivered)
                 throw new InvalidOperationException("Pedido despachado ou entregue não pode ser cancelado diretamente.");
 
-            OrderStatusId = OrderStatus.Canceled;
+            OrderStatusId = (int)OrderStatusEnum.Canceled; // 16
             UpdateTimestamp();
             AddHistory("Pedido cancelado.");
 
             RaiseDomainEvent(new OrderCanceledDomainEvent(Id, TenantId));
         }
+
         public void AddApprovedPayment(string method, decimal amount)
         {
-            if (OrderStatusId >= OrderStatus.Paid && OrderStatusId != OrderStatus.Pending)
+            if (OrderStatusId >= (int)OrderStatusEnum.Paid && OrderStatusId != (int)OrderStatusEnum.Pending)
                 throw new InvalidOperationException("Este pedido já foi pago ou não está aguardando pagamento.");
+
             var payment = Payment.CreatePending(Id, method, amount);
             payment.Approve();
             _payments.Add(payment);
-            OrderStatusId = OrderStatus.Paid;
+            OrderStatusId = (int)OrderStatusEnum.Paid; // 2
             UpdateTimestamp();
             AddHistory($"Pagamento direto de {amount:C} via {method} aprovado.");
         }
@@ -258,9 +257,6 @@ namespace CloudShopping.Domain.Entities.Orders
 
         private void AddHistory(string notes)
         {
-            // Se você utilizar o Factory Method OrderStateHistory.Create, certifique-se de 
-            // que a classe OrderStateHistory aceite OrderId = 0 antes da inserção no EF Core, 
-            // ou deixe o EF Core gerenciar o vínculo via objeto de navegação.
             _stateHistory.Add(OrderStateHistory.Create(this.Id, this.OrderStatusId, notes));
         }
     }
