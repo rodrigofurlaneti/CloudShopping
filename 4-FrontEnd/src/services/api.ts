@@ -256,6 +256,142 @@ export interface AdjustInventoryPayload {
     reason: string;
 }
 
+// ---- Orders (Kanban administrativo) ----
+
+// IDs do OrderStatus "padrão do sistema" (OrderStatusEnum no backend). Um tenant pode
+// ter status customizados com IDs > 16 — esses não aparecem aqui, então o Kanban some
+// eles no fluxo de setores/status carregado dinamicamente, mas os botões de ação rápida
+// abaixo (que dependem de regras fixas do Order.cs) só se aplicam aos status padrão.
+export const SYSTEM_ORDER_STATUS = {
+    Pending: 1,
+    Paid: 2,
+    Invoiced: 3,
+    Processing: 4,
+    Separating: 5,
+    Packing: 6,
+    GenerateLabel: 7,
+    ReadyToShip: 8,
+    Shipped: 9,
+    TrackingNumber: 10,
+    Intransit: 11,
+    Delivered: 12,
+    DeliveryFailed: 13,
+    Returning: 14,
+    Refunded: 15,
+    Canceled: 16,
+} as const;
+
+export interface OrderSummary {
+    orderId: number;
+    customerId: number;
+    customerEmail?: string | null;
+    customerDisplayName?: string | null;
+    orderDate: string;
+    totalAmount: number;
+    orderStatusId: number;
+    statusName: string;
+    totalItems: number;
+}
+
+export interface OrderAddress {
+    street: string;
+    number: string;
+    neighborhood?: string | null;
+    city: string;
+    state: string;
+    zipCode: string;
+}
+
+export interface OrderLineItem {
+    productId: number;
+    quantity: number;
+    unitPrice: number;
+}
+
+// paymentStatusId: 1 Processing, 2 Approved, 3 Declined, 4 Refunded (PaymentStatus enum)
+export interface OrderPayment {
+    paymentId: number;
+    paymentMethod: string;
+    amount: number;
+    paymentStatusId: number;
+}
+
+export interface OrderDetail {
+    orderId: number;
+    customerId: number;
+    orderDate: string;
+    totalAmount: number;
+    orderStatusId: number;
+    address?: OrderAddress | null;
+    items: OrderLineItem[];
+    payments: OrderPayment[];
+}
+
+export const OrderService = {
+    // Endpoint novo: não existia listagem tenant-wide (só GetById e GetByCustomer),
+    // o que inviabilizava montar as colunas do Kanban administrativo.
+    getAll: (page = 1, pageSize = 200, statusId?: number) =>
+        fetchClient<PagedResult<OrderSummary>>(
+            `/v1/orders?page=${page}&pageSize=${pageSize}${statusId != null ? `&statusId=${statusId}` : ''}`
+        ),
+
+    // GetOrderByIdQuery valida que o pedido pertence ao customerId informado — o
+    // customerId de cada card já vem da listagem, então é sempre repassado aqui.
+    getById: (orderId: number, customerId: number) =>
+        fetchClient<OrderDetail>(`/v1/orders/${orderId}?customerId=${customerId}`),
+
+    // --- Pagamentos ---
+    addPendingPayment: (orderId: number, paymentMethod: string, amount: number) =>
+        fetchClient<void>(`/v1/orders/${orderId}/payments/pending`, {
+            method: 'POST',
+            body: JSON.stringify({ orderId, paymentMethod, amount }),
+        }),
+
+    approvePayment: (orderId: number, paymentId: number) =>
+        fetchClient<void>(`/v1/orders/${orderId}/payments/approve`, {
+            method: 'POST',
+            body: JSON.stringify({ orderId, paymentId }),
+        }),
+
+    declinePayment: (orderId: number, paymentId: number) =>
+        fetchClient<void>(`/v1/orders/${orderId}/payments/decline`, {
+            method: 'POST',
+            body: JSON.stringify({ orderId, paymentId }),
+        }),
+
+    refundPayment: (orderId: number, paymentId: number) =>
+        fetchClient<void>(`/v1/orders/${orderId}/payments/refund`, {
+            method: 'POST',
+            body: JSON.stringify({ orderId, paymentId }),
+        }),
+
+    // --- Fluxo Kanban / status (sem corpo, exceto onde indicado) ---
+    startProcessing: (orderId: number) => fetchClient<void>(`/v1/orders/${orderId}/status/processing`, { method: 'PATCH' }),
+    startSeparating: (orderId: number) => fetchClient<void>(`/v1/orders/${orderId}/status/separating`, { method: 'PATCH' }),
+    startPacking: (orderId: number) => fetchClient<void>(`/v1/orders/${orderId}/status/packing`, { method: 'PATCH' }),
+    markAsInvoiced: (orderId: number) => fetchClient<void>(`/v1/orders/${orderId}/status/invoiced`, { method: 'PATCH' }),
+    markAsPaid: (orderId: number) => fetchClient<void>(`/v1/orders/${orderId}/status/paid`, { method: 'PATCH' }),
+    generateShippingLabel: (orderId: number) => fetchClient<void>(`/v1/orders/${orderId}/shipping/label`, { method: 'POST' }),
+    markAsReadyToShip: (orderId: number) => fetchClient<void>(`/v1/orders/${orderId}/status/ready-to-ship`, { method: 'PATCH' }),
+    shipOrder: (orderId: number) => fetchClient<void>(`/v1/orders/${orderId}/shipping/dispatch`, { method: 'POST' }),
+    markAsInTransit: (orderId: number) => fetchClient<void>(`/v1/orders/${orderId}/status/intransit`, { method: 'PATCH' }),
+
+    setTrackingNumber: (orderId: number, trackingNumber: string) =>
+        fetchClient<void>(`/v1/orders/${orderId}/shipping/tracking`, {
+            method: 'POST',
+            body: JSON.stringify({ orderId, trackingNumber }),
+        }),
+
+    markAsDelivered: (orderId: number) => fetchClient<void>(`/v1/orders/${orderId}/status/delivered`, { method: 'PATCH' }),
+    markDeliveryFailed: (orderId: number) => fetchClient<void>(`/v1/orders/${orderId}/status/delivery-failed`, { method: 'PATCH' }),
+
+    // reason vai como query string (o controller usa [FromQuery] string reason)
+    requestReturn: (orderId: number, reason: string) =>
+        fetchClient<void>(`/v1/orders/${orderId}/return?reason=${encodeURIComponent(reason)}`, { method: 'POST' }),
+
+    cancelOrder: (orderId: number) => fetchClient<void>(`/v1/orders/${orderId}/cancel`, { method: 'POST' }),
+};
+
 // Corpo de erro retornado pela API no formato Result Pattern (Error { Code, Message })
 interface ApiErrorBody {
     code?: string;

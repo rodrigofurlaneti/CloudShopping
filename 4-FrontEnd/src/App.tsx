@@ -10,6 +10,7 @@ import { OrderSectors } from './pages/admin/OrderSectors';
 import { OrderStatuses } from './pages/admin/OrderStatuses';
 import { Customers } from './pages/admin/Customers';
 import { Products } from './pages/admin/Products';
+import { OrdersKanban } from './pages/admin/OrdersKanban';
 
 function App() {
     return (
@@ -33,6 +34,7 @@ function App() {
                 <Route path="/admin/order-statuses" element={<OrderStatuses />} />
                 <Route path="/admin/customers" element={<Customers />} />
                 <Route path="/admin/products" element={<Products />} />
+                <Route path="/admin/orders" element={<OrdersKanban />} />
             </Routes>
         </BrowserRouter>
     );

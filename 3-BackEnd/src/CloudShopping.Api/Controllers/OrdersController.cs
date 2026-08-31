@@ -20,6 +20,8 @@ using CloudShopping.Application.Features.Orders.Commands.StartOrderProcessing;
 using CloudShopping.Application.Features.Orders.Commands.StartOrderSeparating;
 using CloudShopping.Application.Features.Orders.Queries.GetCustomerOrders;
 using CloudShopping.Application.Features.Orders.Queries.GetOrderById;
+using CloudShopping.Application.Features.Orders.Queries.GetPaginatedTenantOrders;
+using CloudShopping.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
@@ -39,6 +41,27 @@ namespace CloudShopping.Api.Controllers
         }
 
         #region Queries (Leituras)
+
+        // GET /api/v1/orders?page=&pageSize=&statusId=
+        // Endpoint novo: não existia nenhuma listagem de pedidos do tenant inteiro (só
+        // GetById e GetByCustomer), o que inviabilizava o Kanban administrativo. Reaproveita
+        // a GetPaginatedTenantOrdersQuery/Handler que já existiam na Application mas ainda
+        // não estavam ligados a nenhuma rota. pageSize default alto (200) porque o Kanban
+        // quer montar as colunas com o conjunto inteiro de pedidos ativos de uma vez.
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetAll(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 200,
+            [FromQuery] int? statusId = null,
+            CancellationToken cancellationToken = default)
+        {
+            var query = new GetPaginatedTenantOrdersQuery(page, pageSize, (OrderStatusEnum?)statusId);
+            var result = await _mediator.Send(query, cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
+            return Ok(result.Value);
+        }
 
         [HttpGet("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]

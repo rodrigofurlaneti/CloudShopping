@@ -6,5 +6,8 @@ using System.Threading.Tasks;
 
 namespace CloudShopping.Application.Features.Orders.ViewModels
 {
-    public sealed record OrderPaymentViewModel(string PaymentMethod, decimal Amount, int PaymentStatusId);
+    // PaymentId foi adicionado: sem ele, o painel administrativo não tinha como
+    // saber qual pagamento chamar em ApprovePayment/DeclinePayment/RefundPayment
+    // (esses comandos exigem o PaymentId, não apenas o OrderId).
+    public sealed record OrderPaymentViewModel(int PaymentId, string PaymentMethod, decimal Amount, int PaymentStatusId);
 }

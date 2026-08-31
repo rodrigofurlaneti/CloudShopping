@@ -35,29 +35,48 @@ namespace CloudShopping.Application.Features.Orders.Queries.GetPaginatedTenantOr
         {
             var tenantId = _tenantProvider.GetTenantId();
             var offset = (request.Page - 1) * request.PageSize;
+            // Query reescrita: a versão original selecionava OrderStatusId (int) mas o
+            // OrderSummaryResponse esperava StatusName (string) — o Dapper não conseguia
+            // popular o record corretamente. Agora faz join com OrderStatus (nome real,
+            // válido também para status customizados por tenant, não só os padrões do
+            // sistema) e com Customers/Individuals/Companies para exibir o cliente nos
+            // cards do Kanban administrativo.
+            // TotalItems leva um CAST(... AS SIGNED) porque o SUM() do MySQL devolve
+            // DECIMAL mesmo somando uma coluna inteira (oi.Quantity), e o Dapper exige
+            // que o tipo da coluna bata exatamente com o parâmetro do record (TotalItems
+            // é int) para materializar via construtor posicional — sem o CAST ele falha
+            // ao tentar mapear o resultado.
             const string sql = @"
                 -- Conta o total para a paginação
-                SELECT COUNT(1) 
-                FROM Orders 
-                WHERE TenantId = @TenantId 
+                SELECT COUNT(1)
+                FROM Orders
+                WHERE TenantId = @TenantId
                   AND IsActive = 1
                   AND (@StatusFilter IS NULL OR OrderStatusId = @StatusFilter);
 
                 -- Busca os dados da página solicitada com a soma dos itens (TotalItems)
-                SELECT 
+                SELECT
                     o.Id AS OrderId,
                     o.CustomerId,
+                    c.Email AS CustomerEmail,
+                    COALESCE(ind.FullName, comp.CompanyName) AS CustomerDisplayName,
                     o.OrderDate,
                     o.TotalAmount,
                     o.OrderStatusId,
-                    COALESCE(SUM(oi.Quantity), 0) AS TotalItems
+                    COALESCE(os.Name, CONCAT('Status #', o.OrderStatusId)) AS StatusName,
+                    CAST(COALESCE(SUM(oi.Quantity), 0) AS SIGNED) AS TotalItems
                 FROM Orders o
                 LEFT JOIN OrderItems oi ON o.Id = oi.OrderId
-                WHERE o.TenantId = @TenantId 
+                LEFT JOIN OrderStatus os ON o.OrderStatusId = os.Id
+                LEFT JOIN Customers c ON o.CustomerId = c.Id
+                LEFT JOIN Individuals ind ON c.Id = ind.CustomerId
+                LEFT JOIN Companies comp ON c.Id = comp.CustomerId
+                WHERE o.TenantId = @TenantId
                   AND o.IsActive = 1
                   AND (@StatusFilter IS NULL OR o.OrderStatusId = @StatusFilter)
-                GROUP BY 
-                    o.Id, o.CustomerId, o.OrderDate, o.TotalAmount, o.OrderStatusId
+                GROUP BY
+                    o.Id, o.CustomerId, c.Email, ind.FullName, comp.CompanyName,
+                    o.OrderDate, o.TotalAmount, o.OrderStatusId, os.Name
                 ORDER BY o.OrderDate DESC
                 LIMIT @PageSize OFFSET @Offset;
             ";

@@ -4,6 +4,7 @@ using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,6 +14,13 @@ namespace CloudShopping.Application.Behaviors
         where TRequest : IRequest<TResponse>
         where TResponse : Result
     {
+        // Reflete a assinatura genérica de Result.Failure<TValue>(Error) uma única vez,
+        // já que TResponse aqui pode ser tanto "Result" (comandos) quanto "Result<T>"
+        // (queries) — não dá pra saber TValue em tempo de compilação dentro desta classe genérica.
+        private static readonly MethodInfo GenericFailureMethod = typeof(Result)
+            .GetMethods(BindingFlags.Public | BindingFlags.Static)
+            .Single(method => method.Name == nameof(Result.Failure) && method.IsGenericMethodDefinition);
+
         private readonly IEnumerable<IValidator<TRequest>> _validators;
         public ValidationBehavior(IEnumerable<IValidator<TRequest>> validators)
         {
@@ -34,9 +42,30 @@ namespace CloudShopping.Application.Behaviors
                 .ToArray();
             if (errors.Any())
             {
-                return (dynamic)Result.Failure(errors[0]);
+                return BuildFailureResponse(errors[0]);
             }
             return await next();
+        }
+
+        // Result.Failure(error) devolve uma instância de "Result" pura — que NÃO é o
+        // mesmo tipo em runtime de "Result<TValue>" (são classe base/derivada, não
+        // conversíveis entre si por cast). Retornar isso via "dynamic" fazia o DLR
+        // tentar (e falhar) uma conversão implícita Base -> Derivada em runtime,
+        // estourando RuntimeBinderException sempre que a validação de uma query
+        // (TResponse = Result<T>) falhava. Aqui construímos o Result<T> de falha
+        // correto via reflection, chamando Result.Failure<TValue>(error) com o TValue
+        // real de TResponse — e, para comandos (TResponse = Result puro), usamos o
+        // Failure(Error) não-genérico diretamente.
+        private static TResponse BuildFailureResponse(Error error)
+        {
+            if (typeof(TResponse) == typeof(Result))
+            {
+                return (TResponse)(object)Result.Failure(error);
+            }
+
+            var valueType = typeof(TResponse).GetGenericArguments()[0];
+            var typedFailureMethod = GenericFailureMethod.MakeGenericMethod(valueType);
+            return (TResponse)typedFailureMethod.Invoke(null, new object[] { error })!;
         }
     }
 }
