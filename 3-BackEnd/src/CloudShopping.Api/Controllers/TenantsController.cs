@@ -1,4 +1,5 @@
 using CloudShopping.Application.Features.Tenants.Commands.CreateTenant;
+using CloudShopping.Application.Features.Tenants.Commands.RegisterCompany;
 using CloudShopping.Application.Features.Tenants.Queries.GetTenantById;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -41,6 +42,19 @@ namespace CloudShopping.Api.Controllers
             if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
 
             return CreatedAtAction(nameof(GetById), new { id = result.Value }, new { id = result.Value });
+        }
+
+        // Auto-cadastro público: qualquer visitante pode criar sua própria empresa (Tenant)
+        // na plataforma e já sair com o primeiro usuário administrador criado.
+        [HttpPost("register")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Register([FromBody] RegisterCompanyCommand command, CancellationToken cancellationToken)
+        {
+            var result = await _mediator.Send(command, cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
+
+            return CreatedAtAction(nameof(GetById), new { id = result.Value.TenantId }, result.Value);
         }
     }
 }

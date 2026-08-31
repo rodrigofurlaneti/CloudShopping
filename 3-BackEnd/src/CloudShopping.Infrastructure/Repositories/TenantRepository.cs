@@ -59,5 +59,12 @@ namespace CloudShopping.Infrastructure.Repositories
 
             return (items, totalCount);
         }
+
+        public async Task<Tenant?> GetByDomainAsync(string domain, CancellationToken cancellationToken = default)
+        {
+            var normalized = domain.Trim().ToLower();
+            return await _context.Tenants
+                .FirstOrDefaultAsync(t => t.Domain == normalized, cancellationToken);
+        }
     }
 }

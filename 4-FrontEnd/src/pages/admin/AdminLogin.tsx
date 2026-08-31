@@ -1,9 +1,10 @@
-﻿import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
 export function AdminLogin() {
     const navigate = useNavigate();
-    const [email, setEmail] = useState('');
+    const [searchParams] = useSearchParams();
+    const [email, setEmail] = useState(searchParams.get('username') ?? '');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
@@ -98,9 +99,15 @@ export function AdminLogin() {
                 </form>
 
                 {/* Rodapé do Card */}
-                <div className="mt-8 text-center border-t border-slate-700/60 pt-4">
+                <div className="mt-8 text-center border-t border-slate-700/60 pt-4 space-y-2">
                     <p className="text-xs text-slate-500">
                         Área restrita a lojistas e administradores autorizados.
+                    </p>
+                    <p className="text-xs text-slate-500">
+                        Ainda não tem uma loja?{' '}
+                        <Link to="/admin/register" className="text-orange-400 hover:underline">
+                            Cadastre sua empresa
+                        </Link>
                     </p>
                 </div>
 
