@@ -4,6 +4,12 @@ import { ProductDetail } from './pages/ProductDetail';
 import { AdminLogin } from './pages/admin/AdminLogin';
 import { RegisterCompany } from './pages/admin/RegisterCompany';
 import { Dashboard } from './pages/admin/Dashboard';
+import { Departments } from './pages/admin/Departments';
+import { StoreBanners } from './pages/admin/StoreBanners';
+import { OrderSectors } from './pages/admin/OrderSectors';
+import { OrderStatuses } from './pages/admin/OrderStatuses';
+import { Customers } from './pages/admin/Customers';
+import { Products } from './pages/admin/Products';
 
 function App() {
     return (
@@ -21,6 +27,12 @@ function App() {
 
                 {/* Painel administrativo (Backoffice) */}
                 <Route path="/admin/dashboard" element={<Dashboard />} />
+                <Route path="/admin/departments" element={<Departments />} />
+                <Route path="/admin/banners" element={<StoreBanners />} />
+                <Route path="/admin/order-sectors" element={<OrderSectors />} />
+                <Route path="/admin/order-statuses" element={<OrderStatuses />} />
+                <Route path="/admin/customers" element={<Customers />} />
+                <Route path="/admin/products" element={<Products />} />
             </Routes>
         </BrowserRouter>
     );

@@ -1,6 +1,7 @@
 using CloudShopping.Application.Features.OrderSector.Commands.CreateOrderSector;
 using CloudShopping.Application.Features.OrderSector.Commands.ToggleOrderSectorStatus;
 using CloudShopping.Application.Features.OrderSector.Commands.UpdateOrderSector;
+using CloudShopping.Application.Features.OrderSector.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
@@ -18,6 +19,27 @@ namespace CloudShopping.Api.Controllers
         {
             _mediator = mediator;
         }
+
+        #region Consultas (Read)
+
+        // Endpoint adicionado para dar suporte à tela administrativa de Setores Logísticos:
+        // o GetOrderSectorsQuery/Handler já existiam na camada de Application, mas ainda
+        // não estavam expostos por nenhuma rota. Por padrão traz todos os setores
+        // (ativos e inativos) para permitir reativação pelo painel; onlyActive=true
+        // filtra apenas os ativos (uso, por exemplo, em telas de seleção de pedido).
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetAll([FromQuery] bool onlyActive = false, CancellationToken cancellationToken = default)
+        {
+            var query = new GetOrderSectorsQuery(onlyActive);
+            var result = await _mediator.Send(query, cancellationToken);
+            if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
+
+            return Ok(result.Value);
+        }
+
+        #endregion
 
         #region Comandos (Write / Modificações)
 

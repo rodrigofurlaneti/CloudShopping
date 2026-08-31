@@ -8,6 +8,7 @@ using CloudShopping.Application.Features.Customers.Commands.UpdateB2BProfile;
 using CloudShopping.Application.Features.Customers.Commands.UpdateB2CProfile;
 using CloudShopping.Application.Features.Customers.Commands.UpdateCustomerAddress;
 using CloudShopping.Application.Features.Customers.Queries.GetCustomerById;
+using CloudShopping.Application.Features.Customers.Queries.GetPaginatedCustomers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
@@ -27,6 +28,27 @@ namespace CloudShopping.Api.Controllers
         }
 
         #region Queries (Leituras)
+
+        // GET /api/v1/customers?page=&pageSize=&searchTerm=
+        // Reaproveita a GetPaginatedCustomersQuery/Handler que já existiam na Application
+        // mas ainda não estavam expostos por nenhum endpoint (mesmo padrão de gap-fill
+        // usado em OrderSectors/OrderStatus).
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAll(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? searchTerm = null,
+            CancellationToken cancellationToken = default)
+        {
+            var query = new GetPaginatedCustomersQuery(page, pageSize, searchTerm);
+            var result = await _mediator.Send(query, cancellationToken);
+
+            if (!result.IsSuccess)
+                return BadRequest(new { message = result.Error.Message });
+
+            return Ok(result.Value);
+        }
 
         [HttpGet("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]

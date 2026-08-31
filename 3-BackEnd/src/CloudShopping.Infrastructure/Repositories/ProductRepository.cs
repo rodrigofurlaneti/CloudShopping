@@ -76,7 +76,12 @@ namespace CloudShopping.Infrastructure.Repositories
 
             var totalCount = await query.CountAsync(cancellationToken);
 
+            // Include(Images) é necessário aqui: o ProductSummaryViewModel usa
+            // p.Images para resolver a foto principal da listagem — sem o Include,
+            // a coleção sempre viria vazia e a listagem mostraria "sem imagem" para
+            // todo produto, mesmo com fotos já enviadas.
             var items = await query
+                .Include(p => p.Images)
                 .OrderBy(p => p.Name)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)

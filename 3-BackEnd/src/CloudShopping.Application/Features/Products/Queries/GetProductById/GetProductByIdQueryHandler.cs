@@ -23,12 +23,17 @@ namespace CloudShopping.Application.Features.Products.Queries.GetProductById
 
             return new ProductViewModel(
                 product.Id,
+                product.DepartmentId,
                 product.Sku,
                 product.Name,
                 product.Price,
                 product.PhysicalStock,
                 product.ReservedStock,
                 product.AvailableStock,
+                product.Location?.Aisle,
+                product.Location?.Rack,
+                product.Location?.Level,
+                product.Location?.Position,
                 product.Images.Select(i => new ProductImageViewModel(i.Id, i.FileName, i.FilePath, i.IsPrimary, i.DisplayOrder)).ToList());
         }
     }
