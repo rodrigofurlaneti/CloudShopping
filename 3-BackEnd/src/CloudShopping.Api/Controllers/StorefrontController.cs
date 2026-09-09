@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace CloudShopping.Api.Controllers;
 
 [ApiController, Route("api/v1/store")]
-public sealed class StorefrontController(AppDbContext db, StoreCommerceService commerce) : ControllerBase
+public sealed class StorefrontController(AppDbContext db, StoreCommerceService commerce, CloudShopping.Infrastructure.Payments.AsaasPayments payments) : ControllerBase
 {
     private int CustomerId => StoreSecurity.Subject(User);
     [HttpGet("context"), AllowAnonymous]
@@ -113,7 +113,7 @@ public sealed class StorefrontController(AppDbContext db, StoreCommerceService c
     [HttpGet("orders/{id:int}"), Authorize(Roles = "Customer")]
     public async Task<IActionResult> Order(int id, CancellationToken ct) => Ok(await commerce.GetOrder(CustomerId, id, ct));
     [HttpPost("orders/{id:int}/cancel"), Authorize(Roles = "Customer")]
-    public async Task<IActionResult> Cancel(int id, CancellationToken ct) { await commerce.Release(id, CustomerId, ct); return NoContent(); }
+    public async Task<IActionResult> Cancel(int id, CancellationToken ct) { await payments.Reconcile(id, CustomerId, ct,"cancel","Customer:"+CustomerId); return NoContent(); }
 
     [HttpGet("admin/shipping-options"), Authorize(Roles = "Administrator")]
     public async Task<IActionResult> AdminShipping(CancellationToken ct) => Ok(await db.Set<ShippingOption>().ToListAsync(ct));
@@ -159,4 +159,3 @@ internal static class TaxDocument
         return Calculate(value.Length - 2) == value[^2] - '0' && Calculate(value.Length - 1) == value[^1] - '0';
     }
 }
-

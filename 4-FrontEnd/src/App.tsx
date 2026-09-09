@@ -1,3 +1,5 @@
+import { AsaasSettings } from './pages/admin/AsaasSettings';
+import { FinancePayments } from './pages/admin/FinancePayments';
 import { SessionProvider, AdminOnly } from './components/SessionProvider';
 import { CartPage } from './pages/CartPage';
 import { CheckoutPage } from './pages/CheckoutPage';
@@ -21,6 +23,8 @@ function App() {
     return (
         <BrowserRouter>
             <SessionProvider><Routes>
+                <Route path="/admin/asaas" element={<AdminOnly><AsaasSettings /></AdminOnly>} />
+                <Route path="/admin/payments" element={<AdminOnly><FinancePayments /></AdminOnly>} />
                 {/* Rotas públicas da Loja Virtual */}
                 <Route path="/" element={<StoreHome />} />
                 <Route path="/product/:id" element={<ProductDetail />} />

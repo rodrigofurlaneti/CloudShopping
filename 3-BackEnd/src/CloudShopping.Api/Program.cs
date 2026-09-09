@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.RateLimiting;
+using CloudShopping.Infrastructure.Payments;
+using CloudShopping.Api.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
@@ -23,6 +25,11 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped<StoreCommerceService>();
 builder.Services.AddHostedService<ReservationExpiryWorker>();
+builder.Services.AddHttpClient<IAsaasGateway,AsaasGateway>().RedactLoggedHeaders(_=>true).ConfigurePrimaryHttpMessageHandler(()=>new HttpClientHandler {AllowAutoRedirect=false});
+builder.Services.AddScoped<AsaasAccounts>();
+builder.Services.AddScoped<AsaasPayments>();
+builder.Services.AddSingleton<AsaasInbox>();
+builder.Services.AddHostedService<AsaasWorker>();
 builder.Services.AddProblemDetails();
 var keyDirectory = Path.GetFullPath(builder.Configuration["DataProtection:KeyPath"] ?? Path.Combine(builder.Environment.ContentRootPath, ".local", "keys"));
 Directory.CreateDirectory(keyDirectory);
@@ -59,7 +66,8 @@ app.UseExceptionHandler(error => error.Run(async ctx => {
     var ex = ctx.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>()?.Error;
     var status = ex switch {
         UnauthorizedAccessException => 403, KeyNotFoundException => 404,
-        ValidationException or ArgumentException => 400,
+        ValidationException or ArgumentException or System.Text.Json.JsonException => 400,
+        AsaasApiException => 502,
         DbUpdateConcurrencyException or CommerceConflictException => 409,
         InvalidOperationException => 409, _ => 500
     };
@@ -77,7 +85,7 @@ app.UseAuthentication();
 app.Use(StoreSecurity.ResolveTenant);
 app.UseAuthorization();
 app.Use(async (ctx, next) => {
-    if (ctx.Request.Path.StartsWithSegments("/api") && !HttpMethods.IsGet(ctx.Request.Method) &&
+    if (ctx.GetEndpoint()?.Metadata.GetMetadata<AsaasWebhookAttribute>() == null && ctx.Request.Path.StartsWithSegments("/api") && !HttpMethods.IsGet(ctx.Request.Method) &&
         !HttpMethods.IsHead(ctx.Request.Method) && !HttpMethods.IsOptions(ctx.Request.Method))
     {
         try { await ctx.RequestServices.GetRequiredService<IAntiforgery>().ValidateRequestAsync(ctx); }

@@ -14,7 +14,7 @@ using Microsoft.Extensions.Configuration;
 using MySqlConnector;
 using Xunit;
 
-public sealed class CommerceTests : IAsyncLifetime
+public sealed partial class CommerceTests : IAsyncLifetime
 {
     private readonly string database = "cloudshopping_test_" + Guid.NewGuid().ToString("N");
     private string connection = "";

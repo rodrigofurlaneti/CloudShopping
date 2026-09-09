@@ -152,12 +152,14 @@ public sealed class StoreCommerceService(AppDbContext db, IDataProtectionProvide
         order.OrderItems.Select(x => (object)new { x.ProductId, name = x.ProductName, x.Sku, x.Quantity, x.UnitPrice }).ToArray(),
         order.OrderAddress == null ? null : new { order.OrderAddress.Street, order.OrderAddress.Number,
             order.OrderAddress.Neighborhood, order.OrderAddress.City, order.OrderAddress.State, order.OrderAddress.ZipCode });
-    public async Task Release(int orderId, int? customerId, CancellationToken ct)
+    public async Task Release(int orderId, int? customerId, CancellationToken ct, bool paymentResolved = false)
     {
         await using var tx = await db.Database.BeginTransactionAsync(ct);
         var order = await db.Orders.Include(x => x.OrderItems).SingleOrDefaultAsync(x => x.Id == orderId &&
             (customerId == null || x.CustomerId == customerId), ct) ?? throw new KeyNotFoundException();
         if (order.ReservationState == "Released") return;
+        if (!paymentResolved && await db.Set<CloudShopping.Infrastructure.Payments.PaymentAttempt>().AnyAsync(x=>x.OrderId==orderId,ct))
+            throw new CommerceConflictException("Este pedido possui integração financeira. Solicite o cancelamento pela área de pagamento.");
         if (order.OrderStatusId != 1 || order.ReservationState != "Reserved") throw new CommerceConflictException("Pedido não pode ser cancelado nesta etapa.");
         foreach (var item in order.OrderItems)
         {

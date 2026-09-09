@@ -21,6 +21,35 @@ namespace CloudShopping.Domain.Entities.Orders
         public DateTime? ReservationExpiresAt { get; private set; }
         public string ReservationState { get; private set; } = "None";
         public int Version { get; private set; } = 1;
+        public string FinancialState { get; private set; } = "Unpaid";
+        public bool FulfillmentBlocked { get; private set; }
+        public void SchedulePayment(DateTime until)
+        {
+            if (OrderStatusId != 1 || ReservationState != "Reserved") throw new InvalidOperationException("Pedido não aceita pagamento.");
+            ReservationExpiresAt = until; UpdateTimestamp();
+        }
+        public void RecordProviderPayment(string key, string method, decimal amount)
+        {
+            if (_payments.Any(x=>x.ProviderKey==key)) return;
+            _payments.Add(Payment.FromProvider(Id,method,amount,key));
+            if (ReservationState == "Reserved" && OrderStatusId == 1)
+            { ReservationState="Consumed"; OrderStatusId=2; FinancialState="Paid"; }
+            else { FinancialState="PaidReview"; FulfillmentBlocked=true; }
+            AddHistory(FulfillmentBlocked ? "Pagamento recebido após encerramento da reserva: análise financeira obrigatória." : "Pagamento Asaas confirmado e estoque baixado.");
+            UpdateTimestamp();
+        }
+        public void RecordProviderRefund(string key,string method,decimal amount)
+        {
+            var payment=_payments.SingleOrDefault(x=>x.ProviderKey==key);
+            if(payment==null){payment=Payment.FromProvider(Id,method,amount,key);_payments.Add(payment);}
+            if (payment?.PaymentStatusId == PaymentStatus.Approved) payment.Refund();
+            FinancialState="Refunded"; FulfillmentBlocked=true; OrderStatusId=15;
+            AddHistory("Estorno Asaas confirmado. Estoque físico depende de devolução/inspeção."); UpdateTimestamp();
+        }
+        public void HoldFinancialReview(string reason)
+        {
+            FinancialState="Review"; FulfillmentBlocked=true; AddHistory(reason);UpdateTimestamp();
+        }
         public void ConfigureCheckout(string key, string hash, decimal shipping, string method, DateTime expires)
         {
             if (shipping < 0) throw new ArgumentException("Frete inválido.");

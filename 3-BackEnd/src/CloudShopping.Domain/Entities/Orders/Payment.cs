@@ -5,6 +5,11 @@ namespace CloudShopping.Domain.Entities.Orders
     public sealed class Payment : AuditableEntity<int>
     {
         public int OrderId { get; private set; }
+        public string? ProviderKey { get; private set; }
+        internal static Payment FromProvider(int orderId, string method, decimal amount, string key)
+        {
+            var payment = CreatePending(orderId, method, amount); payment.ProviderKey = key; payment.Approve(); return payment;
+        }
         public string PaymentMethod { get; private set; }
         public decimal Amount { get; private set; }
         public PaymentStatus PaymentStatusId { get; private set; }

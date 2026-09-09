@@ -56,6 +56,7 @@ public static class StoreSecurity
     }
     public static async Task ResolveTenant(HttpContext http, RequestDelegate next)
     {
+        if(http.GetEndpoint()?.Metadata.GetMetadata<CloudShopping.Api.Controllers.AsaasWebhookAttribute>() != null) {await next(http);return;}
         if (!http.Request.Path.StartsWithSegments("/api")) { await next(http); return; }
         var config = http.RequestServices.GetRequiredService<IConfiguration>();
         int tenant = 0;

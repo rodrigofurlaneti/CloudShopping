@@ -25,6 +25,8 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
+    { label: 'Pagamentos Asaas', to: '/admin/asaas', icon: Settings },
+    { label: 'Financeiro', to: '/admin/payments', icon: ClipboardList },
     { label: 'Dashboard', to: '/admin/dashboard', icon: Home },
     { label: 'Pedidos', to: '/admin/orders', icon: ClipboardList },
     { label: 'Setores Logísticos', to: '/admin/order-sectors', icon: Warehouse },

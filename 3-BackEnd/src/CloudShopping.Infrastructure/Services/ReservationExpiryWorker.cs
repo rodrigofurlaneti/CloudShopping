@@ -35,7 +35,8 @@ public sealed class ReservationExpiryWorker(IServiceProvider services, IConfigur
         {
             using var scope = services.CreateScope();
             await using var db = new AppDbContext(scope.ServiceProvider.GetRequiredService<DbContextOptions<AppDbContext>>(), new FixedTenant(tenant));
-            var ids = await db.Orders.Where(x => x.ReservationState == "Reserved" && x.OrderStatusId == 1 && x.ReservationExpiresAt <= DateTime.UtcNow)
+            var ids = await db.Orders.Where(x => x.ReservationState == "Reserved" && x.OrderStatusId == 1 && x.ReservationExpiresAt <= DateTime.UtcNow &&
+                !db.Set<CloudShopping.Infrastructure.Payments.PaymentAttempt>().Any(p=>p.OrderId==x.Id))
                 .OrderBy(x => x.Id).Select(x => x.Id).Take(100).ToListAsync(ct);
             var commerce = new StoreCommerceService(db, services.GetRequiredService<IDataProtectionProvider>(), config);
             foreach (var id in ids)
