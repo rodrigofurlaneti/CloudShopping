@@ -34,7 +34,7 @@ public sealed partial class AppDbContext
         b.Entity<Payment>().HasQueryFilter(x => Orders.Any(o => o.Id == x.OrderId));
         b.Entity<OrderStateHistory>().HasQueryFilter(x => Orders.Any(o => o.Id == x.OrderId));
         b.Entity<ProductImage>().HasQueryFilter(x => Products.Any(p => p.Id == x.ProductId));
-        b.Entity<StockMovement>().HasQueryFilter(x => Products.Any(p => p.Id == x.ProductId));
+        b.Entity<StockMovement>().HasQueryFilter(x => Products.IgnoreQueryFilters().Any(p => p.Id == x.ProductId && p.TenantId == _currentTenantId));
         b.Entity<AuthSession>().ToTable("authsessions").HasKey(x => x.Id);
         b.Entity<AuthSession>().Property(x => x.Id).HasColumnType("char(32)");
         b.Entity<ShippingOption>().ToTable("shippingoptions").HasKey(x => x.Id);
@@ -68,6 +68,7 @@ public sealed partial class AppDbContext
                 if (prop == null || e.Property(name).CurrentValue is not int id || id <= 0) continue;
                 bool owned = name switch {
                     "CustomerId" => await Customers.AnyAsync(x => x.Id == id, ct),
+                    "ProductId" when e.Entity is StockMovement => await Products.IgnoreQueryFilters().AnyAsync(x => x.Id == id && x.TenantId == _currentTenantId, ct),
                     "ProductId" => await Products.AnyAsync(x => x.Id == id, ct),
                     "EmployeeId" => await Set<Employee>().AnyAsync(x => x.Id == id, ct),
                     "EmployeeUserId" => await Set<EmployeeUser>().AnyAsync(x => x.Id == id, ct),
@@ -82,4 +83,3 @@ public sealed partial class AppDbContext
         }
     }
 }
-

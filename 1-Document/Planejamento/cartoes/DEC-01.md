@@ -35,3 +35,8 @@ Entregar decisão curta com alternativa escolhida, justificativa, responsável, 
 **Desbloqueia:** [DB-10](DB-10.md), [DB-23](DB-23.md)
 
 
+
+
+## Progresso da entrega 2
+
+Status: **Parcial**. Consulte [implementação de pagamentos, evidências e pendências](../07-entrega-pagamentos-asaas.md). A escolha inclui recebimento direto e plataforma com split. Testes locais não substituem homologação Asaas nem encerram os critérios amplos deste cartão.

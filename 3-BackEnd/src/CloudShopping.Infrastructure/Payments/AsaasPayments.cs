@@ -11,8 +11,8 @@ namespace CloudShopping.Infrastructure.Payments;
 public sealed class AsaasPayments(AppDbContext db,IAsaasGateway gateway,AsaasAccounts accounts,StoreCommerceService commerce,IConfiguration config)
 {
     private Task<PaymentLock> Lock(int orderId,CancellationToken ct)=>PaymentLock.Acquire(db.Database.GetConnectionString()!,"payment:"+orderId,ct);
-    private Task<Order> Order(int id,int? customer,CancellationToken ct)=>db.Orders.Include(x=>x.OrderItems).Include(x=>x.OrderAddress).Include(x=>x.Payments)
-        .SingleOrDefaultAsync(x=>x.Id==id&&(customer==null||x.CustomerId==customer),ct).ContinueWith(t=>t.GetAwaiter().GetResult()??throw new KeyNotFoundException("Pedido não encontrado."),ct);
+    private async Task<Order> Order(int id,int? customer,CancellationToken ct)=>await db.Orders.Include(x=>x.OrderItems).Include(x=>x.OrderAddress).Include(x=>x.Payments)
+        .SingleOrDefaultAsync(x=>x.Id==id&&(customer==null||x.CustomerId==customer),ct)??throw new KeyNotFoundException("Pedido não encontrado.");
     public async Task<object> View(int orderId,int? customer,CancellationToken ct)
     {
         var order=await Order(orderId,customer,ct);var a=await db.Set<PaymentAttempt>().AsNoTracking().SingleOrDefaultAsync(x=>x.OrderId==orderId,ct);
@@ -204,7 +204,7 @@ public sealed class AsaasPayments(AppDbContext db,IAsaasGateway gateway,AsaasAcc
             {
                 var expected=JsonSerializer.Deserialize<JsonElement[]>(a.SplitJson)!;
                 var actual=p.TryGetProperty("split",out var splits)&&splits.ValueKind==JsonValueKind.Array?splits.EnumerateArray().ToArray():[];
-                if(expected.Length!=actual.Length || expected.Any(e=>!actual.Any(s=>s.Text("walletId")==e.Text("walletId")&&s.Money("percentualValue")==e.Money("percentualValue"))) || actual.Any(s=>s.Text("status")=="REFUSED"))
+                if(expected.Length!=actual.Length || expected.Any(e=>!actual.Any(s=>s.Text("walletId")==e.Text("walletId")&&s.Money("percentualValue")==e.Money("percentualValue"))) || actual.Any(s=>s.Text("status") is "REFUSED" or "CANCELLED" or "CANCELED"))
                 {await Review(a,order,"Split divergente ou recusado pelo Asaas. Confira os recebedores antes de expedir.",ct);return;}
                 await ApplyPaid(a,order,ct);
                 if(a.CancelRequested&&!a.RefundRequested)a.LastError="Pagamento já confirmado. O cancelamento exige solicitação de estorno pela loja.";

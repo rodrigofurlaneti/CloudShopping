@@ -8,6 +8,8 @@ Após a análise, foi implementado e testado o recorte **base, catálogo, carrin
 
 ## Comece aqui
 
+A segunda entrega acrescenta os dois modelos de recebimento Asaas, pagamentos e conciliação. Consulte [entrega 2, configuração e homologação pendente](07-entrega-pagamentos-asaas.md). Os resultados da entrega 1 permanecem como registro histórico.
+
 1. Leia o [diagnóstico](01-diagnostico.md) para distinguir código existente, defeitos e funcionalidades propostas.
 2. Use o [roadmap e dependências](02-roadmap.md) para selecionar a próxima entrega.
 3. Abra o [índice dos 98 cartões](03-backlog.md). Cada cartão é um arquivo separado, pronto para copiar para o gestor de tarefas.

@@ -1,6 +1,6 @@
 # Backlog de conclusão do CloudShopping
 
-98 cartões no escopo completo. Há implementação parcial relacionada a 29 cartões e 69 permanecem planejados; veja [entrega 1](06-entrega-base-catalogo-checkout.md). Cada título abre um cartão com contexto, escopo, dependências e critérios de aceite. A prioridade é da proposta, não uma medição do esforço. A etapa Venda é uma entrega integrada em homologação; produção exige os gates de Lançamento.
+98 cartões no escopo completo. Há implementação parcial relacionada a 43 cartões e 55 permanecem planejados; veja [entrega 1](06-entrega-base-catalogo-checkout.md) e [entrega 2](07-entrega-pagamentos-asaas.md). Cada título abre um cartão com contexto, escopo, dependências e critérios de aceite. A prioridade é da proposta, não uma medição do esforço. A etapa Venda é uma entrega integrada em homologação; produção exige os gates de Lançamento.
 
 ## 00-decisoes
 

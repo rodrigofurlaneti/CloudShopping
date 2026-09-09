@@ -26,6 +26,31 @@ public sealed partial class CommerceTests
         var preview=await Prepare(db);return (await Service(db).Confirm(customerId,Guid.NewGuid().ToString(),preview.Token,default)).Id;
     }
     [Fact]
+    public async Task Payment_for_product_removed_from_catalog_still_commits_reserved_stock()
+    {
+        await using var db=Db(1);var gateway=new FakeAsaas();var id=await PaymentOrder(db,gateway);
+        await Payments(db,gateway).Start(id,customerId,"PIX",default);
+        await db.Database.ExecuteSqlRawAsync("UPDATE products SET IsActive=0");
+        gateway.Status="RECEIVED";await Payments(db,gateway).Reconcile(id,customerId,default);
+        db.ChangeTracker.Clear();Assert.Equal("Paid",(await db.Orders.SingleAsync()).FinancialState);
+        Assert.Single(await db.StockMovements.ToListAsync());
+        Assert.Equal(0,(await db.Products.IgnoreQueryFilters().SingleAsync(x=>x.TenantId==1)).PhysicalStock);
+        await using var other=Db(2);Assert.Empty(await other.StockMovements.ToListAsync());
+    }
+    [Fact]
+    public async Task Manual_recovery_checks_canonical_payment_and_records_operator()
+    {
+        await using var db=Db(1);var gateway=new FakeAsaas {LoseCreationResponse=true,HidePayments=true};var id=await PaymentOrder(db,gateway);
+        await Payments(db,gateway).Start(id,customerId,"PIX",default);
+        gateway.OverrideAmount=999;
+        await Assert.ThrowsAsync<CloudShopping.Infrastructure.Services.CommerceConflictException>(()=>Payments(db,gateway).Recover(id,"pay_test","Administrator:42",default));
+        gateway.OverrideAmount=null;
+        await Payments(db,gateway).Recover(id,"pay_test","Administrator:42",default);
+        Assert.Equal(1,gateway.PaymentCreates);
+        Assert.Equal("pay_test",(await db.Set<PaymentAttempt>().SingleAsync()).RemotePaymentId);
+        Assert.Equal("Administrator:42",(await db.Set<PaymentOperation>().SingleAsync(x=>x.Kind=="Recover")).RequestedBy);
+    }
+    [Fact]
     public async Task Asaas_direct_payment_replay_commits_stock_and_ledger_once()
     {
         await using var db=Db(1);var gateway=new FakeAsaas();var id=await PaymentOrder(db,gateway);
@@ -146,12 +171,61 @@ public sealed partial class CommerceTests
         services.AddSingleton(new AsaasInbox(PaymentConfig,protection));await using var provider=services.BuildServiceProvider();
         using var worker=new AsaasWorker(provider,PaymentConfig,NullLogger<AsaasWorker>.Instance);await worker.RunOnce(default);
     }
+    [Fact]
+    public async Task Bank_slip_refund_exposes_provider_form_and_waits_for_done()
+    {
+        await using var db=Db(1);var gateway=new FakeAsaas();var id=await PaymentOrder(db,gateway);
+        await Payments(db,gateway).Start(id,customerId,"BOLETO",default);gateway.Status="RECEIVED";
+        await Payments(db,gateway).Reconcile(id,customerId,default);
+        await Payments(db,gateway).Reconcile(id,null,default,"refund","Administrator:42");
+        Assert.Equal("https://sandbox.asaas.com/refund/test",(await db.Set<PaymentAttempt>().SingleAsync()).RefundRequestUrl);
+        Assert.Equal("Paid",(await db.Orders.SingleAsync()).FinancialState);
+        Assert.Equal("Administrator:42",(await db.Set<PaymentOperation>().SingleAsync()).RequestedBy);
+        await Payments(db,gateway).Reconcile(id,null,default,"refund","Administrator:42");Assert.Equal(1,gateway.RefundRequests);
+        gateway.Status="REFUNDED";await Payments(db,gateway).Reconcile(id,null,default);
+        Assert.Equal("Refunded",(await db.Orders.SingleAsync()).FinancialState);
+    }
+    [Fact]
+    public async Task Definitive_creation_rejection_can_cancel_without_holding_stock_forever()
+    {
+        await using var db=Db(1);var gateway=new FakeAsaas{RejectCreation=true};var id=await PaymentOrder(db,gateway);
+        await Payments(db,gateway).Start(id,customerId,"PIX",default);
+        Assert.Equal("Failed",(await db.Set<PaymentAttempt>().SingleAsync()).State);
+        await Payments(db,gateway).Reconcile(id,customerId,default,"cancel");db.ChangeTracker.Clear();
+        Assert.Equal(0,(await db.Products.SingleAsync()).ReservedStock);Assert.Equal("Cancelled",(await db.Set<PaymentAttempt>().SingleAsync()).State);
+    }
+    [Fact]
+    public async Task Checkout_cancel_timeout_is_recovered_by_authenticated_terminal_event()
+    {
+        await using var db=Db(1);var gateway=new FakeAsaas{LoseCancelResponse=true};var id=await PaymentOrder(db,gateway);
+        await Payments(db,gateway).Start(id,customerId,"CREDIT_CARD",default);
+        await Payments(db,gateway).Reconcile(id,customerId,default,"cancel");
+        Assert.Equal(1,(await db.Products.SingleAsync()).ReservedStock);
+        var a=await db.Set<AsaasConnection>().SingleAsync();
+        var payload=JsonSerializer.Serialize(new{id="evt_cancel",@event="CHECKOUT_CANCELED",checkout=new{id="checkout_test"}});
+        await new AsaasInbox(PaymentConfig,protection).Receive(a.Id,WebhookSecret,payload,default);
+        await RunPaymentWorker(gateway);db.ChangeTracker.Clear();
+        Assert.Equal(0,(await db.Products.SingleAsync()).ReservedStock);Assert.Equal("Cancelled",(await db.Set<PaymentAttempt>().SingleAsync()).State);
+    }
+    [Fact]
+    public async Task Another_issuer_webhook_cannot_change_this_tenants_payment()
+    {
+        await using var db=Db(1);var gateway=new FakeAsaas();var id=await PaymentOrder(db,gateway);
+        await Payments(db,gateway).Start(id,customerId,"PIX",default);gateway.Status="RECEIVED";
+        var attempt=await db.Set<PaymentAttempt>().SingleAsync();
+        await using var other=Db(2);
+        var account=new AsaasConnection{TenantId=2,AccountKey="Sandbox:other-wallet",WalletId="other-wallet",ProtectedApiKey="unused",WebhookTokenHash=JsonFields.Hash(WebhookSecret)};
+        other.Add(account);await other.SaveChangesAsync();
+        var payload=JsonSerializer.Serialize(new{id="evt_foreign",@event="PAYMENT_RECEIVED",payment=new{id="pay_test",externalReference=JsonFields.Reference(attempt)}});
+        await new AsaasInbox(PaymentConfig,protection).Receive(account.Id,WebhookSecret,payload,default);
+        await RunPaymentWorker(gateway);db.ChangeTracker.Clear();Assert.Equal("Unpaid",(await db.Orders.SingleAsync()).FinancialState);
+    }
 }
 
 public sealed class FakeAsaas:IAsaasGateway
 {
     public int PaymentCreates,CheckoutCreates,RefundRequests;
-    public bool LoseCreationResponse,HidePayments,Deleted;
+    public bool LoseCreationResponse,HidePayments,Deleted,RejectCreation,LoseCancelResponse;
     public decimal? OverrideAmount;
     public string Status="PENDING";
     public JsonElement LastPaymentBody,LastCheckoutBody;
@@ -174,6 +248,7 @@ public sealed class FakeAsaas:IAsaasGateway
         if(path=="customers/cus_test"&&method==HttpMethod.Put)return Task.FromResult(Json(customer!));
         if(path=="payments"&&method==HttpMethod.Post)
         {
+            if(RejectCreation)throw new AsaasApiException(400);
             PaymentCreates++;LastPaymentBody=Json(body!);hasPayment=true;
             if(LoseCreationResponse)throw new HttpRequestException("synthetic response lost");
             return Task.FromResult(Payment());
@@ -186,7 +261,7 @@ public sealed class FakeAsaas:IAsaasGateway
         if(path=="payments/pay_test/bankSlip/refund"){RefundRequests++;return Task.FromResult(Json(new{requestUrl="https://sandbox.asaas.com/refund/test"}));}
         if(path=="payments/pay_test/refund"){RefundRequests++;Status="REFUND_REQUESTED";return Task.FromResult(Payment());}
         if(path=="payments/pay_test"&&method==HttpMethod.Delete){Deleted=true;return Task.FromResult(Json(new{deleted=true}));}
-        if(path=="checkouts/checkout_test/cancel")return Task.FromResult(Json(new{}));
+        if(path=="checkouts/checkout_test/cancel"){if(LoseCancelResponse)throw new HttpRequestException("Synthetic cancel response lost");return Task.FromResult(Json(new{}));}
         throw new InvalidOperationException("Unexpected fake Asaas route: "+method+" "+path);
     }
 }

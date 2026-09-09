@@ -35,3 +35,8 @@ Entregar implementação/contrato OpenAPI atualizado, testes dos cenários de ac
 **Desbloqueia:** [FE-11A](FE-11A.md), [BE-15](BE-15.md), [BE-17](BE-17.md), [BE-26](BE-26.md)
 
 
+
+
+## Progresso da entrega 2
+
+Status: **Parcial**. Consulte [implementação de pagamentos, evidências e pendências](../07-entrega-pagamentos-asaas.md). A escolha inclui recebimento direto e plataforma com split. Testes locais não substituem homologação Asaas nem encerram os critérios amplos deste cartão.

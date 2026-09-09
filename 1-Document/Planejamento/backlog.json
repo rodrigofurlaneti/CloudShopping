@@ -1,7 +1,7 @@
 {
   "date": "2026-09-09",
   "kind": "proposta-planejamento",
-  "note": "Dependências da proposta, não grafo de imports. Recorte implementado em 09/09/2026; progresso e limitações em 06-entrega-base-catalogo-checkout.md.",
+  "note": "Dependências da proposta, não grafo de imports. Progresso nas entregas 06 e 07; critérios amplos e homologação externa permanecem pendentes.",
   "cards": [
     {
       "id": "DEC-01",
@@ -23,12 +23,14 @@
       ],
       "evidence": "1-Document/Projeto_ Plataforma E-commerce Multi-Tenant (SaaS).md; docs.asaas.com/reference/criar-novo-checkout",
       "priority": "P0",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "DB-10",
         "DB-23"
-      ]
+      ],
+      "paymentDeliveryEvidence": "07-entrega-pagamentos-asaas.md",
+      "paymentDeliveryNote": "Recorte implementado e testado localmente; homologação externa Asaas e critérios amplos pendentes."
     },
     {
       "id": "DEC-02",
@@ -516,7 +518,9 @@
         "DB-09",
         "DB-28"
       ],
-      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md",
+      "paymentDeliveryEvidence": "07-entrega-pagamentos-asaas.md",
+      "paymentDeliveryNote": "Recorte implementado e testado localmente; homologação externa Asaas e critérios amplos pendentes."
     },
     {
       "id": "BE-05",
@@ -549,7 +553,9 @@
         "BE-11C",
         "BE-28"
       ],
-      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md",
+      "paymentDeliveryEvidence": "07-entrega-pagamentos-asaas.md",
+      "paymentDeliveryNote": "Recorte implementado e testado localmente; homologação externa Asaas e critérios amplos pendentes."
     },
     {
       "id": "FE-05",
@@ -1010,14 +1016,16 @@
       ],
       "evidence": "CloudShopping.Domain/Entities/Orders/Payment.cs; Dump20260909 (1).sql",
       "priority": "P1",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "BE-10",
         "DB-11",
         "DB-23",
         "DB-24"
-      ]
+      ],
+      "paymentDeliveryEvidence": "07-entrega-pagamentos-asaas.md",
+      "paymentDeliveryNote": "Recorte implementado e testado localmente; homologação externa Asaas e critérios amplos pendentes."
     },
     {
       "id": "BE-10",
@@ -1042,7 +1050,7 @@
       ],
       "evidence": "módulo novo; docs.asaas.com/docs/guia-de-cobrancas",
       "priority": "P1",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "FE-10",
@@ -1050,7 +1058,9 @@
         "BE-11B",
         "BE-23",
         "BE-24"
-      ]
+      ],
+      "paymentDeliveryEvidence": "07-entrega-pagamentos-asaas.md",
+      "paymentDeliveryNote": "Recorte implementado e testado localmente; homologação externa Asaas e critérios amplos pendentes."
     },
     {
       "id": "FE-10",
@@ -1075,12 +1085,14 @@
       ],
       "evidence": "4-FrontEnd/src/layouts/BackofficeLayout.tsx; módulo novo",
       "priority": "P1",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "FE-11",
         "FE-23"
-      ]
+      ],
+      "paymentDeliveryEvidence": "07-entrega-pagamentos-asaas.md",
+      "paymentDeliveryNote": "Recorte implementado e testado localmente; homologação externa Asaas e critérios amplos pendentes."
     },
     {
       "id": "DB-11",
@@ -1108,7 +1120,7 @@
       ],
       "evidence": "CloudShopping.Infrastructure/Persistence/Configurations/PaymentConfiguration.cs; módulo novo",
       "priority": "P1",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "BE-11",
@@ -1117,7 +1129,9 @@
         "DB-21",
         "DB-23",
         "DB-26"
-      ]
+      ],
+      "paymentDeliveryEvidence": "07-entrega-pagamentos-asaas.md",
+      "paymentDeliveryNote": "Recorte implementado e testado localmente; homologação externa Asaas e critérios amplos pendentes."
     },
     {
       "id": "BE-11",
@@ -1143,11 +1157,13 @@
       ],
       "evidence": "CloudShopping.Domain/Entities/Customers; docs.asaas.com/docs/guia-de-cobrancas",
       "priority": "P1",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "BE-11A"
-      ]
+      ],
+      "paymentDeliveryEvidence": "07-entrega-pagamentos-asaas.md",
+      "paymentDeliveryNote": "Recorte implementado e testado localmente; homologação externa Asaas e critérios amplos pendentes."
     },
     {
       "id": "BE-11A",
@@ -1172,13 +1188,15 @@
       ],
       "evidence": "docs.asaas.com/reference/criar-nova-cobranca; docs.asaas.com/reference/criar-novo-checkout",
       "priority": "P1",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "BE-11C",
         "BE-23",
         "BE-27"
-      ]
+      ],
+      "paymentDeliveryEvidence": "07-entrega-pagamentos-asaas.md",
+      "paymentDeliveryNote": "Recorte implementado e testado localmente; homologação externa Asaas e critérios amplos pendentes."
     },
     {
       "id": "BE-11B",
@@ -1204,12 +1222,14 @@
       ],
       "evidence": "docs.asaas.com/docs/polling-vs-webhooks-en; docs.asaas.com/docs/criar-novo-webhook-pela-aplicacao-web",
       "priority": "P1",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "BE-11C",
         "BE-24"
-      ]
+      ],
+      "paymentDeliveryEvidence": "07-entrega-pagamentos-asaas.md",
+      "paymentDeliveryNote": "Recorte implementado e testado localmente; homologação externa Asaas e critérios amplos pendentes."
     },
     {
       "id": "BE-11C",
@@ -1236,13 +1256,15 @@
       ],
       "evidence": "CloudShopping.Domain/Entities/Orders/Order.cs; docs.asaas.com/docs/webhook-para-cobrancas",
       "priority": "P1",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "BE-11D",
         "FE-11",
         "BE-12"
-      ]
+      ],
+      "paymentDeliveryEvidence": "07-entrega-pagamentos-asaas.md",
+      "paymentDeliveryNote": "Recorte implementado e testado localmente; homologação externa Asaas e critérios amplos pendentes."
     },
     {
       "id": "BE-11D",
@@ -1266,14 +1288,16 @@
       ],
       "evidence": "módulo novo; docs.asaas.com/docs/polling-vs-webhooks-en",
       "priority": "P1",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "BE-11E",
         "FE-11A",
         "BE-21",
         "BE-26"
-      ]
+      ],
+      "paymentDeliveryEvidence": "07-entrega-pagamentos-asaas.md",
+      "paymentDeliveryNote": "Recorte implementado e testado localmente; homologação externa Asaas e critérios amplos pendentes."
     },
     {
       "id": "BE-11E",
@@ -1297,14 +1321,16 @@
       ],
       "evidence": "CloudShopping.Application/Features/Orders; docs.asaas.com/docs/webhook-para-cobrancas",
       "priority": "P1",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "FE-11A",
         "BE-15",
         "BE-17",
         "BE-26"
-      ]
+      ],
+      "paymentDeliveryEvidence": "07-entrega-pagamentos-asaas.md",
+      "paymentDeliveryNote": "Recorte implementado e testado localmente; homologação externa Asaas e critérios amplos pendentes."
     },
     {
       "id": "FE-11",
@@ -1330,11 +1356,13 @@
       ],
       "evidence": "4-FrontEnd/src/App.tsx; docs.asaas.com/reference/criar-novo-checkout",
       "priority": "P1",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "FE-26"
-      ]
+      ],
+      "paymentDeliveryEvidence": "07-entrega-pagamentos-asaas.md",
+      "paymentDeliveryNote": "Recorte implementado e testado localmente; homologação externa Asaas e critérios amplos pendentes."
     },
     {
       "id": "FE-11A",
@@ -1366,7 +1394,9 @@
         "FE-23",
         "FE-26"
       ],
-      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md",
+      "paymentDeliveryEvidence": "07-entrega-pagamentos-asaas.md",
+      "paymentDeliveryNote": "Recorte implementado e testado localmente; homologação externa Asaas e critérios amplos pendentes."
     },
     {
       "id": "DB-12",
@@ -2383,11 +2413,13 @@
       ],
       "evidence": "docs.asaas.com/docs/split",
       "priority": "P2",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": true,
       "unlocks": [
         "BE-23"
-      ]
+      ],
+      "paymentDeliveryEvidence": "07-entrega-pagamentos-asaas.md",
+      "paymentDeliveryNote": "Recorte implementado e testado localmente; homologação externa Asaas e critérios amplos pendentes."
     },
     {
       "id": "BE-23",
@@ -2413,11 +2445,13 @@
       ],
       "evidence": "docs.asaas.com/docs/split; módulo novo",
       "priority": "P2",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": true,
       "unlocks": [
         "FE-23"
-      ]
+      ],
+      "paymentDeliveryEvidence": "07-entrega-pagamentos-asaas.md",
+      "paymentDeliveryNote": "Recorte implementado e testado localmente; homologação externa Asaas e critérios amplos pendentes."
     },
     {
       "id": "FE-23",

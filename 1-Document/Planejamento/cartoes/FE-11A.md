@@ -41,3 +41,8 @@ Entregar tela/fluxo integrado ao contrato aprovado, loading/vazio/erro/sucesso e
 ## Progresso da entrega 1
 
 Consultar o [recorte implementado, testes e pendências](../06-entrega-base-catalogo-checkout.md). Esta entrega não encerra automaticamente os critérios acima.
+
+
+## Progresso da entrega 2
+
+Status: **Parcial**. Consulte [implementação de pagamentos, evidências e pendências](../07-entrega-pagamentos-asaas.md). A escolha inclui recebimento direto e plataforma com split. Testes locais não substituem homologação Asaas nem encerram os critérios amplos deste cartão.

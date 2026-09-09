@@ -1,0 +1,22 @@
+{
+  "date": "2026-09-09",
+  "scope": "Asaas Direct e PlatformSplit",
+  "backendBuild": "passed",
+  "frontendBuild": "passed",
+  "tests": {
+    "passed": 27,
+    "failed": 0,
+    "mysqlScenarios": 25,
+    "gatewayUnitTests": 2,
+    "externalAsaas": "simulated"
+  },
+  "httpSmoke": "passed",
+  "paymentFilesLint": "passed",
+  "externalSandboxHomologated": false,
+  "productionDeployed": false,
+  "realFinancialTransactions": false,
+  "backlog": {
+    "Parcial": 43,
+    "Planejado": 55
+  }
+}

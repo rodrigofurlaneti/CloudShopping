@@ -41,6 +41,12 @@ assert order['totalAmount'] == quote['total']
 assert c.call('/store/checkout/confirm', 'POST', attempt)['id'] == order['id']
 other = Client(); other.session(); other.call('/session/guest','POST',{}); other.session()
 other.call('/store/orders/'+str(order['id']), expected=404)
+c.call('/asaas/connection', expected=403)
+other.call('/asaas/orders/'+str(order['id']), expected=404)
+assert c.call('/asaas/orders/'+str(order['id']))['configured'] is False
+c.call('/asaas/orders/'+str(order['id']), 'POST', {'method':'PIX'}, expected=400, csrf=False)
+c.call('/asaas/orders/'+str(order['id']), 'POST', {'method':'INVALID'}, expected=400)
+c.call('/asaas/admin/payments', expected=403)
 c.call('/store/orders/'+str(order['id'])+'/cancel','POST',{}, expected=204)
 c.call('/store/orders/'+str(order['id'])+'/cancel','POST',{}, expected=204)
 c.call('/session/logout','POST',{}, expected=204); assert c.session()['user'] is None
@@ -60,6 +66,10 @@ admin.call('/session/admin/login','POST',{'username':'admin','password':admin_pa
 assert admin.session()['user']['role']=='Administrator'
 admin.call('/products?page=1&pageSize=10')
 admin.call('/store/admin/shipping-options')
+assert admin.call('/asaas/connection')['configured'] is False
+assert admin.call('/asaas/admin/payments') == []
+admin.call('/asaas/orders/'+str(order['id']), expected=403)
+print('PASS: Asaas customer ownership, administrator isolation, unconfigured state, CSRF and method validation')
 admin.call('/store/cart',expected=403)
 admin.call('/orders/1/cancel','POST',{},expected=409)
 admin.call('/session/logout','POST',{},expected=204)

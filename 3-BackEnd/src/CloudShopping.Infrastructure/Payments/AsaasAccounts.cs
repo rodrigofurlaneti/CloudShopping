@@ -13,8 +13,8 @@ public sealed class AsaasAccounts(AppDbContext db,IAsaasGateway gateway,IDataPro
         return new {configured=current!=null, mode=current?.Mode, environment=current?.Environment,
             walletId=current?.WalletId, webhookPath=current==null?null:WebhookPath(current),
             productionAllowed=config.GetValue<bool>("Asaas:AllowProduction"),
-            merchantWalletId=config[$"Asaas:Platform:Sandbox:MerchantWallets:{db.CurrentTenantId}"],
-            merchantPercent=config[$"Asaas:Platform:Sandbox:MerchantPercent:{db.CurrentTenantId}"]};
+            merchantWalletId=config[$"Asaas:Platform:{current?.Environment??"Sandbox"}:MerchantWallets:{db.CurrentTenantId}"],
+            merchantPercent=config[$"Asaas:Platform:{current?.Environment??"Sandbox"}:MerchantPercent:{db.CurrentTenantId}"]};
     }
     public static string WebhookPath(AsaasConnection a)=>"/api/webhooks/asaas/"+(a.Mode=="PlatformSplit"?"platform-"+a.Environment.ToLowerInvariant():a.Id);
     public async Task<object> Configure(string mode,string environment,string? apiKey,string? webhookToken,CancellationToken ct)
