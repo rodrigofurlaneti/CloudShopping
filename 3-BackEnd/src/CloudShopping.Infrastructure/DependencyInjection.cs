@@ -15,9 +15,10 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        var connectionString = configuration.GetConnectionString("DefaultConnection")
+            ?? throw new InvalidOperationException("Configure ConnectionStrings__DefaultConnection.");
         services.AddDbContext<AppDbContext>(options =>
-            options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+            options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 43))));
         services.AddScoped<IDbConnection>(sp => new MySqlConnection(connectionString));
         services.AddScoped<ISqlConnectionFactory>(sp => new SqlConnectionFactory(connectionString));
         services.AddHttpContextAccessor();

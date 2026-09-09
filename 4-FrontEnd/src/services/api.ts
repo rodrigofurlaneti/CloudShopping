@@ -1,7 +1,4 @@
-// Configurações globais da API
-const API_BASE_URL = 'http://localhost:5147/api';
-const STATIC_BASE_URL = 'http://localhost:5147'; // wwwroot (app.UseStaticFiles()), sem o prefixo /api
-const DEFAULT_TENANT_ID = '1'; // Em produção, isso viria de um AuthContext ou do subdomínio
+import { request, STATIC_BASE_URL } from "./http";
 
 // Monta a URL pública de um arquivo salvo em wwwroot (ex: imagens de produto),
 // a partir do caminho relativo devolvido pela API (ex: "uploads/1/products/45/foto.jpg").
@@ -393,60 +390,10 @@ export const OrderService = {
 };
 
 // Corpo de erro retornado pela API no formato Result Pattern (Error { Code, Message })
-interface ApiErrorBody {
-    code?: string;
-    message?: string;
-}
-
 // Wrapper genérico para o fetch (injeta o X-Tenant-Id automaticamente)
-async function fetchClient<T>(endpoint: string, options?: RequestInit): Promise<T> {
-    const headers = {
-        'Content-Type': 'application/json',
-        'X-Tenant-Id': DEFAULT_TENANT_ID,
-        ...options?.headers,
-    };
-
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        ...options,
-        headers,
-    });
-
-    if (!response.ok) {
-        const errorBody: ApiErrorBody | null = await response.json().catch(() => null);
-        const message = errorBody?.message || `Erro na requisição: ${response.status} - ${response.statusText}`;
-        throw new Error(message);
-    }
-
-    // Respostas 204 No Content (PUT/DELETE) não possuem corpo para converter em JSON
-    if (response.status === 204) {
-        return undefined as T;
-    }
-
-    return response.json();
-}
-
-// Variante do fetchClient para envio de arquivos (multipart/form-data). Não define
-// Content-Type manualmente: o navegador precisa gerar o boundary automaticamente.
+async function fetchClient<T>(endpoint: string, options?: RequestInit): Promise<T> { return request<T>(endpoint, options); }
 async function fetchMultipart<T>(endpoint: string, formData: FormData, method: 'POST' | 'PUT' = 'POST'): Promise<T> {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        method,
-        headers: {
-            'X-Tenant-Id': DEFAULT_TENANT_ID,
-        },
-        body: formData,
-    });
-
-    if (!response.ok) {
-        const errorBody: ApiErrorBody | null = await response.json().catch(() => null);
-        const message = errorBody?.message || `Erro na requisição: ${response.status} - ${response.statusText}`;
-        throw new Error(message);
-    }
-
-    if (response.status === 204) {
-        return undefined as T;
-    }
-
-    return response.json();
+    return request<T>(endpoint, { method, body: formData });
 }
 
 // Serviços organizados por domínio
@@ -488,7 +435,7 @@ export const StoreBannerService = {
             method: 'PUT',
             body: JSON.stringify({
                 id,
-                tenantId: Number(DEFAULT_TENANT_ID),
+
                 ...payload,
             }),
         }),

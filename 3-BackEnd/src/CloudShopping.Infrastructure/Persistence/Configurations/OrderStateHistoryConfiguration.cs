@@ -8,7 +8,7 @@ namespace CloudShopping.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<OrderStateHistory> builder)
         {
-            builder.ToTable("OrderStateHistories");
+            builder.ToTable("orderstatehistory");
             builder.HasKey(h => h.Id);
             builder.Property(h => h.OrderId).IsRequired();
             builder.Property(h => h.OrderStatusId).IsRequired();

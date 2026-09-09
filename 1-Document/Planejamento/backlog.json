@@ -1,0 +1,3196 @@
+{
+  "date": "2026-09-09",
+  "kind": "proposta-planejamento",
+  "note": "Dependências da proposta, não grafo de imports. Recorte implementado em 09/09/2026; progresso e limitações em 06-entrega-base-catalogo-checkout.md.",
+  "cards": [
+    {
+      "id": "DEC-01",
+      "epic": "00-decisoes",
+      "title": "Definir recebimento Asaas e modalidade de checkout",
+      "phase": "Fundação",
+      "layer": "Definição",
+      "dependencies": [],
+      "context": "A aplicação é multi-tenant; a conta que emite a cobrança determina credenciais, vínculo do cliente e recebedor.",
+      "scope": [
+        "Registrar se cada lojista recebe em conta própria ou se há subcontas/split; não presumir marketplace",
+        "Adotar como proposta inicial cartão em página hospedada Asaas e Pix/boleto via cobrança; confirmar experiência e parcelamento",
+        "Documentar ambiente sandbox, responsável pela conta e meios habilitados; decisão pendente de negócio, sem bloquear diagnóstico"
+      ],
+      "acceptance": [
+        "Documento identifica titular da cobrança, taxas/comissão e responsável por estornos",
+        "Há exemplos de pedido de duas lojas e respectiva conta emissora",
+        "Se split for escolhido, DB-23/BE-23/FE-23 tornam-se pré-requisitos de produção; sem decisão, não ativar pagamento real"
+      ],
+      "evidence": "1-Document/Projeto_ Plataforma E-commerce Multi-Tenant (SaaS).md; docs.asaas.com/reference/criar-novo-checkout",
+      "priority": "P0",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "DB-10",
+        "DB-23"
+      ]
+    },
+    {
+      "id": "DEC-02",
+      "epic": "00-decisoes",
+      "title": "Fechar regras de venda, estoque e entrega",
+      "phase": "Fundação",
+      "layer": "Definição",
+      "dependencies": [],
+      "context": "O documento menciona reserva em carrinhos; o checkout atual reserva estoque apenas ao finalizar. Carrinho de 30 dias não deve implicar reserva de 30 dias sem decisão expressa.",
+      "scope": [
+        "Propor carrinho sem reserva e reserva curta no checkout; definir TTL por meio de pagamento",
+        "Definir transportadora ou tabela de frete inicial, retirada, cobertura e produtos físicos/B2C/B2B",
+        "Definir pagamento tardio: tentar reservar novamente; sem saldo, bloquear expedição e iniciar tratamento financeiro"
+      ],
+      "acceptance": [
+        "Regras descrevem expiração, corrida pagamento/cancelamento e boleto vencido",
+        "Frete, parcelamento, arredondamento e política de devolução têm exemplos numéricos",
+        "Decisões identificam dono e pendências; prazos comerciais não são inventados"
+      ],
+      "evidence": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/Checkout/CheckoutCommandHandler.cs",
+      "priority": "P0",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "DB-05",
+        "DB-07",
+        "DB-08"
+      ]
+    },
+    {
+      "id": "DEC-03",
+      "epic": "00-decisoes",
+      "title": "Definir fluxo operacional, fiscal e limites da primeira versão",
+      "phase": "Fundação",
+      "layer": "Definição",
+      "dependencies": [],
+      "context": "Os status existentes representam etapas, mas não comprovam emissão fiscal, etiqueta ou rastreamento.",
+      "scope": [
+        "Definir estados financeiros separados de estados de atendimento e eventos que autorizam cada transição",
+        "Definir integração fiscal de mercadorias com responsável contábil; Asaas NFS-e não deve ser assumida como NF-e de produtos",
+        "Classificar módulos deste plano como lançamento, evolução ou condicionado; definir metas de carga, recuperação e acessibilidade"
+      ],
+      "acceptance": [
+        "Matriz de transições distingue autorização de cartão, confirmação, recebimento, estorno e chargeback",
+        "Fluxo fiscal e logístico identifica provedor ou operação assistida verificável",
+        "Há checklist de lançamento aprovado pelo responsável de produto antes da ativação comercial"
+      ],
+      "evidence": "3-BackEnd/src/CloudShopping.Domain/Entities/Orders/Order.cs; docs.asaas.com/docs/notas-fiscais",
+      "priority": "P0",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "DB-12",
+        "DB-14",
+        "DB-25"
+      ]
+    },
+    {
+      "id": "DB-01",
+      "epic": "01-base",
+      "title": "Estabelecer baseline e migrações compatíveis com o dump",
+      "phase": "Fundação",
+      "layer": "Banco de Dados",
+      "dependencies": [],
+      "context": "O dump, o SQL versionado e os mappings EF divergem; corrigir isso precede qualquer expansão.",
+      "scope": [
+        "Comparar nomes/case, PK/FK e tipos de addresses, orderstatehistory, individuals, companies, orderaddresses e payments",
+        "Criar baseline versionada e migração incremental; nunca executar o CreateDatabase destrutivo em banco existente",
+        "Definir seeds estáveis, checksum, backup e estratégia de restauração em cópia sanitizada"
+      ],
+      "acceptance": [
+        "Banco vazio e cópia do schema do dump convergem ao mesmo schema sem perda de registros",
+        "Segundo deploy não reaplica migrações nem duplica seeds",
+        "Relatório demonstra mapeamento de todas as tabelas existentes e restauração ensaiada"
+      ],
+      "evidence": "2-MySql/CreateDatabase.sql; Dump20260909 (1).sql; CloudShopping.Infrastructure/Persistence/Configurations",
+      "priority": "P0",
+      "status": "Parcial",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-01",
+        "DB-02",
+        "DB-03",
+        "DB-25",
+        "DB-00"
+      ],
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+    },
+    {
+      "id": "BE-01",
+      "epic": "01-base",
+      "title": "Alinhar persistência, contratos de erro e configuração",
+      "phase": "Fundação",
+      "layer": "Backend",
+      "dependencies": [
+        "DB-01"
+      ],
+      "context": "A aplicação mistura EF/Dapper e retorna falhas de domínio de formas distintas; a base precisa funcionar no mesmo schema.",
+      "scope": [
+        "Corrigir mappings e SQL das consultas; parametrizar conexão e remover valores sensíveis do código/config versionada",
+        "Padronizar ProblemDetails com código, mensagem segura, campos e correlationId; preservar status 400/401/403/404/409",
+        "Escolher runtime suportado e validar compatibilidade EF/Pomelo; publicar OpenAPI com exemplos e paginação limitada"
+      ],
+      "acceptance": [
+        "Smoke test CRUD de cada agregado funciona em MySQL com case sensitivity de produção",
+        "Erros de validação não retornam stack trace/SQL nem viram 500 genérico",
+        "Build e testes de integração registram versões; secrets somente no provedor de configuração"
+      ],
+      "evidence": "3-BackEnd/src/CloudShopping.Api/Program.cs; CloudShopping.Infrastructure/Persistence; CloudShopping.Application/Behaviors",
+      "priority": "P0",
+      "status": "Parcial",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-01",
+        "BE-02",
+        "BE-25",
+        "BE-00",
+        "BE-06A",
+        "BE-00A"
+      ],
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+    },
+    {
+      "id": "FE-01",
+      "epic": "01-base",
+      "title": "Centralizar configuração e consumo da API",
+      "phase": "Fundação",
+      "layer": "Frontend",
+      "dependencies": [
+        "BE-01"
+      ],
+      "context": "api.ts e authService.ts fixam localhost; o cliente HTTP ainda não oferece contrato uniforme de sessão e erros.",
+      "scope": [
+        "Ler API/static URL por ambiente e manter tipagens alinhadas ao OpenAPI",
+        "Centralizar JSON/multipart, erros, cancelamento, paginação e tratamento de 204",
+        "Definir componentes de loading, vazio, erro recuperável e feedback para formulários"
+      ],
+      "acceptance": [
+        "Build homologação aponta ao endpoint configurado sem editar fonte",
+        "400 mostra erro por campo; 401 encaminha autenticação; 409 preserva dados para corrigir",
+        "Multipart e respostas vazias não falham ao converter JSON"
+      ],
+      "evidence": "4-FrontEnd/src/services/api.ts; 4-FrontEnd/src/services/authService.ts",
+      "priority": "P0",
+      "status": "Parcial",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-02",
+        "FE-25",
+        "FE-06A"
+      ],
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+    },
+    {
+      "id": "DB-02",
+      "epic": "02-identidade",
+      "title": "Persistir sessões e recuperação de acesso",
+      "phase": "Fundação",
+      "layer": "Banco de Dados",
+      "dependencies": [
+        "DB-01"
+      ],
+      "context": "EmployeeUsers já existe; não há fluxo de sessão funcional comprovado. A identidade do consumidor precisa ser vinculada ao Customer.",
+      "scope": [
+        "Adicionar identidades de cliente e sessões/tokens revogáveis com hashes, expiração e vínculo tenant",
+        "Definir índices por tenant+login normalizado e constraints que evitem vínculo de outra loja",
+        "Guardar recuperação/verificação com token de uso único e trilha mínima de segurança"
+      ],
+      "acceptance": [
+        "Mesmo email pode existir em lojas distintas e não se duplica na mesma loja",
+        "Tokens de recuperação/sessão não são persistidos em texto puro",
+        "Revogação e expiração são consultáveis por índice e migração preserva usuários atuais"
+      ],
+      "evidence": "CloudShopping.Domain/Entities/Backoffice/EmployeeUser.cs; Dump20260909 (1).sql",
+      "priority": "P0",
+      "status": "Parcial",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-02",
+        "DB-03"
+      ],
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+    },
+    {
+      "id": "BE-02",
+      "epic": "02-identidade",
+      "title": "Implementar autenticação real do administrador e consumidor",
+      "phase": "Fundação",
+      "layer": "Backend",
+      "dependencies": [
+        "DB-02",
+        "BE-01"
+      ],
+      "context": "AdminLogin apenas aguarda e redireciona; Program não configura autenticação real.",
+      "scope": [
+        "Implementar login/logout/me, renovação/revogação e recuperação para administrador e cliente",
+        "Validar senha por hash, limitar tentativas e evitar enumeração de contas; usar cookie seguro ou contrato de token documentado",
+        "Configurar middleware; proteger APIs privadas; proteger CSRF quando cookies autenticam mutações"
+      ],
+      "acceptance": [
+        "Credencial incorreta não gera sessão; logout impede reutilização conforme estratégia definida",
+        "Token expirado, usuário inativo e sessão de outra loja são recusados",
+        "Recuperação expirada/reutilizada falha e acesso válido funciona em teste integrado"
+      ],
+      "evidence": "3-BackEnd/src/CloudShopping.Api/Program.cs; CloudShopping.Infrastructure/Services/PasswordHasher.cs",
+      "priority": "P0",
+      "status": "Parcial",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-02",
+        "BE-03",
+        "BE-06",
+        "BE-16"
+      ],
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+    },
+    {
+      "id": "FE-02",
+      "epic": "02-identidade",
+      "title": "Conectar login, recuperação e área autenticada",
+      "phase": "Fundação",
+      "layer": "Frontend",
+      "dependencies": [
+        "BE-02",
+        "FE-01"
+      ],
+      "context": "A tela de login existe visualmente, sem chamada à API nem proteção das rotas.",
+      "scope": [
+        "Substituir simulação por autenticação real e criar fluxo de consumidor e recuperação",
+        "Adicionar guard de rotas, contexto de sessão e logout; preservar destino após login",
+        "Não expor sessão em logs; tratar expiração sem apagar formulário indevidamente"
+      ],
+      "acceptance": [
+        "Abrir URL administrativa sem sessão encaminha ao login",
+        "Credenciais inválidas mantêm formulário e mostram mensagem; válidas carregam usuário real",
+        "Logout e expiração removem dados privados visíveis; reload mantém somente sessão válida"
+      ],
+      "evidence": "4-FrontEnd/src/pages/admin/AdminLogin.tsx; 4-FrontEnd/src/App.tsx",
+      "priority": "P0",
+      "status": "Parcial",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-03",
+        "FE-06",
+        "FE-25"
+      ],
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+    },
+    {
+      "id": "DB-03",
+      "epic": "03-tenant-rbac",
+      "title": "Reforçar integridade de tenant e permissões",
+      "phase": "Fundação",
+      "layer": "Banco de Dados",
+      "dependencies": [
+        "DB-01",
+        "DB-02"
+      ],
+      "context": "Filtros de consulta não impedem toda gravação indevida e entidades filhas dependem do vínculo com o pai.",
+      "scope": [
+        "Definir chaves compostas tenant+id/FKs nos relacionamentos privados adequados ou estratégia equivalente auditável",
+        "Expandir Profiles/ProfileUsers com catálogo de permissões e vínculos únicos",
+        "Definir escopo global imutável vs customização por tenant para departments/status/sectors/banners"
+      ],
+      "acceptance": [
+        "FK ou validação transacional documentada impede produto/cliente/pedido de lojas diferentes se vincularem",
+        "Perfis não aceitam usuário de outro tenant",
+        "Seeds globais e customizações da loja coexistem sem colisão nem atualização cruzada"
+      ],
+      "evidence": "CloudShopping.Infrastructure/Persistence/AppDbContext.cs; Dump20260909 (1).sql",
+      "priority": "P0",
+      "status": "Parcial",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-03",
+        "DB-04",
+        "DB-06",
+        "DB-10",
+        "DB-19",
+        "DB-24"
+      ],
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+    },
+    {
+      "id": "BE-03",
+      "epic": "03-tenant-rbac",
+      "title": "Resolver loja e autorizar cada operação",
+      "phase": "Fundação",
+      "layer": "Backend",
+      "dependencies": [
+        "DB-03",
+        "BE-02"
+      ],
+      "context": "TenantProvider aceita header e assume loja 1. Isso não comprova vínculo do usuário com a loja.",
+      "scope": [
+        "Resolver domínio validado para vitrine e tenant autorizado da sessão para administração; falhar quando contexto é inválido",
+        "Auditar cada endpoint/handler/repository EF e Dapper, incluindo carrinhos, imagens, perfis, histórico e consultas por ID",
+        "Implementar policies para catálogo, pedidos, financeiro, clientes e configuração; proteção de registros globais"
+      ],
+      "acceptance": [
+        "Usuário da loja A não lê nem altera recurso de B trocando header/body/URL",
+        "Sem tenant válido não há fallback silencioso para loja 1 em produção",
+        "Permissão de leitura não permite ajuste de estoque/estorno e globais não são alteráveis por lojista"
+      ],
+      "evidence": "CloudShopping.Infrastructure/Services/TenantProvider.cs; CloudShopping.Api/Controllers",
+      "priority": "P0",
+      "status": "Parcial",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-03",
+        "BE-04",
+        "BE-05",
+        "BE-06",
+        "BE-10",
+        "BE-19",
+        "BE-25"
+      ],
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+    },
+    {
+      "id": "FE-03",
+      "epic": "03-tenant-rbac",
+      "title": "Aplicar contexto de loja e telas de usuários/perfis",
+      "phase": "Fundação",
+      "layer": "Frontend",
+      "dependencies": [
+        "BE-03",
+        "FE-02"
+      ],
+      "context": "DEFAULT_TENANT_ID é 1 e o menu não representa permissões reais.",
+      "scope": [
+        "Remover tenant fixo; carregar contexto público por domínio e privado pela sessão",
+        "Criar gestão de colaboradores/perfis aproveitando cadastro existente; mostrar ações permitidas",
+        "Ao trocar contexto autorizado, invalidar caches e dados da loja anterior"
+      ],
+      "acceptance": [
+        "Duas lojas exibem catálogo/configurações distintas sem editar código",
+        "Operador sem permissão não recebe atalhos de estorno e API continua sendo autoridade",
+        "Troca de loja não mantém dados privados no cache/UI; vínculo de perfil é confirmado pelo servidor"
+      ],
+      "evidence": "4-FrontEnd/src/services/api.ts; 4-FrontEnd/src/layouts/BackofficeLayout.tsx",
+      "priority": "P0",
+      "status": "Parcial",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-04",
+        "FE-05",
+        "FE-10",
+        "FE-11A",
+        "FE-12",
+        "FE-16",
+        "FE-19",
+        "FE-21"
+      ],
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+    },
+    {
+      "id": "DB-04",
+      "epic": "04-catalogo",
+      "title": "Completar catálogo comercial e SKUs vendáveis",
+      "phase": "Venda",
+      "layer": "Banco de Dados",
+      "dependencies": [
+        "DB-03"
+      ],
+      "context": "Products tem nome, SKU, preço e estoque; catálogo precisa descrever o produto e suportar variantes sem duplicar saldos.",
+      "scope": [
+        "Adicionar descrição, slug, marca, peso/dimensões e publicação; separar atributos de produto e SKU/variante",
+        "Migrar produto atual para variante padrão ou preservar SKU simples com extensão explícita; estoque/preço pertencem à unidade vendável",
+        "Índices tenant+SKU/slug, relação com imagens e categorias; definir unicidade da imagem principal"
+      ],
+      "acceptance": [
+        "Todos produtos antigos seguem consultáveis com SKU e saldo preservados",
+        "Dois SKUs da mesma loja não têm o mesmo código e variantes não compartilham saldo por acidente",
+        "Pesos/medidas inválidos são recusados e nome/slug têm regras documentadas"
+      ],
+      "evidence": "CloudShopping.Domain/Entities/Products/Product.cs; CloudShopping.Infrastructure/Persistence/Configurations/ProductConfiguration.cs",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-04",
+        "DB-05",
+        "DB-07",
+        "DB-08",
+        "DB-18",
+        "DB-20",
+        "DB-28"
+      ]
+    },
+    {
+      "id": "BE-04",
+      "epic": "04-catalogo",
+      "title": "Publicar API de catálogo e completar gestão de produtos",
+      "phase": "Venda",
+      "layer": "Backend",
+      "dependencies": [
+        "DB-04",
+        "BE-03"
+      ],
+      "context": "Há CRUD administrativo e consultas; contratos da vitrine precisam filtrar publicáveis e suportar características reais.",
+      "scope": [
+        "Expandir CRUD/DTOs com descrição, variantes, categoria, imagens, peso e dimensões; validar escopo",
+        "Expor listagem pública paginada, detalhe por slug/id, busca, filtros e ordenação com allowlist",
+        "Validar conteúdo/tamanho de imagens, alteração de capa/ordem/exclusão e compensar falha de persistência do upload"
+      ],
+      "acceptance": [
+        "Produto inativo/não publicado não aparece na vitrine nem pode ser comprado",
+        "Filtro e paginação retornam conjunto correto para duas lojas; input SQL é tratado como dado",
+        "Imagem inválida falha; trocar capa mantém exatamente uma principal e não perde imagem anterior por falha"
+      ],
+      "evidence": "CloudShopping.Api/Controllers/ProductsController.cs; CloudShopping.Application/Features/Products",
+      "priority": "P1",
+      "status": "Parcial",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-04",
+        "BE-07",
+        "BE-18",
+        "BE-20",
+        "BE-28"
+      ],
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+    },
+    {
+      "id": "FE-04",
+      "epic": "04-catalogo",
+      "title": "Substituir vitrine simulada por catálogo real",
+      "phase": "Venda",
+      "layer": "Frontend",
+      "dependencies": [
+        "BE-04",
+        "FE-03"
+      ],
+      "context": "StoreHome/ProductDetail usam dados simulados; Products administrativo já consome API e deve ser ampliado.",
+      "scope": [
+        "Conectar cards, categorias e detalhe ao catálogo; mostrar imagem/descrição/preço/disponibilidade reais",
+        "Completar formulário admin com variantes e ficha de transporte, edição de capa e ordem",
+        "Sincronizar filtros com URL; tratar produto removido, sem estoque, carregamento e erro"
+      ],
+      "acceptance": [
+        "Alteração publicada no admin aparece na loja correta",
+        "Selecionar variante atualiza SKU/preço/imagem; esgotada não habilita compra",
+        "URL direta e navegação móvel funcionam; não sobram preços/produtos fictícios na jornada"
+      ],
+      "evidence": "4-FrontEnd/src/pages/StoreHome.tsx; 4-FrontEnd/src/pages/ProductDetail.tsx; 4-FrontEnd/src/pages/admin/Products.tsx",
+      "priority": "P1",
+      "status": "Parcial",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-07",
+        "FE-18",
+        "FE-20",
+        "FE-28"
+      ],
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+    },
+    {
+      "id": "DB-05",
+      "epic": "05-estoque",
+      "title": "Modelar reservas identificáveis e concorrência",
+      "phase": "Venda",
+      "layer": "Banco de Dados",
+      "dependencies": [
+        "DB-04",
+        "DEC-02"
+      ],
+      "context": "ReservedStock é contador sem vínculo individual; Version não é concurrency token configurado.",
+      "scope": [
+        "Criar StockReservations por tenant/pedido/item/SKU com quantidade, expiração e estado; chave de operação única",
+        "Configurar controle concorrente por Version incrementada ou atualização atômica condicionada; documentar estratégia",
+        "Relacionar StockMovements à operação/reserva/pedido e impor quantidades/saldos válidos"
+      ],
+      "acceptance": [
+        "Duas reservas concorrentes da última unidade permitem apenas uma confirmação",
+        "Mesma chave não cria segunda reserva/movimento",
+        "Migração define como reconciliar ReservedStock legado, sem inventar vínculo nem zerar saldo silenciosamente"
+      ],
+      "evidence": "CloudShopping.Domain/Entities/Products/Product.cs; CloudShopping.Infrastructure/Persistence/Configurations/ProductConfiguration.cs",
+      "priority": "P1",
+      "status": "Parcial",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-05",
+        "DB-09",
+        "DB-28"
+      ],
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+    },
+    {
+      "id": "BE-05",
+      "epic": "05-estoque",
+      "title": "Implementar ciclo atômico de reserva e baixa",
+      "phase": "Venda",
+      "layer": "Backend",
+      "dependencies": [
+        "DB-05",
+        "BE-03"
+      ],
+      "context": "Checkout reserva; cancelamento publica evento após commit. A liberação atual não demonstra persistência no mesmo fluxo.",
+      "scope": [
+        "Criar serviço de reservar/consumir/liberar com transação e idempotência por operação",
+        "Implementar worker de expiração com lock/claim; consumir reserva uma vez ao evento financeiro definido; registrar movimentos",
+        "Tratar conflitos com resposta recuperável e definir compensação de pagamento tardio; preservar invariantes em ajustes"
+      ],
+      "acceptance": [
+        "Teste concorrente da última unidade não gera overselling nem saldo negativo",
+        "Repetir pagamento/cancelamento/expiração não duplica baixa ou liberação",
+        "Falha no meio da operação faz rollback; reinício do worker retoma reservas pendentes e deixa trilha"
+      ],
+      "evidence": "CloudShopping.Application/Features/Orders/Commands/Checkout/CheckoutCommandHandler.cs; CloudShopping.Application/Features/Orders/Event/OrderCanceledDomainEventHandler.cs",
+      "priority": "P1",
+      "status": "Parcial",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-05",
+        "BE-09",
+        "BE-11C",
+        "BE-28"
+      ],
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+    },
+    {
+      "id": "FE-05",
+      "epic": "05-estoque",
+      "title": "Completar painel de estoque e histórico",
+      "phase": "Venda",
+      "layer": "Frontend",
+      "dependencies": [
+        "BE-05",
+        "FE-03"
+      ],
+      "context": "Products já permite entrada e ajuste, mas falta visibilidade da origem dos saldos e reservas.",
+      "scope": [
+        "Exibir físico/reservado/disponível, histórico paginado e reservas por pedido para perfil autorizado",
+        "Exigir motivo em ajustes e mostrar conflito atualizado sem sobrescrever saldo",
+        "Oferecer filtro baixo estoque e acesso ao pedido que mantém a reserva"
+      ],
+      "acceptance": [
+        "Entrada/ajuste retorna movimento com motivo/autor e saldo correto",
+        "Operador não confunde reservado com vendável; UI apresenta saldo após 409",
+        "Reservas de outra loja nunca aparecem; histórico permanece ao desativar produto"
+      ],
+      "evidence": "4-FrontEnd/src/pages/admin/Products.tsx",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-26"
+      ]
+    },
+    {
+      "id": "DB-06",
+      "epic": "06-clientes",
+      "title": "Completar cliente, endereços e vínculo externo",
+      "phase": "Venda",
+      "layer": "Banco de Dados",
+      "dependencies": [
+        "DB-03"
+      ],
+      "context": "Modelo distingue Guest/Lead/B2C/B2B, mas PKs e endereço precisam ser coerentes e consumo autenticado deve preservar histórico.",
+      "scope": [
+        "Corrigir perfis PF/PJ e associação à identidade; normalizar CPF/CNPJ/email conforme contrato",
+        "Adicionar complemento/telefone quando necessários e garantir endereço padrão conforme tipo/cliente",
+        "Criar vínculo CustomerProviderAccounts por tenant+conta Asaas+customer, separando ID externo da identidade local"
+      ],
+      "acceptance": [
+        "Migração preserva cliente/endereço existente",
+        "PF/PJ não coexistem de forma inválida segundo regra definida; um endereço padrão por tipo",
+        "Mesmo consumidor em contas Asaas distintas tem vínculos independentes"
+      ],
+      "evidence": "Dump20260909 (1).sql; CloudShopping.Domain/Entities/Customers",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-06",
+        "DB-07",
+        "DB-08",
+        "DB-11",
+        "DB-20",
+        "DB-22",
+        "DB-27"
+      ]
+    },
+    {
+      "id": "BE-06",
+      "epic": "06-clientes",
+      "title": "Concluir jornada do consumidor e posse dos dados",
+      "phase": "Venda",
+      "layer": "Backend",
+      "dependencies": [
+        "DB-06",
+        "BE-02",
+        "BE-03",
+        "BE-06A"
+      ],
+      "context": "Cadastro e perfis existem, mas IDs informados pelo caller não comprovam posse.",
+      "scope": [
+        "Criar/meus dados e endereços com identidade derivada da sessão; oferecer sessão visitante segura",
+        "Completar criação/atualização/desativação de endereço, contatos PJ e normalização/validação",
+        "Migrar Guest para conta verificada preservando carrinho/pedidos, com resolução explícita de duplicidade"
+      ],
+      "acceptance": [
+        "Cliente A não consulta endereço/pedido de B mesmo conhecendo ID",
+        "Conversão Guest→B2C/B2B não perde histórico nem duplica cliente existente",
+        "Alterar endereço cadastral não muda snapshot de pedido; endereço inativo não entra no checkout"
+      ],
+      "evidence": "CloudShopping.Api/Controllers/CustomersController.cs; CloudShopping.Application/Features/Customers",
+      "priority": "P1",
+      "status": "Parcial",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-06",
+        "BE-07",
+        "BE-11",
+        "BE-20",
+        "BE-22"
+      ],
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+    },
+    {
+      "id": "FE-06",
+      "epic": "06-clientes",
+      "title": "Criar minha conta e cadastro no checkout",
+      "phase": "Venda",
+      "layer": "Frontend",
+      "dependencies": [
+        "BE-06",
+        "FE-02",
+        "FE-06A"
+      ],
+      "context": "Há gestão administrativa de clientes; faltam telas públicas completas de identificação e endereços.",
+      "scope": [
+        "Criar cadastro/login do consumidor, edição PF/PJ, lista de endereços e seleção de padrão",
+        "Reutilizar componentes no checkout com máscaras acessíveis e validação do servidor",
+        "Completar gestão administrativa sem permitir alteração de identidade fora das permissões"
+      ],
+      "acceptance": [
+        "Consumidor conclui cadastro PF ou PJ e seleciona endereço persistido",
+        "Erro de CPF/CEP/email aparece no campo sem perder preenchimento",
+        "Reload preserva dados confirmados; outra sessão não vê informações do cliente"
+      ],
+      "evidence": "4-FrontEnd/src/pages/admin/Customers.tsx; 4-FrontEnd/src/App.tsx",
+      "priority": "P1",
+      "status": "Parcial",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-07",
+        "FE-12",
+        "FE-16",
+        "FE-20",
+        "FE-22",
+        "FE-27"
+      ],
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+    },
+    {
+      "id": "DB-07",
+      "epic": "07-carrinho",
+      "title": "Garantir carrinho ativo e linhas únicas",
+      "phase": "Venda",
+      "layer": "Banco de Dados",
+      "dependencies": [
+        "DB-06",
+        "DB-04",
+        "DEC-02"
+      ],
+      "context": "Carts/CartItems existem e expiração de 30 dias está documentada; falta fechar garantia de carrinho ativo e integração com variante.",
+      "scope": [
+        "Definir unicidade do carrinho ativo por cliente/sessão dentro do tenant e SKU único por carrinho",
+        "Persistir estado/versionamento e UTC de expiração; quantidades positivas",
+        "Migrar linhas existentes para SKU vendável sem duplicação; retenção de carrinhos expirados é política separada"
+      ],
+      "acceptance": [
+        "Inserção concorrente não cria dois carrinhos ativos para a mesma identidade",
+        "Não há duas linhas para o mesmo SKU e quantidade zero/negativa é recusada",
+        "Reabrir carrinho expirado não restaura reserva antiga"
+      ],
+      "evidence": "CloudShopping.Domain/Entities/Carts; Dump20260909 (1).sql",
+      "priority": "P1",
+      "status": "Parcial",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-07",
+        "DB-09"
+      ],
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+    },
+    {
+      "id": "BE-07",
+      "epic": "07-carrinho",
+      "title": "Concluir API de carrinho e unificação de sessão",
+      "phase": "Venda",
+      "layer": "Backend",
+      "dependencies": [
+        "DB-07",
+        "BE-06",
+        "BE-04"
+      ],
+      "context": "Controller expõe consulta e adição; jornada precisa alteração de quantidade, remoção e posse segura.",
+      "scope": [
+        "Expor obter/criar carrinho atual, adicionar, substituir quantidade, remover e limpar; sempre validar titular e tenant",
+        "Recalcular preço disponível no servidor, renovar expiração e retornar totais/avisos; não reservar ao navegar sob proposta DEC-02",
+        "Unificar carrinho visitante/autenticado de forma idempotente com regra de soma/limites"
+      ],
+      "acceptance": [
+        "Adicionar mesmo SKU atualiza linha; remover último item retorna estado vazio válido",
+        "Preço enviado pelo navegador é ignorado e produto indisponível gera aviso consistente",
+        "Login repetido não duplica itens; carrinho de outra identidade não é acessível"
+      ],
+      "evidence": "CloudShopping.Api/Controllers/CartsController.cs; CloudShopping.Application/Features/Carts",
+      "priority": "P1",
+      "status": "Parcial",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-07",
+        "BE-08",
+        "BE-09"
+      ],
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+    },
+    {
+      "id": "FE-07",
+      "epic": "07-carrinho",
+      "title": "Implementar comprar, minicarrinho e página de carrinho",
+      "phase": "Venda",
+      "layer": "Frontend",
+      "dependencies": [
+        "BE-07",
+        "FE-04",
+        "FE-06"
+      ],
+      "context": "Botões da vitrine não executam compra e não há rota de carrinho.",
+      "scope": [
+        "Conectar adicionar à variante selecionada e criar minicarrinho/contador/página",
+        "Permitir quantidade/remoção/limpar com estados pendentes e recuperação de falha",
+        "Mostrar total calculado pela API, alteração de preço e indisponibilidade; preservar contexto ao autenticar"
+      ],
+      "acceptance": [
+        "Produto real entra e permanece após reload conforme sessão",
+        "Clique repetido e requests concorrentes não deixam quantidade divergente na tela",
+        "Carrinho vazio tem ação de continuar compra; checkout só é habilitado com linhas válidas"
+      ],
+      "evidence": "4-FrontEnd/src/pages/ProductDetail.tsx; 4-FrontEnd/src/layouts/StoreLayout.tsx; 4-FrontEnd/src/App.tsx",
+      "priority": "P1",
+      "status": "Parcial",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-08"
+      ],
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+    },
+    {
+      "id": "DB-08",
+      "epic": "08-frete",
+      "title": "Persistir configuração e cotações de frete",
+      "phase": "Venda",
+      "layer": "Banco de Dados",
+      "dependencies": [
+        "DB-04",
+        "DB-06",
+        "DEC-02"
+      ],
+      "context": "O pedido tem endereço, mas não tem modelo de cotação/serviço/valor de frete.",
+      "scope": [
+        "Criar método/região de entrega por tenant e cotação com validade, CEP, itens e hash do carrinho",
+        "Armazenar provedor/serviceId, preço, prazo e opção de retirada quando adotada",
+        "Definir moeda/decimais e índices por validade; guardar somente payload operacional necessário"
+      ],
+      "acceptance": [
+        "Cotação pertence ao tenant/carrinho/endereço e expira de forma verificável",
+        "Mudança de quantidade/CEP torna cotação anterior incompatível",
+        "Migração não altera TotalAmount dos pedidos antigos"
+      ],
+      "evidence": "Dump20260909 (1).sql; CloudShopping.Domain/Entities/Orders/Order.cs",
+      "priority": "P1",
+      "status": "Parcial",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-08",
+        "DB-09",
+        "DB-13"
+      ],
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+    },
+    {
+      "id": "BE-08",
+      "epic": "08-frete",
+      "title": "Implementar cálculo de frete e elegibilidade",
+      "phase": "Venda",
+      "layer": "Backend",
+      "dependencies": [
+        "DB-08",
+        "BE-07"
+      ],
+      "context": "Calcular frete apenas no browser permitiria alterar total da compra; decisão de provedor ainda pode estar pendente.",
+      "scope": [
+        "Criar interface de frete com primeiro adaptador decidido em DEC-02, por transportadora ou tabela real",
+        "Validar peso/dimensões, CEP, cobertura e retornar opções/cotação com expiração",
+        "Revalidar cotação no fechamento, tratar timeout e impedir frete zero por erro de integração"
+      ],
+      "acceptance": [
+        "CEP fora de cobertura retorna indisponibilidade explícita",
+        "Mesmo conteúdo/CEP gera total rastreável; adulterar quoteId/valor é rejeitado",
+        "Falha do provedor não cria pedido com entrega grátis; retirada respeita configuração da loja"
+      ],
+      "evidence": "CloudShopping.Application/Features/Orders/Commands/Checkout; módulo novo",
+      "priority": "P1",
+      "status": "Parcial",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-08",
+        "BE-09",
+        "BE-13"
+      ],
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+    },
+    {
+      "id": "FE-08",
+      "epic": "08-frete",
+      "title": "Criar seleção de entrega no carrinho e checkout",
+      "phase": "Venda",
+      "layer": "Frontend",
+      "dependencies": [
+        "BE-08",
+        "FE-07"
+      ],
+      "context": "A jornada pública não apresenta entrega real nem custo validado.",
+      "scope": [
+        "Solicitar CEP/endereço, listar opções com preço/prazo e permitir retirada se habilitada",
+        "Invalidar seleção após mudança de carrinho/endereço e mostrar recálculo",
+        "Tratar sem cobertura, serviço indisponível e cotação expirada"
+      ],
+      "acceptance": [
+        "Trocar CEP ou quantidade solicita cotação atualizada",
+        "Usuário vê entrega + itens antes de confirmar e não segue sem opção válida",
+        "Frete indisponível tem mensagem recuperável e não aparece como grátis"
+      ],
+      "evidence": "4-FrontEnd/src/App.tsx; módulo novo",
+      "priority": "P1",
+      "status": "Parcial",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-09"
+      ],
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+    },
+    {
+      "id": "DB-09",
+      "epic": "09-checkout",
+      "title": "Ampliar snapshot e idempotência do pedido",
+      "phase": "Venda",
+      "layer": "Banco de Dados",
+      "dependencies": [
+        "DB-05",
+        "DB-07",
+        "DB-08",
+        "DB-00"
+      ],
+      "context": "Order guarda preço/endereço, mas faltam composição de total, descrição histórica e chave contra checkout duplicado.",
+      "scope": [
+        "Adicionar publicId/número por tenant, snapshot nome/SKU/variante/comprador e totais de itens/frete/desconto/total",
+        "Persistir CheckoutAttempts com chave única tenant+titular+idempotencyKey, hash de request e resultado",
+        "Separar estado financeiro, atendimento e versão; backfill de pedidos antigos com origem marcada, sem inventar dados históricos",
+        "Definir snapshots de entrega e cobrança, destinatário e complemento sem usar endereço atual para reconstruir a venda."
+      ],
+      "acceptance": [
+        "Repetição da chave recupera mesmo pedido e payload diferente com a mesma chave gera conflito",
+        "Atualizar produto/cliente não modifica snapshot",
+        "Subtotal+frete−desconto=total com arredondamento documentado e valores antigos preservados"
+      ],
+      "evidence": "CloudShopping.Domain/Entities/Orders/Order.cs; CloudShopping.Domain/Entities/Orders/OrderItem.cs",
+      "priority": "P1",
+      "status": "Parcial",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-09",
+        "DB-11",
+        "DB-12",
+        "DB-14",
+        "DB-16",
+        "DB-17",
+        "DB-20",
+        "DB-27"
+      ],
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+    },
+    {
+      "id": "BE-09",
+      "epic": "09-checkout",
+      "title": "Fechar pedido de forma transacional e recuperável",
+      "phase": "Venda",
+      "layer": "Backend",
+      "dependencies": [
+        "DB-09",
+        "BE-05",
+        "BE-07",
+        "BE-08",
+        "BE-00",
+        "BE-00A"
+      ],
+      "context": "Checkout atual usa valores do catálogo e commit, mas não tem idempotência nem frete e precisa corrigir validações de estado.",
+      "scope": [
+        "Criar preview autoritativo e confirmação com chave, versão do carrinho e cotação; validar endereço ativo e posse",
+        "Em transação criar pedido/snapshots/reserva e registrar intenção de pagamento; limpar/consumir carrinho somente após sucesso",
+        "Não manter transação SQL aberta durante chamada externa; expor recuperação por chave/publicId"
+      ],
+      "acceptance": [
+        "Duas confirmações concorrentes retornam um pedido e uma reserva",
+        "Falha após salvar e antes de responder permite recuperar resultado sem nova compra",
+        "Preço/cotação alterados retornam 409 com novo resumo; pedido não fica parcialmente salvo"
+      ],
+      "evidence": "CloudShopping.Application/Features/Orders/Commands/Checkout/CheckoutCommandHandler.cs",
+      "priority": "P1",
+      "status": "Parcial",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-09",
+        "BE-11A",
+        "BE-16",
+        "BE-17",
+        "BE-27"
+      ],
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+    },
+    {
+      "id": "FE-09",
+      "epic": "09-checkout",
+      "title": "Implementar revisão e confirmação de pedido",
+      "phase": "Venda",
+      "layer": "Frontend",
+      "dependencies": [
+        "BE-09",
+        "FE-08"
+      ],
+      "context": "Não existe checkout público. O consumidor precisa revisar dados e recuperar a operação após queda de rede.",
+      "scope": [
+        "Criar etapas identificação/endereço/entrega/revisão com resumo do servidor",
+        "Gerar chave por tentativa e reutilizar em reenvio; guardar somente referência necessária à recuperação",
+        "Mostrar conflito de preço/estoque e exigir nova revisão antes de confirmar conteúdo alterado"
+      ],
+      "acceptance": [
+        "Double click/reload após timeout recupera mesmo pedido",
+        "Valor final corresponde ao servidor, incluindo frete e descontos quando habilitados",
+        "Formulário funciona em móvel/teclado e sucesso de criação não é apresentado como pagamento aprovado"
+      ],
+      "evidence": "4-FrontEnd/src/App.tsx; módulo novo",
+      "priority": "P1",
+      "status": "Parcial",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-11",
+        "FE-17",
+        "FE-27"
+      ],
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+    },
+    {
+      "id": "DB-10",
+      "epic": "10-asaas-config",
+      "title": "Modelar conexão Asaas por loja e ambiente",
+      "phase": "Venda",
+      "layer": "Banco de Dados",
+      "dependencies": [
+        "DB-03",
+        "DEC-01"
+      ],
+      "context": "Payment não identifica conta emissora nem ambiente; dados de sandbox não podem se misturar com produção.",
+      "scope": [
+        "Criar PaymentProviderAccounts com tenant, provider, accountId, environment, status e referências a segredos",
+        "Guardar meios habilitados, regras de parcelamento/vencimento e identificador do webhook; secret fora do banco de negócio ou cifrado com chave externa",
+        "Unicidade por tenant/conta/ambiente e trilha de alterações sem conteúdo secreto"
+      ],
+      "acceptance": [
+        "Duas lojas não compartilham credencial por fallback",
+        "Sandbox e produção têm referências distintas",
+        "Exportação administrativa não devolve segredo; migração não ativa integração automaticamente"
+      ],
+      "evidence": "CloudShopping.Domain/Entities/Orders/Payment.cs; Dump20260909 (1).sql",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-10",
+        "DB-11",
+        "DB-23",
+        "DB-24"
+      ]
+    },
+    {
+      "id": "BE-10",
+      "epic": "10-asaas-config",
+      "title": "Criar adaptador Asaas e configuração segura",
+      "phase": "Venda",
+      "layer": "Backend",
+      "dependencies": [
+        "DB-10",
+        "BE-03"
+      ],
+      "context": "Não foi localizada implementação Asaas; toda chamada deve usar a conta da loja do pedido.",
+      "scope": [
+        "Criar IAsaasClient via HttpClient, configuração por ambiente, timeout e erros tipados; segredo só no servidor",
+        "Implementar diagnóstico de conexão e habilitação de meios por permissão; redigir payloads/logs",
+        "Retentar somente operações comprovadamente seguras; falha ambígua de criação deve ir à conciliação"
+      ],
+      "acceptance": [
+        "Teste sandbox identifica conta correta; tenant errado não usa chave de outra loja",
+        "Logs não contêm access_token, dados de cartão nem documento completo",
+        "Timeout/401/429/5xx retornam falha controlada; POST de cobrança não é repetido cegamente"
+      ],
+      "evidence": "módulo novo; docs.asaas.com/docs/guia-de-cobrancas",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-10",
+        "BE-11",
+        "BE-11B",
+        "BE-23",
+        "BE-24"
+      ]
+    },
+    {
+      "id": "FE-10",
+      "epic": "10-asaas-config",
+      "title": "Criar configuração de pagamentos do lojista",
+      "phase": "Venda",
+      "layer": "Frontend",
+      "dependencies": [
+        "BE-10",
+        "FE-03"
+      ],
+      "context": "Falta tela para ativar conta e meios; operador precisa enxergar prontidão sem acessar segredos.",
+      "scope": [
+        "Criar configurações de conexão/ambiente e opções de pagamento autorizadas",
+        "Exibir conexão testada, última verificação e pré-requisitos pendentes",
+        "Quando necessário receber chave na configuração, enviá-la uma vez por TLS sem persistir em estado/cache duradouro; nunca recuperá-la pela API"
+      ],
+      "acceptance": [
+        "Tela exibe máscara/referência e não revela chave salva",
+        "Só perfil autorizado altera meios/ambiente; sandbox é identificado visualmente",
+        "Integração inválida não aparece disponível no checkout"
+      ],
+      "evidence": "4-FrontEnd/src/layouts/BackofficeLayout.tsx; módulo novo",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-11",
+        "FE-23"
+      ]
+    },
+    {
+      "id": "DB-11",
+      "epic": "11-pagamentos",
+      "title": "Modelar tentativas, eventos e estornos",
+      "phase": "Venda",
+      "layer": "Banco de Dados",
+      "dependencies": [
+        "DB-09",
+        "DB-10",
+        "DB-06",
+        "DB-00"
+      ],
+      "context": "Payments tem método/valor/status local; faltam IDs externos e processamento confiável de eventos.",
+      "scope": [
+        "Adicionar PaymentAttempts com conta/ambiente, orderId, externalReference, paymentId/checkoutId, estado, valor e vencimento",
+        "Criar WebhookInbox única por providerAccount+environment+eventId; Usar Outbox compartilhada DB-00 para intenções e histórico de transições",
+        "Criar RefundRequests com valor/estado/chave e relações; índices de pendentes e invariantes para soma reembolsada",
+        "Persistir valor bruto, taxa e líquido quando reportados, além da moeda; distinguir confirmado de recebido."
+      ],
+      "acceptance": [
+        "Evento duplicado não cria nova linha operacional e tentativa não tem ID externo duplicado na mesma conta",
+        "Um pedido comporta tentativa falha e nova tentativa sem perder histórico",
+        "Não armazenar PAN/CVV; limites de estorno e valores monetários são verificáveis"
+      ],
+      "evidence": "CloudShopping.Infrastructure/Persistence/Configurations/PaymentConfiguration.cs; módulo novo",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-11",
+        "BE-11B",
+        "DB-15",
+        "DB-21",
+        "DB-23",
+        "DB-26"
+      ]
+    },
+    {
+      "id": "BE-11",
+      "epic": "11-pagamentos",
+      "title": "Sincronizar pagador Asaas com vínculo local",
+      "phase": "Venda",
+      "layer": "Backend",
+      "dependencies": [
+        "DB-11",
+        "BE-06",
+        "BE-10"
+      ],
+      "context": "O ID de cliente Asaas pertence à conta emissora e precisa ser reutilizado com segurança.",
+      "scope": [
+        "Resolver vínculo por tenant/conta/ambiente/customer; criar/atualizar pagador conforme dados necessários",
+        "Usar lock e referência local para criação concorrente; tratar resultado externo ambíguo sem duplicação deliberada",
+        "Validar CPF/CNPJ/nome/contato; falha deve manter pedido recuperável e erro por campo"
+      ],
+      "acceptance": [
+        "Duas tentativas simultâneas do mesmo cliente convergem a um vínculo local consistente",
+        "Cliente de outra conta não é reutilizado",
+        "Documento inválido não inicia cobrança; dados pessoais não aparecem nos logs"
+      ],
+      "evidence": "CloudShopping.Domain/Entities/Customers; docs.asaas.com/docs/guia-de-cobrancas",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-11A"
+      ]
+    },
+    {
+      "id": "BE-11A",
+      "epic": "11-pagamentos",
+      "title": "Criar cobranças Pix/boleto e checkout de cartão",
+      "phase": "Venda",
+      "layer": "Backend",
+      "dependencies": [
+        "BE-11",
+        "BE-09"
+      ],
+      "context": "O fluxo existente apenas registra pagamentos locais; a proposta usa APIs Asaas com correlação persistida.",
+      "scope": [
+        "Criar intenção local antes da chamada; Pix/boleto por cobrança e cartão por checkout hospedado conforme DEC-01",
+        "Persistir identificadores, links/QR/linha digitável quando retornados e valor autorizado pelo servidor; não coletar PAN/CVV na proposta hospedada",
+        "Tratar timeout ambíguo como estado a conciliar; externalReference é correlação, não garantia automática de idempotência do provedor"
+      ],
+      "acceptance": [
+        "Pedido com mesmo intento não recebe duas cobranças em retry; resultado incerto bloqueia duplicação até conciliação",
+        "Meio/parcelas/valor fora da configuração são recusados",
+        "Resposta de criação e callback de navegador não aprovam pedido; links são do ambiente correto"
+      ],
+      "evidence": "docs.asaas.com/reference/criar-nova-cobranca; docs.asaas.com/reference/criar-novo-checkout",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-11C",
+        "BE-23",
+        "BE-27"
+      ]
+    },
+    {
+      "id": "BE-11B",
+      "epic": "11-pagamentos",
+      "title": "Receber e persistir webhooks autenticados",
+      "phase": "Venda",
+      "layer": "Backend",
+      "dependencies": [
+        "DB-11",
+        "BE-10",
+        "BE-00A"
+      ],
+      "context": "Asaas pode reenviar eventos; endpoint precisa confirmar recebimento somente após gravação durável.",
+      "scope": [
+        "Criar endpoint exclusivo; validar asaas-access-token configurado, tamanho/payload e conta vinculada",
+        "Persistir Inbox e devolver 2xx rápido após commit; deduplicar eventId por conta/ambiente",
+        "Evento desconhecido deve ser registrado para inspeção; tolerar campos extras e processar fora do request"
+      ],
+      "acceptance": [
+        "Token inválido não grava evento de negócio",
+        "Mesmo evento enviado 10 vezes resulta em um item processável; concorrência também deduplica",
+        "Falha de banco não retorna sucesso; evento sobrevivente é processado após reiniciar serviço"
+      ],
+      "evidence": "docs.asaas.com/docs/polling-vs-webhooks-en; docs.asaas.com/docs/criar-novo-webhook-pela-aplicacao-web",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-11C",
+        "BE-24"
+      ]
+    },
+    {
+      "id": "BE-11C",
+      "epic": "11-pagamentos",
+      "title": "Aplicar estados financeiros e efeitos uma única vez",
+      "phase": "Venda",
+      "layer": "Backend",
+      "dependencies": [
+        "BE-11B",
+        "BE-11A",
+        "BE-05",
+        "BE-00A"
+      ],
+      "context": "Order.UpdatePaymentApproved marca pedido pago sem checar quitação integral; estados locais são insuficientes.",
+      "scope": [
+        "Implementar worker Inbox com lock/versionamento e matriz DEC-03; validar conta, pedido, valor e vínculo externo",
+        "Tratar confirmação/recebimento, risco/recusa, vencimento, cancelamento, estorno parcial/total e chargeback; separar jornada checkout do financeiro",
+        "Emitir efeitos de estoque/histórico/notificação por outbox; evento atrasado não regride estado nem reabre pedido cancelado sem regra"
+      ],
+      "acceptance": [
+        "Recebido antes de confirmado não regride pedido; duplicata não duplica baixa nem histórico",
+        "Valor divergente ou pagamento de pedido cancelado vai à análise/compensação, sem liberar expedição",
+        "Autorização de cartão sem captura não conta como quitação; parcial não marca pedido integralmente estornado"
+      ],
+      "evidence": "CloudShopping.Domain/Entities/Orders/Order.cs; docs.asaas.com/docs/webhook-para-cobrancas",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-11D",
+        "FE-11",
+        "BE-12"
+      ]
+    },
+    {
+      "id": "BE-11D",
+      "epic": "11-pagamentos",
+      "title": "Conciliar cobranças e recuperar falhas de integração",
+      "phase": "Venda",
+      "layer": "Backend",
+      "dependencies": [
+        "BE-11C"
+      ],
+      "context": "Webhook pode falhar e resposta de criação pode se perder; operação precisa recuperar estado sem cobrar outra vez.",
+      "scope": [
+        "Criar worker incremental por conta com janela sobreposta/cursor, limite de chamadas e backoff",
+        "Conciliar tentativas sem retorno e eventos não vinculados; usar consulta do provedor e referência externa, tratando múltiplos resultados como divergência",
+        "Criar fila de falhas/reprocessamento auditado e alertas de atraso; não depender de polling contínuo da vitrine"
+      ],
+      "acceptance": [
+        "Cobrança criada externamente com timeout local é vinculada sem nova cobrança",
+        "Evento perdido é recuperado e passa pelo mesmo processador idempotente",
+        "Falha permanente gera caso visível com correlationId; reiniciar worker não duplica efeito"
+      ],
+      "evidence": "módulo novo; docs.asaas.com/docs/polling-vs-webhooks-en",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-11E",
+        "FE-11A",
+        "BE-21",
+        "BE-26"
+      ]
+    },
+    {
+      "id": "BE-11E",
+      "epic": "11-pagamentos",
+      "title": "Executar cancelamento financeiro e reembolso",
+      "phase": "Venda",
+      "layer": "Backend",
+      "dependencies": [
+        "BE-11D"
+      ],
+      "context": "Payment.Refund altera apenas estado local; reembolsar depende de operação externa e resultado confirmado.",
+      "scope": [
+        "Expor solicitação autorizada de cancelamento/estorno integral ou parcial com motivo e chave idempotente",
+        "Checar saldo reembolsável, status e capacidades do meio; persistir intenção, chamar adaptador e aguardar confirmação",
+        "Tratar estorno pendente/negado, pagamento simultâneo a cancelamento e chargeback sem duplicar compensação"
+      ],
+      "acceptance": [
+        "Repetir mesma solicitação gera um pedido de estorno; soma não excede valor elegível",
+        "Erro externo não apresenta estorno como concluído",
+        "Corrida pagamento/cancelamento produz estado consistente e caso de tratamento quando necessário"
+      ],
+      "evidence": "CloudShopping.Application/Features/Orders; docs.asaas.com/docs/webhook-para-cobrancas",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-11A",
+        "BE-15",
+        "BE-17",
+        "BE-26"
+      ]
+    },
+    {
+      "id": "FE-11",
+      "epic": "11-pagamentos",
+      "title": "Apresentar pagamento e acompanhar resultado real",
+      "phase": "Venda",
+      "layer": "Frontend",
+      "dependencies": [
+        "BE-11C",
+        "FE-09",
+        "FE-10"
+      ],
+      "context": "Não há interface pública de pagamento; a página de sucesso precisa consultar o backend.",
+      "scope": [
+        "Exibir Pix com QR/copia e cola, boleto com link/linha e cartão com redirecionamento hospedado",
+        "Apresentar pendente, aprovado, vencido, recusado e recuperação; consultar status local com intervalo limitado ou canal de eventos",
+        "Permitir retomar tentativa existente; só criar outra quando servidor permitir e informar vencimento sem garantir estoque além da política"
+      ],
+      "acceptance": [
+        "Retorno do cartão mostra aguardando enquanto backend não confirma",
+        "Reload mantém mesma referência de pagamento; copiar Pix e abrir boleto usam dados reais",
+        "Falha/expiração não perde pedido e nunca expõe chave Asaas; dois tenants não consultam o mesmo recurso"
+      ],
+      "evidence": "4-FrontEnd/src/App.tsx; docs.asaas.com/reference/criar-novo-checkout",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-26"
+      ]
+    },
+    {
+      "id": "FE-11A",
+      "epic": "11-pagamentos",
+      "title": "Criar painel financeiro e retirar aprovações fictícias",
+      "phase": "Venda",
+      "layer": "Frontend",
+      "dependencies": [
+        "BE-11D",
+        "BE-11E",
+        "FE-03"
+      ],
+      "context": "Kanban permite aprovar/recusar/estornar localmente. O operador deve observar e solicitar operações reais.",
+      "scope": [
+        "Exibir cobrança/tentativas, estado financeiro, valor, recebimento, estornos e divergências",
+        "Substituir aprovação manual Asaas por informação do provedor; solicitar estorno com valor/motivo e estado pendente",
+        "Permitir reprocessamento/consulta conforme permissão com trilha e confirmação específica de operação monetária"
+      ],
+      "acceptance": [
+        "Botão não transforma cobrança Asaas em paga sem evento confiável",
+        "Estorno parcial mostra saldo restante e aguarda confirmação",
+        "Falhas e cobrança desconhecida ficam visíveis ao operador; lista tem paginação/filtros reais"
+      ],
+      "evidence": "4-FrontEnd/src/pages/admin/OrdersKanban.tsx; 4-FrontEnd/src/services/api.ts",
+      "priority": "P1",
+      "status": "Parcial",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-23",
+        "FE-26"
+      ],
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+    },
+    {
+      "id": "DB-12",
+      "epic": "12-pedidos",
+      "title": "Separar status canônico, etapas e auditoria de pedido",
+      "phase": "Venda",
+      "layer": "Banco de Dados",
+      "dependencies": [
+        "DB-09",
+        "DEC-03"
+      ],
+      "context": "IDs configuráveis de status convivem com regras numéricas fixas no domínio.",
+      "scope": [
+        "Definir códigos estáveis de estado e mapa de etapas customizadas; vínculo de setor respeita tenant/global",
+        "Adicionar versão de pedido e trilha append-only com ator/origem/correlationId",
+        "Definir correções de anotação por nova revisão sem remover eventos financeiros históricos"
+      ],
+      "acceptance": [
+        "Adicionar etapa da loja não muda significado de Paid/Canceled nem permite transição indevida",
+        "Histórico registra estado anterior/novo e origem",
+        "Migração mantém status atuais com tabela de equivalência revisada e sem inferência silenciosa"
+      ],
+      "evidence": "CloudShopping.Domain/Enums/OrderStatusEnum.cs; CloudShopping.Domain/Entities/Orders/OrderStateHistory.cs",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-12",
+        "DB-13",
+        "DB-21",
+        "DB-26"
+      ]
+    },
+    {
+      "id": "BE-12",
+      "epic": "12-pedidos",
+      "title": "Corrigir contratos e máquina de estados operacional",
+      "phase": "Venda",
+      "layer": "Backend",
+      "dependencies": [
+        "DB-12",
+        "BE-11C"
+      ],
+      "context": "Rotas paid/invoiced/delivery-failed montam comandos incompatíveis com seus validadores; estados customizados precisam de regra explícita.",
+      "scope": [
+        "Substituir payloads sentinela por DTOs reais e retirar rota que força quitação financeira sem provedor",
+        "Expor allowedActions e versão; validar transição, permissão e concorrência no servidor",
+        "Listar pedidos/detalhe/timeline com filtros/paginação e dados de snapshot; notas não apagam evidência financeira"
+      ],
+      "acceptance": [
+        "Rotas de nota/falha recebem chave/motivo exigidos ou retornam 400 útil",
+        "Ação repetida é idempotente ou conflito explicável, sem histórico duplicado",
+        "Operador não despacha pedido inelegível e etapa customizada não contorna regra financeira"
+      ],
+      "evidence": "CloudShopping.Api/Controllers/OrdersController.cs; CloudShopping.Application/Features/Orders",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-12",
+        "BE-13",
+        "BE-14",
+        "BE-21",
+        "BE-26"
+      ]
+    },
+    {
+      "id": "FE-12",
+      "epic": "12-pedidos",
+      "title": "Completar Kanban e área de meus pedidos",
+      "phase": "Venda",
+      "layer": "Frontend",
+      "dependencies": [
+        "BE-12",
+        "FE-03",
+        "FE-06"
+      ],
+      "context": "Kanban limita carga a 200 e pode usar estado antigo do pedido após atualizar detalhe; cliente não tem acompanhamento.",
+      "scope": [
+        "Paginar/carregar por coluna e filtros; atualizar card/detalhe/allowedActions na mesma resposta",
+        "Criar meus pedidos, detalhe e timeline com snapshot e ação de retomar pagamento",
+        "Mostrar falha de transição e conflito de versão; formulários reais para motivo/chave fiscal quando aplicáveis"
+      ],
+      "acceptance": [
+        "Pedido além dos 200 iniciais é acessível por paginação/busca",
+        "Após transição, próxima ação usa estado novo; falha não deixa card em coluna falsa",
+        "Consumidor vê somente seus pedidos e valores históricos não mudam com catálogo"
+      ],
+      "evidence": "4-FrontEnd/src/pages/admin/OrdersKanban.tsx; 4-FrontEnd/src/services/api.ts",
+      "priority": "P1",
+      "status": "Parcial",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-13",
+        "FE-14",
+        "FE-15",
+        "FE-26"
+      ],
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+    },
+    {
+      "id": "DB-13",
+      "epic": "13-expedicao",
+      "title": "Persistir remessas, etiquetas e rastreamento",
+      "phase": "Operação",
+      "layer": "Banco de Dados",
+      "dependencies": [
+        "DB-08",
+        "DB-12"
+      ],
+      "context": "Atuais métodos de logística mudam status sem entidade de remessa.",
+      "scope": [
+        "Criar Shipments/ShipmentItems com transportadora, serviço, volumes, custo, tracking e documentos",
+        "Criar eventos de rastreio com chave externa única e origem",
+        "Limitar quantidade enviada por item e permitir múltiplas remessas sem forçar entrega total"
+      ],
+      "acceptance": [
+        "Rastreio e etiqueta sobrevivem a reload/reinício",
+        "Evento repetido não duplica histórico",
+        "Quantidade expedida não excede pedido e remessa parcial não equivale a entrega total"
+      ],
+      "evidence": "CloudShopping.Domain/Entities/Orders/Order.cs",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-13",
+        "DB-15",
+        "DB-26"
+      ]
+    },
+    {
+      "id": "BE-13",
+      "epic": "13-expedicao",
+      "title": "Integrar expedição e rastreio reais",
+      "phase": "Operação",
+      "layer": "Backend",
+      "dependencies": [
+        "DB-13",
+        "BE-12",
+        "BE-08"
+      ],
+      "context": "GenerateShippingLabel e SetTrackingNumber não geram/guardam artefatos.",
+      "scope": [
+        "Implementar adaptador logístico escolhido, etiqueta e cancelamento com intenção persistida/idempotência",
+        "Persistir código e eventos por polling controlado/webhook, ou registro assistido auditado quando provedor não oferecer API",
+        "Validar elegibilidade de envio, separação, embalagem e regras de remessa parcial"
+      ],
+      "acceptance": [
+        "Pedido inelegível não gera etiqueta; retry não compra segunda etiqueta",
+        "Código informado pode ser consultado depois; evento duplicado não entrega pedido duas vezes",
+        "Falha externa mantém estado recuperável e não registra etiqueta gerada inexistente"
+      ],
+      "evidence": "CloudShopping.Application/Features/Orders; módulo novo",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-13",
+        "BE-15",
+        "BE-26"
+      ]
+    },
+    {
+      "id": "FE-13",
+      "epic": "13-expedicao",
+      "title": "Criar operação de separação e remessas",
+      "phase": "Operação",
+      "layer": "Frontend",
+      "dependencies": [
+        "BE-13",
+        "FE-12"
+      ],
+      "context": "Kanban possui ações nominais; precisa apresentar artefatos e progresso físico.",
+      "scope": [
+        "Criar lista de separação, conferência por SKU, volumes, geração/download de etiqueta e rastreio",
+        "Mostrar remessas parciais, entrega falha e pendências sem confundir financeiro",
+        "Permitir registrar rastreio assistido conforme permissão e validar campos reais"
+      ],
+      "acceptance": [
+        "Operador imprime etiqueta real da remessa correta",
+        "Itens faltantes impedem confirmar conferência completa",
+        "Cliente acompanha código/transportadora/eventos e visualiza entrega parcial corretamente"
+      ],
+      "evidence": "4-FrontEnd/src/pages/admin/OrdersKanban.tsx",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-26"
+      ]
+    },
+    {
+      "id": "DB-14",
+      "epic": "14-fiscal",
+      "title": "Modelar documentos fiscais de mercadorias",
+      "phase": "Operação",
+      "layer": "Banco de Dados",
+      "dependencies": [
+        "DB-09",
+        "DEC-03"
+      ],
+      "context": "Invoiced é status; chave/documento fiscal não tem persistência adequada.",
+      "scope": [
+        "Criar FiscalDocuments com tipo, provedor, chave, protocolo, estado, XML/PDF por referência e relação ao pedido",
+        "Modelar dados fiscais mínimos do SKU/lojista conforme contrato do provedor e decisão contábil",
+        "Criar eventos/solicitações idempotentes de emissão/cancelamento com retenção definida"
+      ],
+      "acceptance": [
+        "Pedido possui documento verificável, sem armazenar certificado em texto puro",
+        "Mesma chave fiscal não se duplica no escopo definido",
+        "Rejeição e cancelamento preservam histórico e não removem pedido"
+      ],
+      "evidence": "CloudShopping.Domain/Entities/Orders/Order.cs; docs.asaas.com/docs/notas-fiscais",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-14",
+        "DB-26"
+      ]
+    },
+    {
+      "id": "BE-14",
+      "epic": "14-fiscal",
+      "title": "Implementar emissão fiscal e confirmação de autorização",
+      "phase": "Operação",
+      "layer": "Backend",
+      "dependencies": [
+        "DB-14",
+        "BE-12"
+      ],
+      "context": "O caminho atual para faturar envia chave vazia e o domínio apenas altera status.",
+      "scope": [
+        "Integrar provedor NF-e definido ou importar documento autorizado validado para operação assistida",
+        "Persistir solicitação/retorno, rejeição, autorização e cancelamento; só autorizar transição após evidência",
+        "Separar fiscal das vendas de eventual NFS-e da mensalidade SaaS"
+      ],
+      "acceptance": [
+        "Erro de emissão mantém pedido sem faturamento e expõe motivo recuperável",
+        "Retry não emite segunda nota; documento autorizado fica associado e acessível conforme papel",
+        "Chave/protocolo são persistidos e envio respeita bloqueio fiscal definido em DEC-03"
+      ],
+      "evidence": "CloudShopping.Api/Controllers/OrdersController.cs; docs.asaas.com/docs/notas-fiscais",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-14",
+        "BE-26"
+      ]
+    },
+    {
+      "id": "FE-14",
+      "epic": "14-fiscal",
+      "title": "Exibir documentos e tratar rejeições fiscais",
+      "phase": "Operação",
+      "layer": "Frontend",
+      "dependencies": [
+        "BE-14",
+        "FE-12"
+      ],
+      "context": "Operador precisa ver nota real e corrigir pendência, não apenas apertar faturar.",
+      "scope": [
+        "Criar seção fiscal do pedido com status, número/chave e download autorizado",
+        "Exibir rejeição/correção e reenvio controlado; campos específicos do contrato fiscal",
+        "Na área do cliente, disponibilizar documentos liberados sem expor configuração fiscal da loja"
+      ],
+      "acceptance": [
+        "Status autorizado só aparece após backend confirmar",
+        "Rejeição tem mensagem acionável e não duplica emissão ao reenviar",
+        "Documento do pedido B não é acessível pelo cliente A"
+      ],
+      "evidence": "4-FrontEnd/src/pages/admin/OrdersKanban.tsx; módulo novo",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-26"
+      ]
+    },
+    {
+      "id": "DB-15",
+      "epic": "15-pos-venda",
+      "title": "Modelar devolução e troca por item",
+      "phase": "Operação",
+      "layer": "Banco de Dados",
+      "dependencies": [
+        "DB-11",
+        "DB-13"
+      ],
+      "context": "RequestReturn grava apenas motivo no histórico; falta caso de pós-venda.",
+      "scope": [
+        "Criar ReturnRequests/Items com motivo, quantidade, aprovação, recebimento, inspeção e destino",
+        "Relacionar reembolso a devolução e troca a novo pedido, preservando original",
+        "Restringir quantidade cumulativa devolvida ao item vendido; guardar anexos por referência segura"
+      ],
+      "acceptance": [
+        "Mesmo item não pode ser devolvido duas vezes acima da quantidade comprada",
+        "Reembolso e retorno físico são estados distintos",
+        "Histórico identifica responsável e origem de cada decisão"
+      ],
+      "evidence": "CloudShopping.Domain/Entities/Orders/Order.cs",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-15",
+        "DB-26"
+      ]
+    },
+    {
+      "id": "BE-15",
+      "epic": "15-pos-venda",
+      "title": "Implementar política de devolução e troca",
+      "phase": "Operação",
+      "layer": "Backend",
+      "dependencies": [
+        "DB-15",
+        "BE-11E",
+        "BE-13"
+      ],
+      "context": "Uma devolução não deve repor estoque antes da inspeção nem afirmar estorno antes da confirmação.",
+      "scope": [
+        "Expor solicitação do cliente, análise administrativa e logística reversa conforme política decidida",
+        "Receber/conferir itens e repor somente itens aprovados; criar troca como novo pedido vinculado",
+        "Acionar reembolso parcial/integral existente e emitir eventos de acompanhamento"
+      ],
+      "acceptance": [
+        "Pedido alheio/quantidade inválida é rejeitado",
+        "Recebimento repetido não duplica estoque e estorno repetido usa a mesma intenção",
+        "Recusa registra motivo e cliente acompanha estados separados de reembolso"
+      ],
+      "evidence": "CloudShopping.Application/Features/Orders; módulo novo",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-15",
+        "BE-26"
+      ]
+    },
+    {
+      "id": "FE-15",
+      "epic": "15-pos-venda",
+      "title": "Criar autoatendimento e painel de devoluções",
+      "phase": "Operação",
+      "layer": "Frontend",
+      "dependencies": [
+        "BE-15",
+        "FE-12"
+      ],
+      "context": "A ação existente de devolução não cobre itens, evidências ou acompanhamento.",
+      "scope": [
+        "Selecionar pedido/itens/quantidades/motivo e anexar evidência permitida",
+        "Criar triagem admin com aprovação/recusa, inspeção e reembolso associado",
+        "Mostrar instruções de envio, troca e estado financeiro sem promessa antecipada"
+      ],
+      "acceptance": [
+        "Cliente consegue solicitar devolução parcial e acompanhar protocolo",
+        "Operador vê quantidade recebida e só executa ação permitida",
+        "Pedido trocado permanece rastreável ao original e estorno pendente não aparece concluído"
+      ],
+      "evidence": "4-FrontEnd/src/pages/admin/OrdersKanban.tsx; módulo novo",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-26"
+      ]
+    },
+    {
+      "id": "DB-16",
+      "epic": "16-notificacoes",
+      "title": "Persistir eventos e entregas de mensagens",
+      "phase": "Venda",
+      "layer": "Banco de Dados",
+      "dependencies": [
+        "DB-09",
+        "DB-00"
+      ],
+      "context": "Confirmação e recuperação de acesso precisam de mensagens rastreáveis.",
+      "scope": [
+        "Criar templates versionados por tenant/canal e NotificationDeliveries com evento/destinatário/chave única",
+        "Guardar tentativas, próxima execução, resultado e preferências por finalidade",
+        "Definir retenção de conteúdo para evitar réplica indefinida de dados pessoais"
+      ],
+      "acceptance": [
+        "Mesma mensagem lógica não cria múltiplas entregas concorrentes",
+        "Falha e retomada são consultáveis por índice",
+        "Preferência de marketing é separada de comunicação transacional"
+      ],
+      "evidence": "módulo novo",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-16"
+      ]
+    },
+    {
+      "id": "BE-16",
+      "epic": "16-notificacoes",
+      "title": "Enviar mensagens transacionais com retry",
+      "phase": "Venda",
+      "layer": "Backend",
+      "dependencies": [
+        "DB-16",
+        "BE-02",
+        "BE-09",
+        "BE-00A"
+      ],
+      "context": "Não há serviço transacional de comunicação homologado; produzir notificações depende dos eventos reais.",
+      "scope": [
+        "Implementar provedor email e consumidor de outbox para recuperação, pedido criado, pago, enviado e estorno",
+        "Usar templates seguros, links expiráveis quando necessário e política de retry/dead-letter",
+        "Conectar eventos adicionais conforme módulos forem concluídos sem marcar mensagem enviada antes do retorno do provedor"
+      ],
+      "acceptance": [
+        "Falha do email não desfaz pagamento nem impede consumo futuro",
+        "Evento repetido não envia novamente sem intenção explícita",
+        "Links de recuperação são de uso único e logs não exibem token; teste usa destinatários sandbox"
+      ],
+      "evidence": "módulo novo; CloudShopping.Infrastructure/Persistence/AppDbContext.cs",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-16",
+        "BE-26"
+      ]
+    },
+    {
+      "id": "FE-16",
+      "epic": "16-notificacoes",
+      "title": "Criar preferências e histórico de comunicação",
+      "phase": "Operação",
+      "layer": "Frontend",
+      "dependencies": [
+        "BE-16",
+        "FE-06",
+        "FE-03"
+      ],
+      "context": "Consumidor e suporte precisam entender preferências e entrega das mensagens.",
+      "scope": [
+        "Criar preferências por finalidade e confirmação de salvamento",
+        "Exibir histórico de entregas no admin com permissão e reenvio auditado",
+        "Criar edição/preview de templates autorizados sem expor markup perigoso"
+      ],
+      "acceptance": [
+        "Opt-out de marketing não desliga eventos necessários da compra por engano",
+        "Preview escapa conteúdo e pertence à loja correta",
+        "Reenvio mostra estado real e não dispara duas solicitações por clique"
+      ],
+      "evidence": "módulo novo",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-26"
+      ]
+    },
+    {
+      "id": "DB-17",
+      "epic": "17-promocoes",
+      "title": "Modelar cupons e regras promocionais",
+      "phase": "Evolução",
+      "layer": "Banco de Dados",
+      "dependencies": [
+        "DB-09"
+      ],
+      "context": "Não há modelo de descontos ou resgate no schema atual.",
+      "scope": [
+        "Criar Promotions/Coupons com janela, elegibilidade por produto/cliente, limites e cumulatividade",
+        "Persistir reservas/resgates únicos por pedido e cupom",
+        "Guardar desconto rateado por item no snapshot para estorno parcial"
+      ],
+      "acceptance": [
+        "Código é único por loja e resgate concorrente respeita limite",
+        "Desconto nunca produz total negativo",
+        "Pedido antigo mantém desconto mesmo após expiração da campanha"
+      ],
+      "evidence": "Dump20260909 (1).sql; módulo novo",
+      "priority": "P2",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-17"
+      ]
+    },
+    {
+      "id": "BE-17",
+      "epic": "17-promocoes",
+      "title": "Aplicar promoções no cálculo autoritativo",
+      "phase": "Evolução",
+      "layer": "Backend",
+      "dependencies": [
+        "DB-17",
+        "BE-09",
+        "BE-11E"
+      ],
+      "context": "Cupons precisam participar do preview/checkout e do valor cobrado.",
+      "scope": [
+        "Implementar CRUD autorizado, elegibilidade, ordem de aplicação e rateio determinístico",
+        "Reservar/consumir/liberar uso transacionalmente com checkout/cancelamento",
+        "Revalidar na confirmação e fornecer composição do desconto sem confiar no browser"
+      ],
+      "acceptance": [
+        "Cupom expirado, de outra loja ou esgotado é rejeitado",
+        "Dois checkouts disputando último uso permitem um resgate",
+        "Estorno parcial usa rateio original; retry de pedido não usa cupom duas vezes"
+      ],
+      "evidence": "módulo novo",
+      "priority": "P2",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-17"
+      ]
+    },
+    {
+      "id": "FE-17",
+      "epic": "17-promocoes",
+      "title": "Criar gestão de promoções e aplicação de cupom",
+      "phase": "Evolução",
+      "layer": "Frontend",
+      "dependencies": [
+        "BE-17",
+        "FE-09"
+      ],
+      "context": "Menu de promoções não resolve módulo funcional.",
+      "scope": [
+        "Criar cadastro/listagem de campanhas com validade/limites e preview",
+        "No carrinho/checkout aplicar/remover cupom e mostrar desconto retornado",
+        "Explicar inelegibilidade e exigir revisão quando benefício mudar"
+      ],
+      "acceptance": [
+        "Exibição coincide com desconto salvo/cobrado",
+        "Falha de cupom mantém carrinho intacto",
+        "Expiração durante compra gera nova revisão, sem preço fictício"
+      ],
+      "evidence": "4-FrontEnd/src/layouts/BackofficeLayout.tsx",
+      "priority": "P2",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": []
+    },
+    {
+      "id": "DB-18",
+      "epic": "18-busca-seo",
+      "title": "Modelar categorias hierárquicas e metadados",
+      "phase": "Evolução",
+      "layer": "Banco de Dados",
+      "dependencies": [
+        "DB-04"
+      ],
+      "context": "Departments são planos; catálogo comercial pode precisar hierarquia e URLs duráveis.",
+      "scope": [
+        "Expandir taxonomia com pai/ordem e relação produto-categoria sem perder departamentos legados",
+        "Adicionar metadados SEO, URL canônica e redirecionamentos de slug por tenant",
+        "Criar índices de busca conforme consultas medidas, sem duplicar fonte de preço/estoque"
+      ],
+      "acceptance": [
+        "Categoria não aceita ciclo/parent de outra loja",
+        "Slug antigo resolve redirecionamento sem colisão",
+        "Busca possui plano de consulta avaliado com volume acordado"
+      ],
+      "evidence": "CloudShopping.Domain/Entities/Products/Department.cs; módulo novo",
+      "priority": "P2",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-18"
+      ]
+    },
+    {
+      "id": "BE-18",
+      "epic": "18-busca-seo",
+      "title": "Concluir busca facetada e indexação pública",
+      "phase": "Evolução",
+      "layer": "Backend",
+      "dependencies": [
+        "DB-18",
+        "BE-04"
+      ],
+      "context": "Busca/filtros básicos precedem esta expansão; indexação precisa refletir catálogo publicável.",
+      "scope": [
+        "Implementar filtros combinados, hierarquia, facetas, ordenação e paginação limitada",
+        "Gerar sitemap/canonical/redirect e decidir renderização indexável para páginas públicas",
+        "Atualizar índice após publicação/desativação com invalidação de cache por tenant"
+      ],
+      "acceptance": [
+        "Produtos privados/inativos não entram em sitemap/busca",
+        "Filtro combinado preserva total e ordenação estável",
+        "Mudança de slug leva à página canônica sem cadeia/loop e carga atende meta DEC-03"
+      ],
+      "evidence": "CloudShopping.Application/Features/Products; módulo novo",
+      "priority": "P2",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-18"
+      ]
+    },
+    {
+      "id": "FE-18",
+      "epic": "18-busca-seo",
+      "title": "Entregar navegação de categorias e páginas indexáveis",
+      "phase": "Evolução",
+      "layer": "Frontend",
+      "dependencies": [
+        "BE-18",
+        "FE-04"
+      ],
+      "context": "Barra de pesquisa é visual e páginas usam produto estático; base dinâmica vem em FE-04.",
+      "scope": [
+        "Criar página de categoria/busca com filtros na URL, breadcrumbs e paginação",
+        "Exibir metadados reais, canonical e dados estruturados coerentes com produto",
+        "Implementar renderização/indexabilidade decidida e paginação acessível"
+      ],
+      "acceptance": [
+        "URL compartilhada reproduz filtros e volta preserva seleção",
+        "Página inexistente responde conforme estratégia 404, sem produto fictício",
+        "Título/preço/disponibilidade indexáveis concordam com o conteúdo visível"
+      ],
+      "evidence": "4-FrontEnd/src/layouts/StoreLayout.tsx; 4-FrontEnd/src/pages/ProductDetail.tsx",
+      "priority": "P2",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": []
+    },
+    {
+      "id": "DB-19",
+      "epic": "19-loja-conteudo",
+      "title": "Completar configuração e conteúdo por loja",
+      "phase": "Venda",
+      "layer": "Banco de Dados",
+      "dependencies": [
+        "DB-03"
+      ],
+      "context": "Tenants e StoreBanners existem; marca, políticas e publicação precisam de modelo coerente.",
+      "scope": [
+        "Criar StoreSettings e páginas institucionais com versão/publicação e slug por loja",
+        "Expandir banners com mídia, período, estado e ordenação; preservar restrição escolhida para globais",
+        "Persistir domínio verificado, contato, origem de expedição e canais de atendimento"
+      ],
+      "acceptance": [
+        "Loja tem configuração independente e domínio não é atribuído a duas lojas",
+        "Banner pausado continua administrável e não é exibido publicamente",
+        "Versão publicada de política é recuperável após edição"
+      ],
+      "evidence": "CloudShopping.Domain/Entities/Tenants/Tenant.cs; CloudShopping.Domain/Entities/Store/StoreBanner.cs",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-19",
+        "DB-22"
+      ]
+    },
+    {
+      "id": "BE-19",
+      "epic": "19-loja-conteudo",
+      "title": "Concluir onboarding atômico e configuração pública",
+      "phase": "Venda",
+      "layer": "Backend",
+      "dependencies": [
+        "DB-19",
+        "BE-03"
+      ],
+      "context": "RegisterCompany realiza múltiplos commits; front fixa nome da loja e conta não define prontidão.",
+      "scope": [
+        "Criar tenant/admin/perfil de forma atômica com chave contra cadastro repetido e domínio normalizado",
+        "Expor configurações públicas seguras e APIs admin de marca/páginas/banners, sanitizando conteúdo/links",
+        "Criar checklist de ativação: identidade, catálogo, entrega, políticas e pagamento; módulos opcionais não bloqueiam sem regra"
+      ],
+      "acceptance": [
+        "Falha na criação de perfil não deixa empresa órfã e retry não duplica empresa",
+        "DTO administrativo retorna isActive real e não perde banner pausado",
+        "Publicação não expõe secrets; tenant não pode usar domínio sem validação acordada"
+      ],
+      "evidence": "CloudShopping.Application/Features/Tenants/Commands/RegisterCompany; CloudShopping.Application/Features/Store",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-19",
+        "BE-22",
+        "BE-24",
+        "BE-26"
+      ]
+    },
+    {
+      "id": "FE-19",
+      "epic": "19-loja-conteudo",
+      "title": "Criar configuração inicial e identidade real da loja",
+      "phase": "Venda",
+      "layer": "Frontend",
+      "dependencies": [
+        "BE-19",
+        "FE-03"
+      ],
+      "context": "Onboarding existe, mas loja/usuário no layout são fixos e banner pode reativar ao editar.",
+      "scope": [
+        "Criar checklist inicial, marca/contato/origem/domínio e páginas institucionais",
+        "Hidratar banner com estado real, publicar/pausar e preview; salvar somente campos alterados",
+        "Usar configuração real nos layouts e mostrar página 404; ocultar entradas sem módulo habilitado"
+      ],
+      "acceptance": [
+        "Cadastrar nova loja leva à configuração correta, sem operar na loja 1",
+        "Editar texto de banner pausado não o ativa",
+        "Menus publicados resolvem tela funcional e políticas/contato estão acessíveis na loja"
+      ],
+      "evidence": "4-FrontEnd/src/pages/admin/RegisterCompany.tsx; 4-FrontEnd/src/pages/admin/StoreBanners.tsx",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-22",
+        "FE-24",
+        "FE-26"
+      ]
+    },
+    {
+      "id": "DB-20",
+      "epic": "20-engajamento",
+      "title": "Modelar favoritos e avaliações",
+      "phase": "Evolução",
+      "layer": "Banco de Dados",
+      "dependencies": [
+        "DB-06",
+        "DB-04",
+        "DB-09"
+      ],
+      "context": "Não existem favoritos ou avaliações verificadas.",
+      "scope": [
+        "Criar WishlistItems únicos por cliente/SKU e Reviews vinculadas a compra quando verificadas",
+        "Guardar nota, texto, moderação, denúncia e estado de publicação",
+        "Manter agregados de avaliação derivados sem alterar registros de pedidos"
+      ],
+      "acceptance": [
+        "Favorito repetido não duplica",
+        "Avaliação verificada referencia compra do autor",
+        "Desativar avaliação atualiza média e preserva auditoria"
+      ],
+      "evidence": "módulo novo",
+      "priority": "P2",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-20"
+      ]
+    },
+    {
+      "id": "BE-20",
+      "epic": "20-engajamento",
+      "title": "Implementar favoritos e moderação de avaliações",
+      "phase": "Evolução",
+      "layer": "Backend",
+      "dependencies": [
+        "DB-20",
+        "BE-06",
+        "BE-04"
+      ],
+      "context": "Exibição pública precisa proteger contra avaliações indevidas e conteúdo inseguro.",
+      "scope": [
+        "Criar APIs privadas de favoritos/avaliação e públicas de aprovadas com paginação",
+        "Validar compra, limites e autoria; aplicar sanitização e fluxo de moderação",
+        "Calcular média somente das avaliações publicadas; não moderar automaticamente pelo teor negativo"
+      ],
+      "acceptance": [
+        "Outro cliente não altera favorito/avaliação alheia",
+        "HTML/script não é executável e avaliação pendente não vaza na vitrine",
+        "Média muda após decisão de moderação e cache é invalidado"
+      ],
+      "evidence": "módulo novo",
+      "priority": "P2",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-20"
+      ]
+    },
+    {
+      "id": "FE-20",
+      "epic": "20-engajamento",
+      "title": "Criar favoritos e avaliações na loja",
+      "phase": "Evolução",
+      "layer": "Frontend",
+      "dependencies": [
+        "BE-20",
+        "FE-04",
+        "FE-06"
+      ],
+      "context": "Cards e detalhe não oferecem persistência dessas interações.",
+      "scope": [
+        "Adicionar favorito, lista pessoal e avaliação com nota/texto",
+        "Exibir compra verificada, média e paginação; informar avaliação aguardando moderação",
+        "Criar fila administrativa com decisão/motivo e acesso autorizado"
+      ],
+      "acceptance": [
+        "Favorito persiste após reload e remoção funciona",
+        "Somente compra elegível habilita avaliação verificada",
+        "Aprovar/recusar atualiza fila e apresentação pública conforme resposta da API"
+      ],
+      "evidence": "4-FrontEnd/src/pages/ProductDetail.tsx; módulo novo",
+      "priority": "P2",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": []
+    },
+    {
+      "id": "DB-21",
+      "epic": "21-relatorios",
+      "title": "Preparar dados e índices para indicadores",
+      "phase": "Operação",
+      "layer": "Banco de Dados",
+      "dependencies": [
+        "DB-11",
+        "DB-12"
+      ],
+      "context": "Dashboard é mock; métricas devem distinguir venda, recebido, líquido e estorno.",
+      "scope": [
+        "Definir consultas/views ou tabelas agregadas por tenant/data com atualização rastreável",
+        "Persistir bruto/taxa/líquido reportados pelo provedor sem misturar saldo a receber com receita comercial",
+        "Criar índices com EXPLAIN e conjunto de validação para pedidos cancelados/parciais"
+      ],
+      "acceptance": [
+        "Total agregado reconcilia com transações de exemplo",
+        "Estorno parcial é descontado uma vez e duas lojas não se somam",
+        "Reprocessar janela produz mesmo agregado"
+      ],
+      "evidence": "4-FrontEnd/src/pages/admin/Dashboard.tsx; módulo novo",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-21",
+        "DB-26"
+      ]
+    },
+    {
+      "id": "BE-21",
+      "epic": "21-relatorios",
+      "title": "Publicar indicadores e exportações reais",
+      "phase": "Operação",
+      "layer": "Backend",
+      "dependencies": [
+        "DB-21",
+        "BE-11D",
+        "BE-12"
+      ],
+      "context": "Métricas demonstrativas não representam negócio; definir fórmulas e timezone.",
+      "scope": [
+        "Expor KPIs/séries, pedidos por estado, produtos vendidos/baixo estoque e financeiro por período",
+        "Documentar numerador/denominador, cancelamento, estorno, timezone e atualização",
+        "Paginar/exportar com limite e autorização; proteger contra fórmula maliciosa em exportações tabulares"
+      ],
+      "acceptance": [
+        "KPIs batem com dataset de pedidos aprovados/cancelados/estornados",
+        "Período anterior e timezone não contam pedido duas vezes",
+        "Exportação da loja A não contém B e total reconcilia com painel"
+      ],
+      "evidence": "módulo novo",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-21",
+        "BE-26"
+      ]
+    },
+    {
+      "id": "FE-21",
+      "epic": "21-relatorios",
+      "title": "Substituir dashboard fictício e criar relatórios",
+      "phase": "Operação",
+      "layer": "Frontend",
+      "dependencies": [
+        "BE-21",
+        "FE-03"
+      ],
+      "context": "Todos KPIs, gráficos e pedidos recentes são constantes.",
+      "scope": [
+        "Conectar cards, séries, filtros/período e links a dados reais",
+        "Mostrar data de atualização e diferença entre vendido/recebido/a receber",
+        "Criar exportação e estados vazio/erro; comparação sem base não mostra percentual inventado"
+      ],
+      "acceptance": [
+        "Selecionar período muda consultas e visualização",
+        "Loja sem vendas exibe zeros/estado vazio coerente, sem mocks",
+        "Totais apresentados coincidem com exportação e fórmula documentada"
+      ],
+      "evidence": "4-FrontEnd/src/pages/admin/Dashboard.tsx",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-26"
+      ]
+    },
+    {
+      "id": "DB-22",
+      "epic": "22-privacidade-suporte",
+      "title": "Persistir consentimentos e solicitações de atendimento",
+      "phase": "Venda",
+      "layer": "Banco de Dados",
+      "dependencies": [
+        "DB-06",
+        "DB-19"
+      ],
+      "context": "A loja precisa de políticas e atendimento rastreável; schema não tem finalidade/versão de consentimento.",
+      "scope": [
+        "Criar registros por finalidade/versão/data e solicitações de suporte/privacidade com protocolo",
+        "Definir retenção e anonimização por categoria com responsável de negócio; preservar histórico comercial necessário",
+        "Anexos por referência com acesso privado e limites"
+      ],
+      "acceptance": [
+        "Versão aceita da política pode ser demonstrada",
+        "Anonimização não remove indiscriminadamente pedidos e valores históricos",
+        "Protocolo é único e pertence ao cliente/tenant correto"
+      ],
+      "evidence": "módulo novo",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-22",
+        "DB-26"
+      ]
+    },
+    {
+      "id": "BE-22",
+      "epic": "22-privacidade-suporte",
+      "title": "Implementar suporte, preferências e direitos do titular",
+      "phase": "Venda",
+      "layer": "Backend",
+      "dependencies": [
+        "DB-22",
+        "BE-06",
+        "BE-19"
+      ],
+      "context": "Soft delete por si só não implementa atendimento nem fluxo de solicitação de dados.",
+      "scope": [
+        "Expor abertura/consulta de protocolo e triagem autorizada, com vínculo opcional ao pedido",
+        "Implementar exportação/anonimização mediante verificação de identidade e política definida; registrar decisão",
+        "Separar comunicações transacionais de marketing e aplicar minimização nos logs/downloads"
+      ],
+      "acceptance": [
+        "Cliente não vê protocolo/anexo de outro cliente",
+        "Exportação exige identidade válida; execução repetida não gera inconsistência",
+        "Pedido de remoção tem acompanhamento e resultado justificado segundo política, sem promessa jurídica automática"
+      ],
+      "evidence": "módulo novo",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-22",
+        "BE-26"
+      ]
+    },
+    {
+      "id": "FE-22",
+      "epic": "22-privacidade-suporte",
+      "title": "Criar central de ajuda e preferências de privacidade",
+      "phase": "Venda",
+      "layer": "Frontend",
+      "dependencies": [
+        "BE-22",
+        "FE-06",
+        "FE-19"
+      ],
+      "context": "Menus e links de suporte precisam levar a uma jornada utilizável.",
+      "scope": [
+        "Publicar ajuda, contato, políticas e abertura/acompanhamento de protocolo",
+        "Exibir preferências por finalidade e solicitação de dados com verificação",
+        "Criar triagem simples de suporte no admin e tratar acesso a anexos"
+      ],
+      "acceptance": [
+        "Cliente recebe protocolo e acompanha resposta na tela",
+        "Rejeitar marketing não impede compra",
+        "Política visível corresponde à versão publicada; downloads respeitam sessão e permissões"
+      ],
+      "evidence": "4-FrontEnd/src/layouts/BackofficeLayout.tsx; módulo novo",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-26"
+      ]
+    },
+    {
+      "id": "DB-23",
+      "epic": "23-subcontas-split",
+      "title": "Modelar subcontas e comissões quando contratadas",
+      "phase": "Condicional",
+      "layer": "Banco de Dados",
+      "dependencies": [
+        "DEC-01",
+        "DB-10",
+        "DB-11"
+      ],
+      "context": "Split não é implícito em SaaS. Executar este módulo apenas se DEC-01 escolher divisão de recebimento.",
+      "scope": [
+        "Criar subconta/wallet, situação cadastral e elegibilidade por tenant sem guardar documentos desnecessários",
+        "Persistir regra/versionamento de split, beneficiários e snapshot por cobrança",
+        "Registrar divergências, repasse e reversão associados à cobrança original"
+      ],
+      "acceptance": [
+        "Soma e beneficiários obedecem regra aprovada e conta não habilitada não recebe cobrança",
+        "Regra alterada não muda split de pedido passado",
+        "Ambientes/contas são separados e wallet não é fornecida livremente pelo checkout"
+      ],
+      "evidence": "docs.asaas.com/docs/split",
+      "priority": "P2",
+      "status": "Planejado",
+      "blockedByDecision": true,
+      "unlocks": [
+        "BE-23"
+      ]
+    },
+    {
+      "id": "BE-23",
+      "epic": "23-subcontas-split",
+      "title": "Implementar onboarding e split de pagamento",
+      "phase": "Condicional",
+      "layer": "Backend",
+      "dependencies": [
+        "DB-23",
+        "BE-10",
+        "BE-11A"
+      ],
+      "context": "A plataforma pode precisar de divisão de recebimento, sujeita ao modelo de conta e habilitação Asaas.",
+      "scope": [
+        "Integrar criação/vínculo de subconta e acompanhar situação conforme produto contratado",
+        "Gerar split pelo servidor a partir da regra persistida, respeitando base de cálculo e limites da API",
+        "Tratar bloqueio/divergência/reversão e conciliar repasses; não confundir autorização cadastral com saldo disponível"
+      ],
+      "acceptance": [
+        "Cliente não altera recebedor/comissão pelo body",
+        "Conta não habilitada bloqueia criação conforme regra e explica pendência ao lojista",
+        "Teste sandbox demonstra dois recebedores, divergência e estorno sem duplicar repasse"
+      ],
+      "evidence": "docs.asaas.com/docs/split; módulo novo",
+      "priority": "P2",
+      "status": "Planejado",
+      "blockedByDecision": true,
+      "unlocks": [
+        "FE-23"
+      ]
+    },
+    {
+      "id": "FE-23",
+      "epic": "23-subcontas-split",
+      "title": "Criar painel de habilitação e repasses",
+      "phase": "Condicional",
+      "layer": "Frontend",
+      "dependencies": [
+        "BE-23",
+        "FE-10",
+        "FE-11A"
+      ],
+      "context": "Necessário somente quando a plataforma operar subcontas/split.",
+      "scope": [
+        "Mostrar pendências cadastrais e links seguros do fluxo habilitado",
+        "Exibir comissão, valores previstos/realizados e divergências por venda",
+        "Permitir configuração de regra só a perfil autorizado com efeito explicitamente futuro"
+      ],
+      "acceptance": [
+        "Lojista entende bloqueio de recebimento e ação necessária",
+        "Valor previsto não aparece liquidado",
+        "Alteração de comissão não modifica vendas anteriores"
+      ],
+      "evidence": "módulo condicional novo",
+      "priority": "P2",
+      "status": "Planejado",
+      "blockedByDecision": true,
+      "unlocks": []
+    },
+    {
+      "id": "DB-24",
+      "epic": "24-saas-planos",
+      "title": "Modelar assinatura e limites da plataforma",
+      "phase": "Condicional",
+      "layer": "Banco de Dados",
+      "dependencies": [
+        "DB-03",
+        "DB-10"
+      ],
+      "context": "Cobrança da mensalidade SaaS é distinta do pagamento do comprador da loja.",
+      "scope": [
+        "Criar Plans/Features/TenantSubscriptions/Invoices com conta recebedora da plataforma",
+        "Versionar preço/limites/vigência e estado de trial/ativo/inadimplente/suspenso",
+        "Separar IDs externos e receitas de mensalidade das transações de ecommerce"
+      ],
+      "acceptance": [
+        "Pagamento de compra não quita assinatura da loja",
+        "Mudança de plano mantém histórico e vigência definida",
+        "Limites podem ser consultados sem recontagem total a cada request"
+      ],
+      "evidence": "1-Document/Projeto_ Plataforma E-commerce Multi-Tenant (SaaS).md; módulo novo",
+      "priority": "P2",
+      "status": "Planejado",
+      "blockedByDecision": true,
+      "unlocks": [
+        "BE-24"
+      ]
+    },
+    {
+      "id": "BE-24",
+      "epic": "24-saas-planos",
+      "title": "Cobrar plano SaaS e aplicar limites",
+      "phase": "Condicional",
+      "layer": "Backend",
+      "dependencies": [
+        "DB-24",
+        "BE-10",
+        "BE-11B",
+        "BE-19"
+      ],
+      "context": "Documento chama o produto de SaaS; não há billing da plataforma implementado.",
+      "scope": [
+        "Criar adaptador de assinatura na conta da plataforma com eventos segregados",
+        "Aplicar trial, upgrade/downgrade/cancelamento/inadimplência segundo política explícita",
+        "Bloquear somente operações previstas e manter recebimento de webhooks/estornos de vendas em andamento"
+      ],
+      "acceptance": [
+        "Evento da assinatura não altera Order da loja",
+        "Limite é validado pelo backend e mudança de plano respeita vigência",
+        "Suspensão não impede conciliação nem atendimento de pedidos já pagos"
+      ],
+      "evidence": "docs.asaas.com/docs/checkout-com-assinatura-recorrente; módulo novo",
+      "priority": "P2",
+      "status": "Planejado",
+      "blockedByDecision": true,
+      "unlocks": [
+        "FE-24"
+      ]
+    },
+    {
+      "id": "FE-24",
+      "epic": "24-saas-planos",
+      "title": "Criar plano, faturas e administração da plataforma",
+      "phase": "Condicional",
+      "layer": "Frontend",
+      "dependencies": [
+        "BE-24",
+        "FE-19"
+      ],
+      "context": "Backoffice atual gerencia a loja, não os contratos comerciais SaaS.",
+      "scope": [
+        "Criar tela do lojista com plano/limites/faturas e alteração autorizada",
+        "Criar área separada do administrador da plataforma para tenants e assinaturas",
+        "Mostrar suspensão/regularização e efeitos de mudança de plano antes da ação"
+      ],
+      "acceptance": [
+        "Lojista só vê suas faturas e não recebe privilégios da plataforma",
+        "Mudança pendente não aparece vigente",
+        "Receita SaaS não é somada ao faturamento da loja"
+      ],
+      "evidence": "módulo novo",
+      "priority": "P2",
+      "status": "Planejado",
+      "blockedByDecision": true,
+      "unlocks": []
+    },
+    {
+      "id": "DB-25",
+      "epic": "25-producao",
+      "title": "Preparar recuperação, desempenho e deploy de schema",
+      "phase": "Fundação",
+      "layer": "Banco de Dados",
+      "dependencies": [
+        "DB-01",
+        "DEC-03"
+      ],
+      "context": "Não há migrations nem validação do schema em ambiente compatível comprovadas. Produção exige recuperação ensaiada.",
+      "scope": [
+        "Definir backup/PITR quando disponível, retenção, acesso mínimo e restauração em ambiente isolado",
+        "Testar migrations com volume e estratégia expand/contract; medir locks e índices críticos",
+        "Documentar RPO/RTO acordados e plano de recuperação de DB, inbox/outbox e referências de arquivos"
+      ],
+      "acceptance": [
+        "Restauração reproduz contagens/invariantes no prazo acordado",
+        "Deploy não exige apagar banco e falha tem plano ensaiado",
+        "Queries de catálogo/pedidos/reservas usam plano aceitável com volume definido"
+      ],
+      "evidence": "2-MySql/CreateDatabase.sql; módulo operacional novo",
+      "priority": "P0",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-25",
+        "DB-26"
+      ]
+    },
+    {
+      "id": "BE-25",
+      "epic": "25-producao",
+      "title": "Criar pipeline, observabilidade e operação de workers",
+      "phase": "Fundação",
+      "layer": "Backend",
+      "dependencies": [
+        "BE-01",
+        "BE-03",
+        "DB-25"
+      ],
+      "context": "Não foram encontrados testes/CI funcionais no escopo lido; configuração e workers precisam de padrão de execução.",
+      "scope": [
+        "Criar pipeline build/testes de integração MySQL, análise de dependências e deploy em homologação",
+        "Externalizar segredos; remover credenciais versionadas e planejar rotação quando aplicável, sem reproduzi-las",
+        "Configurar health/readiness, logs redigidos, métricas e alertas de pagamentos/reservas/filas; HTTPS, CORS permitido, rate limits e storage persistente"
+      ],
+      "acceptance": [
+        "Build com schema limpo passa em ambiente compatível e credenciais não aparecem no artefato",
+        "Derrubar worker e reiniciar preserva intenção pendente; alerta identifica atraso com correlationId",
+        "Plano de rollback preserva compatibilidade do schema e arquivos de mídia"
+      ],
+      "evidence": "3-BackEnd/src/CloudShopping.Api/Program.cs; CloudShopping.Infrastructure/Persistence/AppDbContextFactory.cs; .github",
+      "priority": "P0",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-26",
+        "BE-28"
+      ]
+    },
+    {
+      "id": "FE-25",
+      "epic": "25-producao",
+      "title": "Concluir acessibilidade, responsividade e deploy web",
+      "phase": "Fundação",
+      "layer": "Frontend",
+      "dependencies": [
+        "FE-01",
+        "FE-02"
+      ],
+      "context": "Grids fixos, modais sem controle completo de foco e links ausentes afetam a jornada.",
+      "scope": [
+        "Criar pipeline lint/typecheck/build e homologação com URLs configuradas",
+        "Corrigir idioma pt-BR, foco/teclado/Escape, labels/erros/contraste e layout móvel",
+        "Configurar fallback de rotas, cache de assets e política de atualização; exercitar falhas de API e imagens"
+      ],
+      "acceptance": [
+        "Abrir URL interna diretamente funciona no hosting e rota inexistente tem 404 útil",
+        "Fluxo de compra pode ser percorrido por teclado e viewport móvel sem perda de ação",
+        "Build não contém chave Asaas; fallback de erro permite recuperar tela sem refresh obrigatório"
+      ],
+      "evidence": "4-FrontEnd/index.html; 4-FrontEnd/src/layouts; 4-FrontEnd/package.json",
+      "priority": "P0",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-26"
+      ]
+    },
+    {
+      "id": "DB-26",
+      "epic": "26-homologacao",
+      "title": "Homologar migração e invariantes da venda",
+      "phase": "Lançamento",
+      "layer": "Banco de Dados",
+      "dependencies": [
+        "DB-25",
+        "DB-11",
+        "DB-12",
+        "DB-13",
+        "DB-14",
+        "DB-15",
+        "DB-22",
+        "DB-21"
+      ],
+      "context": "Gate de release: presença de tabelas não demonstra consistência dos fluxos.",
+      "scope": [
+        "Preparar dataset sintético com duas lojas, clientes distintos, última unidade e pedidos legados",
+        "Validar constraints, snapshots, idempotência, reservas, estornos e retenção",
+        "Guardar relatório de migração/restauração e consultas de reconciliação sem dados pessoais"
+      ],
+      "acceptance": [
+        "Nenhuma relação cruza tenant indevidamente",
+        "Saldo físico/reservado e quantidade por reserva reconciliam após falhas simuladas",
+        "Migração da versão anterior preserva pedidos e teste de restore passa"
+      ],
+      "evidence": "artefatos dos cartões DB anteriores",
+      "priority": "P1",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-26"
+      ]
+    },
+    {
+      "id": "BE-26",
+      "epic": "26-homologacao",
+      "title": "Homologar jornada completa e Asaas sandbox",
+      "phase": "Lançamento",
+      "layer": "Backend",
+      "dependencies": [
+        "BE-25",
+        "DB-26",
+        "BE-11D",
+        "BE-11E",
+        "BE-12",
+        "BE-13",
+        "BE-14",
+        "BE-15",
+        "BE-16",
+        "BE-19",
+        "BE-22",
+        "BE-21"
+      ],
+      "context": "Gate para chamar sistema vendável: endpoints isolados não bastam.",
+      "scope": [
+        "Executar integração/E2E de cliente→carrinho→frete→pedido→pagamento→expedição→devolução",
+        "Cobrir sandbox Pix/boleto/cartão, recusa, expiração, duplicata/ordem de evento, timeout ambíguo e estorno parcial/total",
+        "Cobrir IDOR entre lojas/clientes, concorrência de estoque, reinício de worker e recuperação; validar conta/ambiente antes de habilitar live"
+      ],
+      "acceptance": [
+        "Cada cenário tem evidência e resultado esperado sem cobrança real nesta tarefa de desenvolvimento",
+        "Última unidade sob concorrência não vende duas vezes; evento repetido não duplica efeito",
+        "Checklist operacional tem responsáveis, alertas, rollback e divergências críticas zeradas"
+      ],
+      "evidence": "plano de testes em README do planejamento; documentação oficial Asaas",
+      "priority": "P1",
+      "status": "Parcial",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-26"
+      ],
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+    },
+    {
+      "id": "FE-26",
+      "epic": "26-homologacao",
+      "title": "Validar experiência integrada e checklist de lançamento",
+      "phase": "Lançamento",
+      "layer": "Frontend",
+      "dependencies": [
+        "BE-26",
+        "FE-25",
+        "FE-11",
+        "FE-11A",
+        "FE-12",
+        "FE-13",
+        "FE-14",
+        "FE-15",
+        "FE-19",
+        "FE-22",
+        "FE-05",
+        "FE-16",
+        "FE-21"
+      ],
+      "context": "Gate do frontend: telas precisam funcionar com serviços reais de homologação.",
+      "scope": [
+        "Executar compra PF/PJ, visitante/login, entrega, pagamento e acompanhamento em móvel/desktop",
+        "Validar timeout/reload/double click, telas vazias/erro, 401/403, acessibilidade e dados por loja",
+        "Remover mocks da jornada publicada e garantir que menu/ações correspondam a módulos habilitados"
+      ],
+      "acceptance": [
+        "Compra termina em pedido real com estado confirmado pelo backend",
+        "Após retorno do Asaas não há falso sucesso; expiração e recuperação são compreensíveis",
+        "Não existem links publicados sem destino nem dados demonstrativos confundidos com dados da loja"
+      ],
+      "evidence": "4-FrontEnd/src/App.tsx; auditoria-frontend.md",
+      "priority": "P1",
+      "status": "Parcial",
+      "blockedByDecision": false,
+      "unlocks": [],
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+    },
+    {
+      "id": "DB-27",
+      "epic": "27-b2b-comercial",
+      "title": "Modelar preços por cliente e orçamento B2B",
+      "phase": "Condicional",
+      "layer": "Banco de Dados",
+      "dependencies": [
+        "DB-06",
+        "DB-09"
+      ],
+      "context": "O cadastro PJ atual não implementa condições comerciais de atacado.",
+      "scope": [
+        "Criar PriceLists, vínculos de clientes/grupos e faixas de quantidade/vigência",
+        "Criar Quotes/QuoteItems com validade, aprovação e snapshot de preço",
+        "Definir mínimo/múltiplo por SKU e condições de pagamento permitidas; crédito exige política própria"
+      ],
+      "acceptance": [
+        "Cliente fora da lista não recebe preço restrito",
+        "Orçamento vencido não vira pedido sem revalidação",
+        "Faixas não são ambíguas e pedido preserva preço negociado"
+      ],
+      "evidence": "CloudShopping.Domain/Entities/Customers/Company.cs; módulo novo",
+      "priority": "P2",
+      "status": "Planejado",
+      "blockedByDecision": true,
+      "unlocks": [
+        "BE-27"
+      ]
+    },
+    {
+      "id": "BE-27",
+      "epic": "27-b2b-comercial",
+      "title": "Implementar condições B2B e conversão de orçamento",
+      "phase": "Condicional",
+      "layer": "Backend",
+      "dependencies": [
+        "DB-27",
+        "BE-09",
+        "BE-11A"
+      ],
+      "context": "Ser pessoa jurídica não implica crédito ou desconto automático.",
+      "scope": [
+        "Resolver tabela de preço pela identidade e validar mínimo/múltiplo",
+        "Criar cotação/aprovação e converter uma vez em pedido, revalidando estoque/entrega",
+        "Aplicar meios de pagamento permitidos; não autorizar venda a prazo sem regra aprovada"
+      ],
+      "acceptance": [
+        "Adulterar preço/lista no request não reduz cobrança",
+        "Mesmo orçamento convertido duas vezes retorna mesmo pedido",
+        "Cliente B2C não acessa condição privada B2B e preço vencido exige revisão"
+      ],
+      "evidence": "módulo novo",
+      "priority": "P2",
+      "status": "Planejado",
+      "blockedByDecision": true,
+      "unlocks": [
+        "FE-27"
+      ]
+    },
+    {
+      "id": "FE-27",
+      "epic": "27-b2b-comercial",
+      "title": "Criar compra empresarial e orçamento",
+      "phase": "Condicional",
+      "layer": "Frontend",
+      "dependencies": [
+        "BE-27",
+        "FE-09",
+        "FE-06"
+      ],
+      "context": "Formulário PJ cobre identidade, não compras empresariais.",
+      "scope": [
+        "Mostrar preços/mínimos para cliente elegível e cotação por lista de SKUs",
+        "Criar área de orçamentos com aprovação/validade/conversão",
+        "Criar gestão de tabelas por perfil autorizado e mostrar condição vigente"
+      ],
+      "acceptance": [
+        "Visitante não vê preço privado",
+        "Quantidade inválida explica mínimo/múltiplo e não avança",
+        "Orçamento convertido aponta ao pedido existente, sem nova cobrança"
+      ],
+      "evidence": "4-FrontEnd/src/pages/admin/Customers.tsx; módulo novo",
+      "priority": "P2",
+      "status": "Planejado",
+      "blockedByDecision": true,
+      "unlocks": []
+    },
+    {
+      "id": "DB-28",
+      "epic": "28-integracoes-catalogo",
+      "title": "Persistir importações e vínculos com ERP",
+      "phase": "Evolução",
+      "layer": "Banco de Dados",
+      "dependencies": [
+        "DB-04",
+        "DB-05"
+      ],
+      "context": "Catálogo só possui cadastro individual; importação precisa rastrear erros e evitar duplicação.",
+      "scope": [
+        "Criar ImportJobs/Rows com estado, hash, resultado e chave de origem por tenant",
+        "Persistir vínculos externos por sistema/tipo/id e cursor de sincronização",
+        "Definir fonte de verdade para preço/estoque e política de conflito antes de sincronizar"
+      ],
+      "acceptance": [
+        "Reexecutar lote não duplica SKUs",
+        "Erros de linha são consultáveis sem armazenar arquivo sensível indefinidamente",
+        "ID externo de outra loja não sobrescreve produto local"
+      ],
+      "evidence": "módulo novo",
+      "priority": "P2",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-28"
+      ]
+    },
+    {
+      "id": "BE-28",
+      "epic": "28-integracoes-catalogo",
+      "title": "Importar catálogo e preparar adaptador ERP",
+      "phase": "Evolução",
+      "layer": "Backend",
+      "dependencies": [
+        "DB-28",
+        "BE-04",
+        "BE-05",
+        "BE-25"
+      ],
+      "context": "Importação não deve contornar validações de estoque e catálogo.",
+      "scope": [
+        "Criar validação prévia/dry-run e execução em lote com limites e relatório por linha",
+        "Reutilizar serviços de domínio e idempotência; permitir retomar falhas",
+        "Implementar primeiro adaptador ERP somente após definir provedor e fonte de verdade; webhooks externos autenticados"
+      ],
+      "acceptance": [
+        "Arquivo com linha inválida gera diagnóstico sem apagar catálogo",
+        "Retry processa apenas pendentes segundo política explícita de atomicidade",
+        "Atualização de estoque respeita reservas existentes e registra origem/motivo"
+      ],
+      "evidence": "módulo novo",
+      "priority": "P2",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-28"
+      ]
+    },
+    {
+      "id": "FE-28",
+      "epic": "28-integracoes-catalogo",
+      "title": "Criar importação assistida e relatório de erros",
+      "phase": "Evolução",
+      "layer": "Frontend",
+      "dependencies": [
+        "BE-28",
+        "FE-04"
+      ],
+      "context": "Operador precisa revisar alterações antes de aplicar lote.",
+      "scope": [
+        "Oferecer modelo de importação, upload e prévia de criação/atualização/erros",
+        "Exibir execução em background e retomada autorizada",
+        "Apresentar conflito de origem/estoque sem permitir sobrescrever reservas"
+      ],
+      "acceptance": [
+        "Prévia deixa claro quantos produtos serão criados/alterados",
+        "Fechar tela não perde job e relatório pode ser retomado",
+        "Reenvio do mesmo lote não aparenta duplicar resultado"
+      ],
+      "evidence": "módulo novo",
+      "priority": "P2",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": []
+    },
+    {
+      "id": "BE-00",
+      "epic": "01-base",
+      "title": "Corrigir criação inicial do histórico de pedido",
+      "phase": "Fundação",
+      "layer": "Backend",
+      "dependencies": [
+        "BE-01"
+      ],
+      "context": "Order.Checkout chama AddHistory com Id=0, mas OrderStateHistory.Create exige ID positivo. O pedido novo falha antes de persistir.",
+      "scope": [
+        "Permitir associação de histórico a pedido novo por navegação/chave temporária coerente com o mapping",
+        "Persistir pedido/itens/endereço/histórico inicial na mesma unidade transacional",
+        "Não enfraquecer validação para permitir referência solta a pedido inexistente"
+      ],
+      "acceptance": [
+        "Criar pedido novo grava um histórico inicial ligado ao ID definitivo",
+        "Falha de histórico desfaz pedido/itens/endereço",
+        "Teste cobre a factory antes e depois da persistência, sem precisar de Asaas"
+      ],
+      "evidence": "CloudShopping.Domain/Entities/Orders/Order.cs:61; CloudShopping.Domain/Entities/Orders/OrderStateHistory.cs:22",
+      "priority": "P0",
+      "status": "Parcial",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-09"
+      ],
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+    },
+    {
+      "id": "BE-06A",
+      "epic": "06-clientes",
+      "title": "Corrigir DTOs e atualização parcial de cadastro",
+      "phase": "Fundação",
+      "layer": "Backend",
+      "dependencies": [
+        "BE-01"
+      ],
+      "context": "DTOs de perfil/endereço não suportam edição sem perda de nascimento/IE/tipo/bairro.",
+      "scope": [
+        "Retornar todos campos necessários ao round-trip e distinguir ausente de nulo em atualização",
+        "Preservar tipo de endereço/bairro/complemento e campos não editados",
+        "Documentar login por email ou username de forma coerente com onboarding"
+      ],
+      "acceptance": [
+        "Alterar só nome preserva nascimento e inscrição estadual",
+        "Alterar rua de endereço Billing mantém tipo e demais campos",
+        "Limpar campo explicitamente permitido é diferente de omitir campo"
+      ],
+      "evidence": "CloudShopping.Application/Features/Customers/DTO; 4-FrontEnd/src/services/api.ts",
+      "priority": "P0",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-06",
+        "FE-06A"
+      ]
+    },
+    {
+      "id": "FE-06A",
+      "epic": "06-clientes",
+      "title": "Impedir perda de dados na edição de clientes",
+      "phase": "Fundação",
+      "layer": "Frontend",
+      "dependencies": [
+        "BE-06A",
+        "FE-01"
+      ],
+      "context": "Customers preenche poucos campos e pode reenviar nulos ou estado de outro cliente; endereço é forçado para Shipping.",
+      "scope": [
+        "Hidratar/resetar formulário integralmente ao abrir/trocar cliente",
+        "Enviar somente alterações ou DTO completo fiel ao contrato; preservar tipo de endereço",
+        "Tratar falha de detalhe sem abrir formulário com estado anterior"
+      ],
+      "acceptance": [
+        "Editar nome não apaga nascimento/IE",
+        "Trocar cliente não reutiliza campos do anterior",
+        "Editar endereço de cobrança mantém Billing/bairro e cancelamento não persiste alterações"
+      ],
+      "evidence": "4-FrontEnd/src/pages/admin/Customers.tsx:170; 4-FrontEnd/src/pages/admin/Customers.tsx:304",
+      "priority": "P0",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "FE-06"
+      ]
+    },
+    {
+      "id": "DB-00",
+      "epic": "01-base",
+      "title": "Persistir outbox transacional compartilhada",
+      "phase": "Fundação",
+      "layer": "Banco de Dados",
+      "dependencies": [
+        "DB-01"
+      ],
+      "context": "Eventos publicados somente após SaveChanges podem se perder entre o commit e o handler. Estoque local deve ser atômico e efeitos assíncronos precisam de registro durável.",
+      "scope": [
+        "Criar OutboxMessages com tenant, tipo, aggregateId, versão, payload mínimo, chave única, tentativas, availableAt e lease.",
+        "Definir índices de claim, retenção após processamento e proteção de dados pessoais.",
+        "Salvar evento na mesma transação do agregado; não incluir chaves, PAN/CVV nem documentos completos no payload."
+      ],
+      "acceptance": [
+        "Rollback do agregado também remove intenção não confirmada.",
+        "Dois workers não processam simultaneamente sem mecanismo de claim/lease.",
+        "Reinício permite retomar item com lease vencido sem perder evento."
+      ],
+      "evidence": "CloudShopping.Infrastructure/Persistence/AppDbContext.cs:78",
+      "priority": "P0",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "DB-09",
+        "DB-11",
+        "DB-16",
+        "BE-00A"
+      ]
+    },
+    {
+      "id": "BE-00A",
+      "epic": "01-base",
+      "title": "Implementar dispatcher de outbox e consumidores idempotentes",
+      "phase": "Fundação",
+      "layer": "Backend",
+      "dependencies": [
+        "DB-00",
+        "BE-01"
+      ],
+      "context": "O mecanismo atual limpa eventos em memória e publica após persistência, sem garantia de retomada.",
+      "scope": [
+        "Gravar eventos duráveis no commit e implementar worker com lease, retry limitado, backoff e fila de falhas.",
+        "Definir tenant explicitamente em execução de background, sem TenantProvider cair na loja 1.",
+        "Registrar resultado idempotente de consumidores; efeitos locais críticos de estoque continuam na transação apropriada."
+      ],
+      "acceptance": [
+        "Encerrar processo entre commit e publicação não perde evento.",
+        "Reentrega não duplica efeito já confirmado.",
+        "Falha permanente aparece em fila auditável e reprocessamento preserva correlationId."
+      ],
+      "evidence": "CloudShopping.Infrastructure/Persistence/AppDbContext.cs; CloudShopping.Application/Features/Orders/Event/OrderCanceledDomainEventHandler.cs",
+      "priority": "P0",
+      "status": "Planejado",
+      "blockedByDecision": false,
+      "unlocks": [
+        "BE-09",
+        "BE-11B",
+        "BE-11C",
+        "BE-16"
+      ]
+    }
+  ],
+  "topologicalWaves": [
+    [
+      "DEC-01",
+      "DEC-02",
+      "DEC-03",
+      "DB-01"
+    ],
+    [
+      "BE-01",
+      "DB-02",
+      "DB-25",
+      "DB-00"
+    ],
+    [
+      "FE-01",
+      "BE-02",
+      "DB-03",
+      "BE-00",
+      "BE-06A",
+      "BE-00A"
+    ],
+    [
+      "FE-02",
+      "BE-03",
+      "DB-04",
+      "DB-06",
+      "DB-10",
+      "DB-19",
+      "FE-06A"
+    ],
+    [
+      "FE-03",
+      "BE-04",
+      "DB-05",
+      "BE-06",
+      "DB-07",
+      "DB-08",
+      "BE-10",
+      "DB-18",
+      "BE-19",
+      "DB-22",
+      "DB-24",
+      "BE-25",
+      "FE-25"
+    ],
+    [
+      "FE-04",
+      "BE-05",
+      "FE-06",
+      "BE-07",
+      "DB-09",
+      "FE-10",
+      "BE-18",
+      "FE-19",
+      "BE-22",
+      "DB-28"
+    ],
+    [
+      "FE-05",
+      "FE-07",
+      "BE-08",
+      "DB-11",
+      "DB-12",
+      "DB-14",
+      "DB-16",
+      "DB-17",
+      "FE-18",
+      "DB-20",
+      "FE-22",
+      "DB-27",
+      "BE-28"
+    ],
+    [
+      "FE-08",
+      "BE-09",
+      "BE-11",
+      "BE-11B",
+      "DB-13",
+      "BE-20",
+      "DB-21",
+      "DB-23",
+      "FE-28"
+    ],
+    [
+      "FE-09",
+      "BE-11A",
+      "DB-15",
+      "BE-16",
+      "FE-20",
+      "BE-24"
+    ],
+    [
+      "BE-11C",
+      "FE-16",
+      "BE-23",
+      "FE-24",
+      "DB-26",
+      "BE-27"
+    ],
+    [
+      "BE-11D",
+      "FE-11",
+      "BE-12",
+      "FE-27"
+    ],
+    [
+      "BE-11E",
+      "FE-12",
+      "BE-13",
+      "BE-14",
+      "BE-21"
+    ],
+    [
+      "FE-11A",
+      "FE-13",
+      "FE-14",
+      "BE-15",
+      "BE-17",
+      "FE-21"
+    ],
+    [
+      "FE-15",
+      "FE-17",
+      "FE-23",
+      "BE-26"
+    ],
+    [
+      "FE-26"
+    ]
+  ]
+}

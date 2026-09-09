@@ -9,7 +9,7 @@ namespace CloudShopping.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<OrderStatus> builder)
         {
-            builder.ToTable("OrderStatus");
+            builder.ToTable("orderstatus");
             builder.HasKey(os => os.Id);
             builder.Property(os => os.Id)
                 .ValueGeneratedOnAdd();

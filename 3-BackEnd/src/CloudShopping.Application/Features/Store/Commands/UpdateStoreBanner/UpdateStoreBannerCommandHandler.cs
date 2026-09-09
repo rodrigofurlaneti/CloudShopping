@@ -30,7 +30,7 @@ namespace CloudShopping.Application.Features.Store.Commands.UpdateStoreBanner
                 return Result.Failure(new Error("StoreBanner.NotFound", "Banner não encontrado."));
 
             banner.Update(
-                tenantId: request.TenantId,
+                tenantId: banner.TenantId,
                 title: request.Title,
                 subtitle: request.Subtitle,
                 discountPercentage: request.DiscountPercentage,

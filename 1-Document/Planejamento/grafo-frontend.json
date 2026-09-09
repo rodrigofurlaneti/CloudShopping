@@ -1,0 +1,333 @@
+{
+  "nodes": [
+    {
+      "id": "4-FrontEnd/src/components/Cards/ProductCard.tsx",
+      "label": "ProductCard",
+      "source_file": "4-FrontEnd/src/components/Cards/ProductCard.tsx"
+    },
+    {
+      "id": "4-FrontEnd/src/components/Row/BannerRow.tsx",
+      "label": "BannerRow",
+      "source_file": "4-FrontEnd/src/components/Row/BannerRow.tsx"
+    },
+    {
+      "id": "4-FrontEnd/src/components/Row/CategoryRow.tsx",
+      "label": "CategoryRow",
+      "source_file": "4-FrontEnd/src/components/Row/CategoryRow.tsx"
+    },
+    {
+      "id": "4-FrontEnd/src/layouts/BackofficeLayout.tsx",
+      "label": "BackofficeLayout",
+      "source_file": "4-FrontEnd/src/layouts/BackofficeLayout.tsx"
+    },
+    {
+      "id": "4-FrontEnd/src/layouts/StoreLayout.tsx",
+      "label": "StoreLayout",
+      "source_file": "4-FrontEnd/src/layouts/StoreLayout.tsx"
+    },
+    {
+      "id": "4-FrontEnd/src/pages/admin/AdminLogin.tsx",
+      "label": "AdminLogin",
+      "source_file": "4-FrontEnd/src/pages/admin/AdminLogin.tsx"
+    },
+    {
+      "id": "4-FrontEnd/src/pages/admin/Customers.tsx",
+      "label": "Customers",
+      "source_file": "4-FrontEnd/src/pages/admin/Customers.tsx"
+    },
+    {
+      "id": "4-FrontEnd/src/pages/admin/Dashboard.tsx",
+      "label": "Dashboard",
+      "source_file": "4-FrontEnd/src/pages/admin/Dashboard.tsx"
+    },
+    {
+      "id": "4-FrontEnd/src/pages/admin/Departments.tsx",
+      "label": "Departments",
+      "source_file": "4-FrontEnd/src/pages/admin/Departments.tsx"
+    },
+    {
+      "id": "4-FrontEnd/src/pages/admin/OrderSectors.tsx",
+      "label": "OrderSectors",
+      "source_file": "4-FrontEnd/src/pages/admin/OrderSectors.tsx"
+    },
+    {
+      "id": "4-FrontEnd/src/pages/admin/OrdersKanban.tsx",
+      "label": "OrdersKanban",
+      "source_file": "4-FrontEnd/src/pages/admin/OrdersKanban.tsx"
+    },
+    {
+      "id": "4-FrontEnd/src/pages/admin/OrderStatuses.tsx",
+      "label": "OrderStatuses",
+      "source_file": "4-FrontEnd/src/pages/admin/OrderStatuses.tsx"
+    },
+    {
+      "id": "4-FrontEnd/src/pages/admin/Products.tsx",
+      "label": "Products",
+      "source_file": "4-FrontEnd/src/pages/admin/Products.tsx"
+    },
+    {
+      "id": "4-FrontEnd/src/pages/admin/RegisterCompany.tsx",
+      "label": "RegisterCompany",
+      "source_file": "4-FrontEnd/src/pages/admin/RegisterCompany.tsx"
+    },
+    {
+      "id": "4-FrontEnd/src/pages/admin/StoreBanners.tsx",
+      "label": "StoreBanners",
+      "source_file": "4-FrontEnd/src/pages/admin/StoreBanners.tsx"
+    },
+    {
+      "id": "4-FrontEnd/src/pages/ProductDetail.tsx",
+      "label": "ProductDetail",
+      "source_file": "4-FrontEnd/src/pages/ProductDetail.tsx"
+    },
+    {
+      "id": "4-FrontEnd/src/pages/StoreHome.tsx",
+      "label": "StoreHome",
+      "source_file": "4-FrontEnd/src/pages/StoreHome.tsx"
+    },
+    {
+      "id": "4-FrontEnd/src/services/api.ts",
+      "label": "api",
+      "source_file": "4-FrontEnd/src/services/api.ts"
+    },
+    {
+      "id": "4-FrontEnd/src/services/authService.ts",
+      "label": "authService",
+      "source_file": "4-FrontEnd/src/services/authService.ts"
+    },
+    {
+      "id": "4-FrontEnd/src/App.tsx",
+      "label": "App",
+      "source_file": "4-FrontEnd/src/App.tsx"
+    },
+    {
+      "id": "4-FrontEnd/src/main.tsx",
+      "label": "main",
+      "source_file": "4-FrontEnd/src/main.tsx"
+    }
+  ],
+  "edges": [
+    {
+      "source": "4-FrontEnd/src/components/Row/BannerRow.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/services/api.ts"
+    },
+    {
+      "source": "4-FrontEnd/src/components/Row/CategoryRow.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/services/api.ts"
+    },
+    {
+      "source": "4-FrontEnd/src/layouts/StoreLayout.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/services/api.ts"
+    },
+    {
+      "source": "4-FrontEnd/src/pages/admin/Customers.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/layouts/BackofficeLayout.tsx"
+    },
+    {
+      "source": "4-FrontEnd/src/pages/admin/Customers.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/services/api.ts"
+    },
+    {
+      "source": "4-FrontEnd/src/pages/admin/Dashboard.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/layouts/BackofficeLayout.tsx"
+    },
+    {
+      "source": "4-FrontEnd/src/pages/admin/Departments.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/layouts/BackofficeLayout.tsx"
+    },
+    {
+      "source": "4-FrontEnd/src/pages/admin/Departments.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/services/api.ts"
+    },
+    {
+      "source": "4-FrontEnd/src/pages/admin/OrderSectors.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/layouts/BackofficeLayout.tsx"
+    },
+    {
+      "source": "4-FrontEnd/src/pages/admin/OrderSectors.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/services/api.ts"
+    },
+    {
+      "source": "4-FrontEnd/src/pages/admin/OrdersKanban.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/layouts/BackofficeLayout.tsx"
+    },
+    {
+      "source": "4-FrontEnd/src/pages/admin/OrdersKanban.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/services/api.ts"
+    },
+    {
+      "source": "4-FrontEnd/src/pages/admin/OrderStatuses.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/layouts/BackofficeLayout.tsx"
+    },
+    {
+      "source": "4-FrontEnd/src/pages/admin/OrderStatuses.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/services/api.ts"
+    },
+    {
+      "source": "4-FrontEnd/src/pages/admin/Products.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/layouts/BackofficeLayout.tsx"
+    },
+    {
+      "source": "4-FrontEnd/src/pages/admin/Products.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/services/api.ts"
+    },
+    {
+      "source": "4-FrontEnd/src/pages/admin/RegisterCompany.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/services/authService.ts"
+    },
+    {
+      "source": "4-FrontEnd/src/pages/admin/StoreBanners.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/layouts/BackofficeLayout.tsx"
+    },
+    {
+      "source": "4-FrontEnd/src/pages/admin/StoreBanners.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/services/api.ts"
+    },
+    {
+      "source": "4-FrontEnd/src/pages/ProductDetail.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/layouts/StoreLayout.tsx"
+    },
+    {
+      "source": "4-FrontEnd/src/pages/StoreHome.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/layouts/StoreLayout.tsx"
+    },
+    {
+      "source": "4-FrontEnd/src/pages/StoreHome.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/components/Cards/ProductCard.tsx"
+    },
+    {
+      "source": "4-FrontEnd/src/pages/StoreHome.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/components/Row/CategoryRow.tsx"
+    },
+    {
+      "source": "4-FrontEnd/src/pages/StoreHome.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/components/Row/BannerRow.tsx"
+    },
+    {
+      "source": "4-FrontEnd/src/App.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/pages/StoreHome.tsx"
+    },
+    {
+      "source": "4-FrontEnd/src/App.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/pages/ProductDetail.tsx"
+    },
+    {
+      "source": "4-FrontEnd/src/App.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/pages/admin/AdminLogin.tsx"
+    },
+    {
+      "source": "4-FrontEnd/src/App.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/pages/admin/RegisterCompany.tsx"
+    },
+    {
+      "source": "4-FrontEnd/src/App.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/pages/admin/Dashboard.tsx"
+    },
+    {
+      "source": "4-FrontEnd/src/App.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/pages/admin/Departments.tsx"
+    },
+    {
+      "source": "4-FrontEnd/src/App.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/pages/admin/StoreBanners.tsx"
+    },
+    {
+      "source": "4-FrontEnd/src/App.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/pages/admin/OrderSectors.tsx"
+    },
+    {
+      "source": "4-FrontEnd/src/App.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/pages/admin/OrderStatuses.tsx"
+    },
+    {
+      "source": "4-FrontEnd/src/App.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/pages/admin/Customers.tsx"
+    },
+    {
+      "source": "4-FrontEnd/src/App.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/pages/admin/Products.tsx"
+    },
+    {
+      "source": "4-FrontEnd/src/App.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/pages/admin/OrdersKanban.tsx"
+    },
+    {
+      "source": "4-FrontEnd/src/main.tsx",
+      "confidence": "EXTRACTED",
+      "relation": "imports",
+      "target": "4-FrontEnd/src/App.tsx"
+    }
+  ]
+}

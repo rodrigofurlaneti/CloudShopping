@@ -1,94 +1,96 @@
-﻿using CloudShopping.Application;
+using Microsoft.AspNetCore.DataProtection;
+using CloudShopping.Application;
 using CloudShopping.Infrastructure;
-using Microsoft.OpenApi.Models;
-
-// Garante que wwwroot exista ANTES do host ser criado. O ASP.NET Core decide
-// se IWebHostEnvironment.WebRootFileProvider vira um PhysicalFileProvider (serve
-// arquivos) ou um NullFileProvider (sempre 404) no momento em que o builder é
-// montado, checando se a pasta wwwroot já existe naquele instante. O
-// FileStorageService cria "wwwroot/uploads/..." sob demanda no primeiro upload,
-// mas se wwwroot ainda não existisse quando a API subiu, o provider já havia
-// sido travado como NullFileProvider — e nenhum arquivo enviado depois disso
-// seria servido até a API ser reiniciada. Criando a pasta aqui, antes do
-// CreateBuilder, isso não acontece mais.
-System.IO.Directory.CreateDirectory(System.IO.Path.Combine(System.AppContext.BaseDirectory, "wwwroot"));
-System.IO.Directory.CreateDirectory(System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot"));
+using CloudShopping.Infrastructure.Persistence;
+using CloudShopping.Infrastructure.Services;
+using CloudShopping.Api.Security;
+using FluentValidation;
+using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// 1. Controllers e serialização JSON (enums como strings)
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
-    });
-
-// 2. Configuração de CORS (Essencial para o Swagger e para o React/Vite)
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
-    });
-});
-
-// 3. Documentação da API (Swagger / OpenAPI)
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "CloudShopping API",
-        Version = "v1",
-        Description = "API Multi-Tenant de E-commerce baseada em Clean Architecture e DDD."
-    });
-
-    // Define o Header X-Tenant-Id
-    c.AddSecurityDefinition("X-Tenant-Id", new OpenApiSecurityScheme
-    {
-        Name = "X-Tenant-Id",
-        Type = SecuritySchemeType.ApiKey,
-        In = ParameterLocation.Header,
-        Description = "Identificador do Tenant (multi-tenant). Ex: 1"
-    });
-
-    // Aplica a obrigatoriedade do Header no Swagger UI para todas as requisições
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "X-Tenant-Id"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
-});
-
-// 4. Camadas da aplicação (Application + Infrastructure)
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+Directory.CreateDirectory(Path.Combine(builder.Environment.ContentRootPath, "wwwroot"));
+builder.Services.AddControllers(o => o.Filters.Add<RequestGuards>())
+    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter()));
+builder.Services.AddScoped<RequestGuards>();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
-
+builder.Services.AddScoped<StoreCommerceService>();
+builder.Services.AddHostedService<ReservationExpiryWorker>();
+builder.Services.AddProblemDetails();
+var keyDirectory = Path.GetFullPath(builder.Configuration["DataProtection:KeyPath"] ?? Path.Combine(builder.Environment.ContentRootPath, ".local", "keys"));
+Directory.CreateDirectory(keyDirectory);
+builder.Services.AddDataProtection().SetApplicationName("CloudShopping").PersistKeysToFileSystem(new DirectoryInfo(keyDirectory));
+builder.Services.AddAntiforgery(o => { o.HeaderName = "X-CSRF-Token"; o.Cookie.SameSite = SameSiteMode.Strict; });
+builder.Services.AddAuthentication(StoreSecurity.Scheme).AddCookie(StoreSecurity.Scheme, o =>
+{
+    o.Cookie.Name = "cloudshopping.session";
+    o.Cookie.HttpOnly = true; o.Cookie.SameSite = SameSiteMode.Strict;
+    o.Cookie.SecurePolicy = builder.Environment.IsDevelopment() ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always;
+    o.SlidingExpiration = false; o.ExpireTimeSpan = TimeSpan.FromHours(8);
+    o.Events.OnValidatePrincipal = StoreSecurity.Validate;
+    o.Events.OnRedirectToLogin = ctx => { ctx.Response.StatusCode = 401; return Task.CompletedTask; };
+    o.Events.OnRedirectToAccessDenied = ctx => { ctx.Response.StatusCode = 403; return Task.CompletedTask; };
+});
+builder.Services.AddAuthorization(o => o.FallbackPolicy = new AuthorizationPolicyBuilder(StoreSecurity.Scheme)
+    .RequireAuthenticatedUser().RequireRole("Administrator").Build());
+builder.Services.AddRateLimiter(o => {
+    o.RejectionStatusCode = 429;
+    o.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext,string>(ctx =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            (ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown") +
+            (ctx.Request.Path.StartsWithSegments("/api/v1/session") && ctx.Request.Method == "POST" ? ":auth" : ":api"),
+            key => new FixedWindowRateLimiterOptions { PermitLimit = key.EndsWith(":auth") ? 20 : 300,
+                Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
+});
+builder.Services.AddCors(o => o.AddDefaultPolicy(p => p
+    .WithOrigins(builder.Configuration.GetSection("Cors:Origins").Get<string[]>() ?? new[] { "http://localhost:5173" })
+    .AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 var app = builder.Build();
-
-app.UseCors("AllowAll");
-
-// Serve os arquivos salvos em wwwroot/uploads/... (imagens de produto).
-// Faltava esse middleware: o FileStorageService já gravava os arquivos em
-// wwwroot, mas nada os expunha via HTTP, então o caminho relativo devolvido
-// pelo upload (ex.: uploads/1/products/45/foto.jpg) resultava em 404.
+app.UseExceptionHandler(error => error.Run(async ctx => {
+    var ex = ctx.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>()?.Error;
+    var status = ex switch {
+        UnauthorizedAccessException => 403, KeyNotFoundException => 404,
+        ValidationException or ArgumentException => 400,
+        DbUpdateConcurrencyException or CommerceConflictException => 409,
+        InvalidOperationException => 409, _ => 500
+    };
+    var message = status == 500 ? "Não foi possível concluir. Informe o identificador da solicitação ao suporte." : ex?.Message;
+    ctx.Response.StatusCode = status;
+    await Results.Problem(statusCode: status, title: message,
+        extensions: new Dictionary<string,object?> { ["message"] = message, ["traceId"] = ctx.TraceIdentifier }).ExecuteAsync(ctx);
+}));
+// Product and banner images are public; administrative upload endpoints remain authorized.
 app.UseStaticFiles();
-
-app.UseSwagger();
-app.UseSwaggerUI();
-
+app.UseRouting();
+app.UseCors();
+app.UseRateLimiter();
+app.UseAuthentication();
+app.Use(StoreSecurity.ResolveTenant);
 app.UseAuthorization();
+app.Use(async (ctx, next) => {
+    if (ctx.Request.Path.StartsWithSegments("/api") && !HttpMethods.IsGet(ctx.Request.Method) &&
+        !HttpMethods.IsHead(ctx.Request.Method) && !HttpMethods.IsOptions(ctx.Request.Method))
+    {
+        try { await ctx.RequestServices.GetRequiredService<IAntiforgery>().ValidateRequestAsync(ctx); }
+        catch (AntiforgeryValidationException) {
+            ctx.Response.StatusCode = 400;
+            await ctx.Response.WriteAsJsonAsync(new { message = "Sessão de formulário expirada. Atualize a página." }); return;
+        }
+    }
+    await next();
+});
+if (app.Environment.IsDevelopment()) { app.UseSwagger(); app.UseSwaggerUI(); }
+app.MapGet("/health", () => Results.Ok(new { status = "ok" })).AllowAnonymous();
 app.MapControllers();
-
 app.Run();
+
+public partial class Program { }

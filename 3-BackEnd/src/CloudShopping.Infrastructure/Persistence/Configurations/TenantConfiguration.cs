@@ -8,10 +8,10 @@ namespace CloudShopping.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<Tenant> builder)
         {
-            builder.ToTable("Tenants");
+            builder.ToTable("tenants");
             builder.HasKey(t => t.Id);
-            builder.Property(t => t.CompanyName).HasMaxLength(150).IsRequired();
-            builder.Property(t => t.Domain).HasMaxLength(150);
+            builder.Property(t => t.CompanyName).HasMaxLength(100).IsRequired();
+            builder.Property(t => t.Domain).HasMaxLength(100);
             builder.HasIndex(t => t.Domain).IsUnique();
         }
     }

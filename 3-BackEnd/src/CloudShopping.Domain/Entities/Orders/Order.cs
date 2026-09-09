@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using CloudShopping.Domain.Entities.Customers;
@@ -14,6 +14,26 @@ namespace CloudShopping.Domain.Entities.Orders
         public int CustomerId { get; private set; }
         public DateTime OrderDate { get; private set; }
         public decimal TotalAmount { get; private set; }
+        public decimal ShippingAmount { get; private set; }
+        public string? ShippingMethod { get; private set; }
+        public string? CheckoutKey { get; private set; }
+        public string? CheckoutHash { get; private set; }
+        public DateTime? ReservationExpiresAt { get; private set; }
+        public string ReservationState { get; private set; } = "None";
+        public int Version { get; private set; } = 1;
+        public void ConfigureCheckout(string key, string hash, decimal shipping, string method, DateTime expires)
+        {
+            if (shipping < 0) throw new ArgumentException("Frete inválido.");
+            CheckoutKey = key; CheckoutHash = hash; ShippingAmount = shipping;
+            ShippingMethod = method; TotalAmount += shipping;
+            ReservationExpiresAt = expires; ReservationState = "Reserved";
+        }
+        public void ReleaseReservation()
+        {
+            if (ReservationState != "Reserved") throw new InvalidOperationException("Reserva já processada.");
+            ReservationState = "Released"; OrderStatusId = (int)OrderStatusEnum.Canceled;
+            AddHistory("Reserva expirada ou cancelada antes do pagamento."); UpdateTimestamp();
+        }
         public int OrderStatusId { get; private set; }
         public OrderAddress? OrderAddress { get; private set; }
         private readonly List<OrderItem> _orderItems = new();
@@ -257,7 +277,7 @@ namespace CloudShopping.Domain.Entities.Orders
 
         private void AddHistory(string notes)
         {
-            _stateHistory.Add(OrderStateHistory.Create(this.Id, this.OrderStatusId, notes));
+            _stateHistory.Add(OrderStateHistory.ForOrder(this, notes));
         }
     }
 }

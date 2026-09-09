@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -33,15 +33,15 @@ namespace CloudShopping.Application.Features.Orders.Queries.GetOrderTimeline
         {
             var tenantId = _tenantProvider.GetTenantId();
             const string sql = @"
-                SELECT 
+                SELECT
                     osh.CreatedAt AS Date,
                     os.Name AS StatusName,
                     osh.Notes
-                FROM OrderStateHistory osh
-                INNER JOIN OrderStatus os ON osh.OrderStatusId = os.Id
-                INNER JOIN Orders o ON osh.OrderId = o.Id
-                WHERE osh.OrderId = @OrderId 
-                  AND o.CustomerId = @CustomerId 
+                FROM orderstatehistory osh
+                INNER JOIN orderstatus os ON osh.OrderStatusId = os.Id
+                INNER JOIN orders o ON osh.OrderId = o.Id
+                WHERE osh.OrderId = @OrderId
+                  AND o.CustomerId = @CustomerId
                   AND o.TenantId = @TenantId -- FILTRO DE SEGURANÇA MULTI-TENANT
                   AND osh.IsActive = 1
                 ORDER BY osh.CreatedAt DESC;

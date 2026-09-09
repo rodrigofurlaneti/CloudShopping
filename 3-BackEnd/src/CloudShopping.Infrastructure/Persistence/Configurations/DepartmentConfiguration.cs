@@ -1,4 +1,4 @@
-﻿using CloudShopping.Domain.Entities.Products;
+using CloudShopping.Domain.Entities.Products;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -8,7 +8,7 @@ namespace CloudShopping.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<Department> builder)
         {
-            builder.ToTable("Departments");
+            builder.ToTable("departments");
 
             builder.HasKey(d => d.Id);
 

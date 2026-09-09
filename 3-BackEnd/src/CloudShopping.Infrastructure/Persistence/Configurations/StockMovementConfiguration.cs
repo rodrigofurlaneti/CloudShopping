@@ -8,7 +8,7 @@ namespace CloudShopping.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<StockMovement> builder)
         {
-            builder.ToTable("StockMovements");
+            builder.ToTable("stockmovements");
             builder.HasKey(sm => sm.Id);
             builder.Property(sm => sm.ProductId)
                 .IsRequired();

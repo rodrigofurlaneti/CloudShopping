@@ -1,0 +1,363 @@
+{
+  "nodes": [
+    {
+      "source_file": "C:/Users/AMD/Documents/dumps/Dump20260909 (1).sql:27",
+      "id": "db:addresses",
+      "label": "addresses"
+    },
+    {
+      "source_file": "C:/Users/AMD/Documents/dumps/Dump20260909 (1).sql:65",
+      "id": "db:addresstypes",
+      "label": "addresstypes"
+    },
+    {
+      "source_file": "C:/Users/AMD/Documents/dumps/Dump20260909 (1).sql:93",
+      "id": "db:cartitems",
+      "label": "cartitems"
+    },
+    {
+      "source_file": "C:/Users/AMD/Documents/dumps/Dump20260909 (1).sql:126",
+      "id": "db:carts",
+      "label": "carts"
+    },
+    {
+      "source_file": "C:/Users/AMD/Documents/dumps/Dump20260909 (1).sql:155",
+      "id": "db:companies",
+      "label": "companies"
+    },
+    {
+      "source_file": "C:/Users/AMD/Documents/dumps/Dump20260909 (1).sql:184",
+      "id": "db:contacts",
+      "label": "contacts"
+    },
+    {
+      "source_file": "C:/Users/AMD/Documents/dumps/Dump20260909 (1).sql:216",
+      "id": "db:customers",
+      "label": "customers"
+    },
+    {
+      "source_file": "C:/Users/AMD/Documents/dumps/Dump20260909 (1).sql:250",
+      "id": "db:customertypes",
+      "label": "customertypes"
+    },
+    {
+      "source_file": "C:/Users/AMD/Documents/dumps/Dump20260909 (1).sql:278",
+      "id": "db:departments",
+      "label": "departments"
+    },
+    {
+      "source_file": "C:/Users/AMD/Documents/dumps/Dump20260909 (1).sql:311",
+      "id": "db:employees",
+      "label": "employees"
+    },
+    {
+      "source_file": "C:/Users/AMD/Documents/dumps/Dump20260909 (1).sql:349",
+      "id": "db:employeeusers",
+      "label": "employeeusers"
+    },
+    {
+      "source_file": "C:/Users/AMD/Documents/dumps/Dump20260909 (1).sql:383",
+      "id": "db:individuals",
+      "label": "individuals"
+    },
+    {
+      "source_file": "C:/Users/AMD/Documents/dumps/Dump20260909 (1).sql:412",
+      "id": "db:orderaddresses",
+      "label": "orderaddresses"
+    },
+    {
+      "source_file": "C:/Users/AMD/Documents/dumps/Dump20260909 (1).sql:447",
+      "id": "db:orderitems",
+      "label": "orderitems"
+    },
+    {
+      "source_file": "C:/Users/AMD/Documents/dumps/Dump20260909 (1).sql:480",
+      "id": "db:orders",
+      "label": "orders"
+    },
+    {
+      "source_file": "C:/Users/AMD/Documents/dumps/Dump20260909 (1).sql:516",
+      "id": "db:ordersectors",
+      "label": "ordersectors"
+    },
+    {
+      "source_file": "C:/Users/AMD/Documents/dumps/Dump20260909 (1).sql:546",
+      "id": "db:orderstatehistory",
+      "label": "orderstatehistory"
+    },
+    {
+      "source_file": "C:/Users/AMD/Documents/dumps/Dump20260909 (1).sql:578",
+      "id": "db:orderstatus",
+      "label": "orderstatus"
+    },
+    {
+      "source_file": "C:/Users/AMD/Documents/dumps/Dump20260909 (1).sql:612",
+      "id": "db:payments",
+      "label": "payments"
+    },
+    {
+      "source_file": "C:/Users/AMD/Documents/dumps/Dump20260909 (1).sql:645",
+      "id": "db:paymentstatus",
+      "label": "paymentstatus"
+    },
+    {
+      "source_file": "C:/Users/AMD/Documents/dumps/Dump20260909 (1).sql:673",
+      "id": "db:productimages",
+      "label": "productimages"
+    },
+    {
+      "source_file": "C:/Users/AMD/Documents/dumps/Dump20260909 (1).sql:706",
+      "id": "db:products",
+      "label": "products"
+    },
+    {
+      "source_file": "C:/Users/AMD/Documents/dumps/Dump20260909 (1).sql:749",
+      "id": "db:profiles",
+      "label": "profiles"
+    },
+    {
+      "source_file": "C:/Users/AMD/Documents/dumps/Dump20260909 (1).sql:779",
+      "id": "db:profileusers",
+      "label": "profileusers"
+    },
+    {
+      "source_file": "C:/Users/AMD/Documents/dumps/Dump20260909 (1).sql:814",
+      "id": "db:stockmovements",
+      "label": "stockmovements"
+    },
+    {
+      "source_file": "C:/Users/AMD/Documents/dumps/Dump20260909 (1).sql:845",
+      "id": "db:storebanners",
+      "label": "storebanners"
+    },
+    {
+      "source_file": "C:/Users/AMD/Documents/dumps/Dump20260909 (1).sql:882",
+      "id": "db:tenants",
+      "label": "tenants"
+    }
+  ],
+  "edges": [
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `CustomerId` -> `Id`",
+      "source": "db:addresses",
+      "target": "db:customers"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `AddressTypeId` -> `Id`",
+      "source": "db:addresses",
+      "target": "db:addresstypes"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `CartId` -> `Id`",
+      "source": "db:cartitems",
+      "target": "db:carts"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `ProductId` -> `Id`",
+      "source": "db:cartitems",
+      "target": "db:products"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `CustomerId` -> `Id`",
+      "source": "db:carts",
+      "target": "db:customers"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `CustomerId` -> `Id`",
+      "source": "db:companies",
+      "target": "db:customers"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `CustomerId` -> `Id`",
+      "source": "db:contacts",
+      "target": "db:customers"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `TenantId` -> `Id`",
+      "source": "db:customers",
+      "target": "db:tenants"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `CustomerTypeId` -> `Id`",
+      "source": "db:customers",
+      "target": "db:customertypes"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `TenantId` -> `Id`",
+      "source": "db:departments",
+      "target": "db:tenants"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `TenantId` -> `Id`",
+      "source": "db:employees",
+      "target": "db:tenants"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `TenantId` -> `Id`",
+      "source": "db:employeeusers",
+      "target": "db:tenants"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `EmployeeId` -> `Id`",
+      "source": "db:employeeusers",
+      "target": "db:employees"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `CustomerId` -> `Id`",
+      "source": "db:individuals",
+      "target": "db:customers"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `OrderId` -> `Id`",
+      "source": "db:orderaddresses",
+      "target": "db:orders"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `AddressTypeId` -> `Id`",
+      "source": "db:orderaddresses",
+      "target": "db:addresstypes"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `OrderId` -> `Id`",
+      "source": "db:orderitems",
+      "target": "db:orders"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `ProductId` -> `Id`",
+      "source": "db:orderitems",
+      "target": "db:products"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `TenantId` -> `Id`",
+      "source": "db:orders",
+      "target": "db:tenants"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `CustomerId` -> `Id`",
+      "source": "db:orders",
+      "target": "db:customers"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `OrderStatusId` -> `Id`",
+      "source": "db:orders",
+      "target": "db:orderstatus"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `TenantId` -> `Id`",
+      "source": "db:ordersectors",
+      "target": "db:tenants"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `OrderId` -> `Id`",
+      "source": "db:orderstatehistory",
+      "target": "db:orders"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `OrderStatusId` -> `Id`",
+      "source": "db:orderstatehistory",
+      "target": "db:orderstatus"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `TenantId` -> `Id`",
+      "source": "db:orderstatus",
+      "target": "db:tenants"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `OrderSectorId` -> `Id`",
+      "source": "db:orderstatus",
+      "target": "db:ordersectors"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `OrderId` -> `Id`",
+      "source": "db:payments",
+      "target": "db:orders"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `PaymentStatusId` -> `Id`",
+      "source": "db:payments",
+      "target": "db:paymentstatus"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `ProductId` -> `Id`",
+      "source": "db:productimages",
+      "target": "db:products"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `TenantId` -> `Id`",
+      "source": "db:products",
+      "target": "db:tenants"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `DepartmentId` -> `Id`",
+      "source": "db:products",
+      "target": "db:departments"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `TenantId` -> `Id`",
+      "source": "db:profiles",
+      "target": "db:tenants"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `TenantId` -> `Id`",
+      "source": "db:profileusers",
+      "target": "db:tenants"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `ProfileId` -> `Id`",
+      "source": "db:profileusers",
+      "target": "db:profiles"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `EmployeeUserId` -> `Id`",
+      "source": "db:profileusers",
+      "target": "db:employeeusers"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `ProductId` -> `Id`",
+      "source": "db:stockmovements",
+      "target": "db:products"
+    },
+    {
+      "confidence": "EXTRACTED",
+      "relation": "FK `TenantId` -> `Id`",
+      "source": "db:storebanners",
+      "target": "db:tenants"
+    }
+  ]
+}

@@ -45,13 +45,7 @@ namespace CloudShopping.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Login(int tenantId, [FromBody] LoginEmployeeCommand command, CancellationToken cancellationToken)
         {
-            var cmd = command with { TenantId = tenantId };
-            var result = await _mediator.Send(cmd, cancellationToken);
-
-            if (!result.IsSuccess)
-                return BadRequest(new { message = result.Error.Message });
-
-            return Ok(new { token = result.Value });
+            return StatusCode(410, new { message = "Use /api/v1/session/admin/login para autenticação com sessão." });
         }
 
         #endregion

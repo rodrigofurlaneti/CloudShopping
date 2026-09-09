@@ -8,8 +8,15 @@ namespace CloudShopping.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<Order> builder)
         {
-            builder.ToTable("Orders");
+            builder.ToTable("orders");
             builder.HasKey(o => o.Id);
+            builder.Property(o => o.ShippingAmount).HasColumnType("decimal(12,2)");
+            builder.Property(o => o.ShippingMethod).HasMaxLength(100);
+            builder.Property(o => o.CheckoutKey).HasMaxLength(64);
+            builder.Property(o => o.CheckoutHash).HasMaxLength(64);
+            builder.Property(o => o.ReservationState).HasMaxLength(20);
+            builder.Property(o => o.Version).IsConcurrencyToken();
+            builder.HasIndex(o => new { o.TenantId, o.CustomerId, o.CheckoutKey }).IsUnique();
             builder.Property(o => o.TenantId)
                 .IsRequired();
             builder.Property(o => o.TotalAmount)
@@ -24,7 +31,7 @@ namespace CloudShopping.Infrastructure.Persistence.Configurations
                 .HasForeignKey(p => p.OrderId)
                 .OnDelete(DeleteBehavior.Cascade);
             builder.HasMany(o => o.StateHistory)
-                .WithOne()
+                .WithOne(h => h.Order)
                 .HasForeignKey(sh => sh.OrderId)
                 .OnDelete(DeleteBehavior.Cascade);
             builder.HasOne(o => o.OrderAddress)

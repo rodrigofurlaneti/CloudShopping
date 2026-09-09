@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,14 +34,14 @@ namespace CloudShopping.Application.Features.Orders.Queries.GetTenantOrders
             var offset = (request.Page - 1) * request.PageSize;
             const string sql = @"
                 -- Conta o total de registros para a paginação
-                SELECT COUNT(1) 
-                FROM Orders 
-                WHERE TenantId = @TenantId 
+                SELECT COUNT(1)
+                FROM orders
+                WHERE TenantId = @TenantId
                   AND IsActive = 1
                   AND (@OrderStatusId IS NULL OR OrderStatusId = @OrderStatusId);
 
                 -- Busca os dados paginados com o total de itens somados diretamente no banco
-                SELECT 
+                SELECT
                     o.Id AS OrderId,
                     o.CustomerId,
                     o.OrderDate,
@@ -49,13 +49,13 @@ namespace CloudShopping.Application.Features.Orders.Queries.GetTenantOrders
                     o.OrderStatusId,
                     os.Name AS StatusName,
                     COALESCE(SUM(oi.Quantity), 0) AS TotalItems
-                FROM Orders o
-                INNER JOIN OrderStatus os ON o.OrderStatusId = os.Id
-                LEFT JOIN OrderItems oi ON o.Id = oi.OrderId
-                WHERE o.TenantId = @TenantId 
+                FROM orders o
+                INNER JOIN orderstatus os ON o.OrderStatusId = os.Id
+                LEFT JOIN orderitems oi ON o.Id = oi.OrderId
+                WHERE o.TenantId = @TenantId
                   AND o.IsActive = 1
                   AND (@OrderStatusId IS NULL OR o.OrderStatusId = @OrderStatusId)
-                GROUP BY 
+                GROUP BY
                     o.Id, o.CustomerId, o.OrderDate, o.TotalAmount, o.OrderStatusId, os.Name
                 ORDER BY o.OrderDate DESC
                 LIMIT @PageSize OFFSET @Offset;

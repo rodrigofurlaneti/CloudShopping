@@ -8,15 +8,17 @@ namespace CloudShopping.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<OrderAddress> builder)
         {
-            builder.ToTable("OrderAddresses");
-            builder.HasKey(oa => oa.Id);
+            builder.ToTable("orderaddresses");
+            builder.Ignore(oa => oa.Id);
+            builder.HasKey(oa => oa.OrderId);
+            builder.Property(oa => oa.OrderId).ValueGeneratedNever();
             builder.Property(oa => oa.OrderId).IsRequired();
-            builder.Property(oa => oa.Street).HasMaxLength(200).IsRequired();
-            builder.Property(oa => oa.Number).HasMaxLength(20).IsRequired();
-            builder.Property(oa => oa.Neighborhood).HasMaxLength(100);
-            builder.Property(oa => oa.City).HasMaxLength(100).IsRequired();
+            builder.Property(oa => oa.Street).HasMaxLength(150).IsRequired();
+            builder.Property(oa => oa.Number).HasMaxLength(10).IsRequired();
+            builder.Property(oa => oa.Neighborhood).HasMaxLength(50);
+            builder.Property(oa => oa.City).HasMaxLength(50).IsRequired();
             builder.Property(oa => oa.State).HasMaxLength(2).IsRequired();
-            builder.Property(oa => oa.ZipCode).HasMaxLength(10).IsRequired();
+            builder.Property(oa => oa.ZipCode).HasMaxLength(8).IsRequired();
         }
     }
 }

@@ -8,11 +8,12 @@ namespace CloudShopping.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<Company> builder)
         {
-            builder.ToTable("Companies");
+            builder.ToTable("companies");
             builder.HasKey(c => c.Id);
-            builder.Property(c => c.BusinessTaxId).HasMaxLength(20).IsRequired();
+            builder.Property(c => c.Id).HasColumnName("CustomerId").ValueGeneratedNever();
+            builder.Property(c => c.BusinessTaxId).HasMaxLength(14).IsRequired();
             builder.Property(c => c.CompanyName).HasMaxLength(150).IsRequired();
-            builder.Property(c => c.StateTaxId).HasMaxLength(20);
+            builder.Property(c => c.StateTaxId).HasMaxLength(15);
         }
     }
 }

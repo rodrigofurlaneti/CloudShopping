@@ -1,8 +1,11 @@
+import { post, resetCsrf } from '../../services/http';
+import { useSession } from '../../services/sessionContext';
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
 export function AdminLogin() {
     const navigate = useNavigate();
+    const { refresh } = useSession();
     const [searchParams] = useSearchParams();
     const [email, setEmail] = useState(searchParams.get('username') ?? '');
     const [password, setPassword] = useState('');
@@ -15,16 +18,11 @@ export function AdminLogin() {
         setLoading(true);
 
         try {
-            // Exemplo de integração futura com a sua API de Backoffice/Auth
-            // const response = await AuthService.login({ email, password });
-
-            // Simulação de sucesso de autenticação
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            // Redireciona para o painel administrativo após logar
+            await post('/v1/session/admin/login', { username: email, password });
+            resetCsrf(); await refresh();
             navigate('/admin/dashboard');
         } catch (error) {
-            setErrorMessage('Credenciais inválidas. Verifique seu e-mail e senha.');
+            setErrorMessage((error as Error).message);
         } finally {
             setLoading(false);
         }
@@ -54,14 +52,14 @@ export function AdminLogin() {
                 <form onSubmit={handleLogin} className="space-y-5">
                     <div>
                         <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
-                            E-mail Corporativo
+                            Usuário administrativo
                         </label>
                         <input
-                            type="email"
+                            type="text"
                             required
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            placeholder="admin@sualoja.com"
+                            placeholder="Seu usuário"
                             className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all"
                         />
                     </div>
@@ -71,9 +69,7 @@ export function AdminLogin() {
                             <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
                                 Senha
                             </label>
-                            <a href="#" className="text-xs text-orange-400 hover:underline">
-                                Esqueceu a senha?
-                            </a>
+
                         </div>
                         <input
                             type="password"

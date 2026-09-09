@@ -8,7 +8,7 @@ namespace CloudShopping.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<Contact> builder)
         {
-            builder.ToTable("Contacts");
+            builder.ToTable("contacts");
             builder.HasKey(c => c.Id);
             builder.Property(c => c.CustomerId).IsRequired();
             builder.Property(c => c.Name).HasMaxLength(150).IsRequired();

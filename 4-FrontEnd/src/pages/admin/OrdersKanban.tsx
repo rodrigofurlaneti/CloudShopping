@@ -583,7 +583,7 @@ export function OrdersKanban() {
                 <div>
                     <h1 className="text-2xl font-bold text-slate-900">Kanban de Gestão de Pedidos</h1>
                     <p className="text-sm text-slate-500 mt-1">
-                        Arraste um pedido para avançar a etapa, ou abra o card para ver detalhes e ações
+                        Consulta de pedidos. Pagamentos e expedição serão habilitados na próxima etapa.
                     </p>
                 </div>
 
@@ -783,7 +783,7 @@ export function OrdersKanban() {
                                         <OrderCard
                                             key={order.orderId}
                                             order={order}
-                                            draggableEnabled
+                                            draggableEnabled={false}
                                             isDragging={draggingOrderId === order.orderId}
                                             isBusy={busyOrderId === order.orderId}
                                             onDragStart={(e) => handleCardDragStart(e, order)}
@@ -897,6 +897,8 @@ export function OrdersKanban() {
                                     </p>
                                 </div>
 
+                                <fieldset disabled className="space-y-4">
+                                <legend className="text-sm text-amber-800">Operações indisponíveis nesta entrega</legend>
                                 {/* Pagamentos */}
                                 <div>
                                     <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
@@ -1082,6 +1084,7 @@ export function OrdersKanban() {
                                             </button>
                                         )}
                                 </div>
+                                </fieldset>
                             </div>
                         )}
                     </div>

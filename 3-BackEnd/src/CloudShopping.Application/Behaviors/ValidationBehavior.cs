@@ -12,7 +12,7 @@ namespace CloudShopping.Application.Behaviors
 {
     public sealed class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
         where TRequest : IRequest<TResponse>
-        where TResponse : Result
+
     {
         // Reflete a assinatura genérica de Result.Failure<TValue>(Error) uma única vez,
         // já que TResponse aqui pode ser tanto "Result" (comandos) quanto "Result<T>"
@@ -42,6 +42,8 @@ namespace CloudShopping.Application.Behaviors
                 .ToArray();
             if (errors.Any())
             {
+                if (!typeof(Result).IsAssignableFrom(typeof(TResponse)))
+                    throw new ValidationException(errors.Select(e => new FluentValidation.Results.ValidationFailure(e.Code, e.Message)));
                 return BuildFailureResponse(errors[0]);
             }
             return await next();

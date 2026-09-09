@@ -1,0 +1,2581 @@
+{
+  "nodes": [
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Customers/Commands/AddCustomerAddress/AddCustomerAddressCommandValidator.cs",
+      "id": "AddCustomerAddressCommandValidator",
+      "label": "AddCustomerAddressCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Abstractions/Data/IOrderRepository.cs",
+      "id": "IOrderRepository",
+      "label": "IOrderRepository"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/MarkOrderAsReadyToShip/MarkOrderAsReadyToShipCommandValidator.cs",
+      "id": "MarkOrderAsReadyToShipCommandValidator",
+      "label": "MarkOrderAsReadyToShipCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/OrderSector/Queries/GetOrderSectorsQueryHandler.cs",
+      "id": "IDbConnection",
+      "label": "IDbConnection"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/Profiles/Queries/GetProfileById/GetProfileByIdQueryHandler.cs",
+      "id": "GetProfileByIdQueryHandler",
+      "label": "GetProfileByIdQueryHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Carts/Commands/AddCartItemCommandHandler.cs",
+      "id": "AddCartItemCommandHandler",
+      "label": "AddCartItemCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/StartOrderSeparating/StartOrderSeparatingCommandValidator.cs",
+      "id": "StartOrderSeparatingCommandValidator",
+      "label": "StartOrderSeparatingCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Abstractions/Data/PagedResult.cs",
+      "id": "PagedResult",
+      "label": "PagedResult"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/EmployeeUsers/Commands/CreateEmployeeUser/CreateEmployeeUserCommandValidator.cs",
+      "id": "CreateEmployeeUserCommandValidator",
+      "label": "CreateEmployeeUserCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Tenants/Commands/CreateTenant/CreateTenantCommandHandler.cs",
+      "id": "CreateTenantCommandHandler",
+      "label": "CreateTenantCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/Employees/Commands/UpdateEmployee/UpdateEmployeeCommandHandler.cs",
+      "id": "UpdateEmployeeCommandHandler",
+      "label": "UpdateEmployeeCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Customers/Commands/CleanupInactiveGuests/CleanupInactiveGuestsCommandHandler.cs",
+      "id": "CleanupInactiveGuestsCommandHandler",
+      "label": "CleanupInactiveGuestsCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/OrderState/Commands/UpdateOrderStatus/UpdateOrderStatusCommandValidator.cs",
+      "id": "UpdateOrderStatusCommandValidator",
+      "label": "UpdateOrderStatusCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/Checkout/CheckoutCommandValidator.cs",
+      "id": "CheckoutCommandValidator",
+      "label": "CheckoutCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/StartOrderSeparating/StartOrderSeparatingCommandHandler.cs",
+      "id": "StartOrderSeparatingCommandHandler",
+      "label": "StartOrderSeparatingCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Abstractions/Data/IDepartmentRepository.cs",
+      "id": "IDepartmentRepository",
+      "label": "IDepartmentRepository"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Products/Commands/CreateProduct/CreateProductCommandHandler.cs",
+      "id": "CreateProductCommandHandler",
+      "label": "CreateProductCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/MarkOrderAsInvoiced/MarkOrderAsInvoicedCommandHandler.cs",
+      "id": "MarkOrderAsInvoicedCommandHandler",
+      "label": "MarkOrderAsInvoicedCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/ProfileUsers/Queries/GetProfileUsersByTenant/GetProfileUsersByTenantQueryValidator.cs",
+      "id": "GetProfileUsersByTenantQueryValidator",
+      "label": "GetProfileUsersByTenantQueryValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/ProfileUsers/Commands/UpdateProfileUser/UpdateProfileUserCommandValidator.cs",
+      "id": "UpdateProfileUserCommandValidator",
+      "label": "UpdateProfileUserCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Customers/Commands/RegisterB2B/RegisterB2BCommandValidator.cs",
+      "id": "RegisterB2BCommandValidator",
+      "label": "RegisterB2BCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Behaviors/ValidationBehavior.cs",
+      "id": "ValidationBehavior",
+      "label": "ValidationBehavior"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/Profiles/Queries/GetProfilesByTenant/GetProfilesByTenantQueryHandler.cs",
+      "id": "GetProfilesByTenantQueryHandler",
+      "label": "GetProfilesByTenantQueryHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/MarkOrderAsInTransit/MarkOrderAsInTransitCommandHandler.cs",
+      "id": "MarkOrderAsInTransitCommandHandler",
+      "label": "MarkOrderAsInTransitCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Customers/Commands/RegisterLead/RegisterLeadCommandValidator.cs",
+      "id": "RegisterLeadCommandValidator",
+      "label": "RegisterLeadCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Customers/Commands/UpdateCustomerAddress/UpdateCustomerAddressCommandValidator.cs",
+      "id": "UpdateCustomerAddressCommandValidator",
+      "label": "UpdateCustomerAddressCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Customers/Commands/UpdateB2BProfile/UpdateB2BProfileCommandValidator.cs",
+      "id": "UpdateB2BProfileCommandValidator",
+      "label": "UpdateB2BProfileCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Products/Commands/CreateProduct/CreateProductCommandValidator.cs",
+      "id": "CreateProductCommandValidator",
+      "label": "CreateProductCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Store/Commands/UpdateStoreBanner/UpdateStoreBannerCommandValidator.cs",
+      "id": "UpdateStoreBannerCommandValidator",
+      "label": "UpdateStoreBannerCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/OrderSector/Commands/CreateOrderSector/CreateOrderSectorCommandHandler.cs",
+      "id": "CreateOrderSectorCommandHandler",
+      "label": "CreateOrderSectorCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/ProfileUsers/Queries/GetProfileUserById/GetProfileUserByIdQueryValidator.cs",
+      "id": "GetProfileUserByIdQueryValidator",
+      "label": "GetProfileUserByIdQueryValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/DTO/OrderHeaderDto.cs",
+      "id": "OrderHeaderDto",
+      "label": "OrderHeaderDto"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Customers/Commands/AddCustomerAddress/AddCustomerAddressCommandHandler.cs",
+      "id": "AddCustomerAddressCommandHandler",
+      "label": "AddCustomerAddressCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/Profiles/Commands/DeleteProfile/DeleteProfileCommandHandler.cs",
+      "id": "DeleteProfileCommandHandler",
+      "label": "DeleteProfileCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/RequestOrderReturn/RequestOrderReturnCommandHandler.cs",
+      "id": "RequestOrderReturnCommandHandler",
+      "label": "RequestOrderReturnCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/DirectCheckout/DirectCheckoutCommandHandler.cs",
+      "id": "DirectCheckoutCommandHandler",
+      "label": "DirectCheckoutCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Products/Commands/UpdateProductLocation/UpdateProductLocationCommandValidator.cs",
+      "id": "UpdateProductLocationCommandValidator",
+      "label": "UpdateProductLocationCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/MarkOrderAsInvoiced/MarkOrderAsInvoicedCommandValidator.cs",
+      "id": "MarkOrderAsInvoicedCommandValidator",
+      "label": "MarkOrderAsInvoicedCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Customers/Commands/RegisterB2C/RegisterB2CCommandHandler.cs",
+      "id": "RegisterB2CCommandHandler",
+      "label": "RegisterB2CCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/EmployeeUsers/Queries/GetEmployeeUsersByTenant/GetEmployeeUsersByTenantQueryValidator.cs",
+      "id": "GetEmployeeUsersByTenantQueryValidator",
+      "label": "GetEmployeeUsersByTenantQueryValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/OrderSector/Commands/ToggleOrderSectorStatus/ToggleOrderSectorStatusCommandHandler.cs",
+      "id": "ToggleOrderSectorStatusCommandHandler",
+      "label": "ToggleOrderSectorStatusCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/MarkOrderAsDelivered/MarkOrderAsDeliveredCommandHandler.cs",
+      "id": "MarkOrderAsDeliveredCommandHandler",
+      "label": "MarkOrderAsDeliveredCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/GenerateShippingLabel/GenerateShippingLabelCommandHandler.cs",
+      "id": "GenerateShippingLabelCommandHandler",
+      "label": "GenerateShippingLabelCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/Employees/Commands/UpdateEmployee/UpdateEmployeeCommandValidator.cs",
+      "id": "UpdateEmployeeCommandValidator",
+      "label": "UpdateEmployeeCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/OrderStateHistories/Commands/UpdateOrderHistoryNote/UpdateOrderHistoryNoteCommandHandler.cs",
+      "id": "UpdateOrderHistoryNoteCommandHandler",
+      "label": "UpdateOrderHistoryNoteCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Abstractions/Services/ITenantProvider.cs",
+      "id": "ITenantProvider",
+      "label": "ITenantProvider"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/DirectCheckout/AddressDtoValidator.cs",
+      "id": "AddressDtoValidator",
+      "label": "AddressDtoValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/OrderStateHistories/Commands/UpdateOrderHistoryNote/UpdateOrderHistoryNoteCommandValidator.cs",
+      "id": "UpdateOrderHistoryNoteCommandValidator",
+      "label": "UpdateOrderHistoryNoteCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/OrderStateHistories/Commands/DeactivateOrderHistory/DeactivateOrderHistoryCommandHandler.cs",
+      "id": "DeactivateOrderHistoryCommandHandler",
+      "label": "DeactivateOrderHistoryCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Api/Controllers/CustomersController.cs",
+      "id": "CustomersController",
+      "label": "CustomersController"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Queries/GetOrderById/GetOrderByIdQueryValidator.cs",
+      "id": "GetOrderByIdQueryValidator",
+      "label": "GetOrderByIdQueryValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/UpdatePaymentDecline/UpdatePaymentDeclinedCommandHandler.cs",
+      "id": "UpdatePaymentDeclinedCommandHandler",
+      "label": "UpdatePaymentDeclinedCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Store/Commands/CreateStoreBanner/CreateStoreBannerCommandValidator.cs",
+      "id": "CreateStoreBannerCommandValidator",
+      "label": "CreateStoreBannerCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Abstractions/Data/IProfileRepository.cs",
+      "id": "IProfileRepository",
+      "label": "IProfileRepository"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Products/Commands/AddProductStock/AddProductStockCommandValidator.cs",
+      "id": "AddProductStockCommandValidator",
+      "label": "AddProductStockCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/Profiles/Commands/DeleteProfile/DeleteProfileCommandValidator.cs",
+      "id": "DeleteProfileCommandValidator",
+      "label": "DeleteProfileCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/Employees/Queries/GetEmployeeById/GetEmployeeByIdQueryHandler.cs",
+      "id": "GetEmployeeByIdQueryHandler",
+      "label": "GetEmployeeByIdQueryHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/SetOrderTrackingNumber/SetOrderTrackingNumberCommandValidator.cs",
+      "id": "SetOrderTrackingNumberCommandValidator",
+      "label": "SetOrderTrackingNumberCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/RequestOrderReturn/RequestOrderReturnCommandValidator.cs",
+      "id": "RequestOrderReturnCommandValidator",
+      "label": "RequestOrderReturnCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Api/Controllers/DepartmentsController.cs",
+      "id": "DepartmentsController",
+      "label": "DepartmentsController"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/EmployeeUsers/Queries/GetEmployeeUserById/GetEmployeeUserByIdQueryHandler.cs",
+      "id": "GetEmployeeUserByIdQueryHandler",
+      "label": "GetEmployeeUserByIdQueryHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/StartOrderProcessing/StartOrderProcessingCommandHandler.cs",
+      "id": "StartOrderProcessingCommandHandler",
+      "label": "StartOrderProcessingCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Customers/Commands/RegisterB2B/RegisterB2BCommandHandler.cs",
+      "id": "RegisterB2BCommandHandler",
+      "label": "RegisterB2BCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/DirectCheckout/OrderItemDtoValidator.cs",
+      "id": "OrderItemDtoValidator",
+      "label": "OrderItemDtoValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/RefundPayment/RefundPaymentCommandValidator.cs",
+      "id": "RefundPaymentCommandValidator",
+      "label": "RefundPaymentCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Abstractions/Data/SqlConnectionFactory.cs",
+      "id": "SqlConnectionFactory",
+      "label": "SqlConnectionFactory"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Store/Commands/DeleteStoreBanner/DeleteStoreBannerCommandValidator.cs",
+      "id": "DeleteStoreBannerCommandValidator",
+      "label": "DeleteStoreBannerCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Customers/Commands/ChangeCustomerEmail/ChangeCustomerEmailCommandValidator.cs",
+      "id": "ChangeCustomerEmailCommandValidator",
+      "label": "ChangeCustomerEmailCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/Profiles/Commands/CreateProfile/CreateProfileCommandHandler.cs",
+      "id": "CreateProfileCommandHandler",
+      "label": "CreateProfileCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Api/Controllers/DepartmentsController.cs",
+      "id": "ISender",
+      "label": "ISender"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/ProfileUsers/Commands/DeleteProfileUser/DeleteProfileUserCommandValidator.cs",
+      "id": "DeleteProfileUserCommandValidator",
+      "label": "DeleteProfileUserCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Queries/GetCustomerOrders/GetCustomerOrdersQueryValidator.cs",
+      "id": "GetCustomerOrdersQueryValidator",
+      "label": "GetCustomerOrdersQueryValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/Profiles/Commands/UpdateProfile/UpdateProfileCommandValidator.cs",
+      "id": "UpdateProfileCommandValidator",
+      "label": "UpdateProfileCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Abstractions/Data/IProductRepository.cs",
+      "id": "IProductRepository",
+      "label": "IProductRepository"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Products/Commands/UpdateProductDetails/UpdateProductDetailsCommandValidator.cs",
+      "id": "UpdateProductDetailsCommandValidator",
+      "label": "UpdateProductDetailsCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/UpdatePaymentRefunded/UpdatePaymentRefundedCommandHandler.cs",
+      "id": "UpdatePaymentRefundedCommandHandler",
+      "label": "UpdatePaymentRefundedCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Abstractions/Data/IStockMovementRepository.cs",
+      "id": "IStockMovementRepository",
+      "label": "IStockMovementRepository"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/EmployeeUsers/Commands/UpdateEmployeeUser/UpdateEmployeeUserCommandValidator.cs",
+      "id": "UpdateEmployeeUserCommandValidator",
+      "label": "UpdateEmployeeUserCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Abstractions/Data/IOrderStateHistoryRepository.cs",
+      "id": "IOrderStateHistoryRepository",
+      "label": "IOrderStateHistoryRepository"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/OrderSector/Commands/UpdateOrderSector/UpdateOrderSectorNameCommandValidator.cs",
+      "id": "UpdateOrderSectorNameCommandValidator",
+      "label": "UpdateOrderSectorNameCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Carts/Commands/AddCartItemCommandValidator.cs",
+      "id": "AddCartItemCommandValidator",
+      "label": "AddCartItemCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Event/OrderCanceledDomainEventHandler.cs",
+      "id": "OrderCanceledDomainEventHandler",
+      "label": "OrderCanceledDomainEventHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Products/Commands/UpdateProductDetails/UpdateProductDetailsCommandHandler.cs",
+      "id": "UpdateProductDetailsCommandHandler",
+      "label": "UpdateProductDetailsCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/Employees/Commands/CreateEmployee/CreateEmployeeCommandHandler.cs",
+      "id": "CreateEmployeeCommandHandler",
+      "label": "CreateEmployeeCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/MarkOrderAsPaid/MarkOrderAsPaidCommandHandler.cs",
+      "id": "MarkOrderAsPaidCommandHandler",
+      "label": "MarkOrderAsPaidCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/OrderSector/Commands/UpdateOrderSector/UpdateOrderSectorNameCommandHandler.cs",
+      "id": "UpdateOrderSectorNameCommandHandler",
+      "label": "UpdateOrderSectorNameCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/DeclinePayment/DeclinePaymentCommandValidator.cs",
+      "id": "DeclinePaymentCommandValidator",
+      "label": "DeclinePaymentCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/Employees/Queries/GetEmployeesByTenant/GetEmployeesByTenantQueryHandler.cs",
+      "id": "GetEmployeesByTenantQueryHandler",
+      "label": "GetEmployeesByTenantQueryHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/Employees/Commands/DeleteEmployee/DeleteEmployeeCommandHandler.cs",
+      "id": "DeleteEmployeeCommandHandler",
+      "label": "DeleteEmployeeCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/MarkOrderAsReadyToShip/MarkOrderAsReadyToShipCommandHandler.cs",
+      "id": "MarkOrderAsReadyToShipCommandHandler",
+      "label": "MarkOrderAsReadyToShipCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Abstractions/Data/IRepository.cs",
+      "id": "IRepository",
+      "label": "IRepository"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Customers/Queries/GetCustomerById/GetCustomerByIdQueryHandler.cs",
+      "id": "GetCustomerByIdQueryHandler",
+      "label": "GetCustomerByIdQueryHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/ShipOrder/ShipOrderCommandValidator.cs",
+      "id": "ShipOrderCommandValidator",
+      "label": "ShipOrderCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Abstractions/Data/ICustomerRepository.cs",
+      "id": "ICustomerRepository",
+      "label": "ICustomerRepository"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/Employees/Queries/GetEmployeesByTenant/GetEmployeesByTenantQueryValidator.cs",
+      "id": "GetEmployeesByTenantQueryValidator",
+      "label": "GetEmployeesByTenantQueryValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/Employees/Commands/CreateEmployee/CreateEmployeeCommandValidator.cs",
+      "id": "CreateEmployeeCommandValidator",
+      "label": "CreateEmployeeCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Departments/Commands/CreateDepartment/CreateDepartmentCommandHandler.cs",
+      "id": "CreateDepartmentCommandHandler",
+      "label": "CreateDepartmentCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/EmployeeUsers/Queries/GetEmployeeUserById/GetEmployeeUserByIdQueryValidator.cs",
+      "id": "GetEmployeeUserByIdQueryValidator",
+      "label": "GetEmployeeUserByIdQueryValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Abstractions/Data/IStoreBannerRepository.cs",
+      "id": "IStoreBannerRepository",
+      "label": "IStoreBannerRepository"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Abstractions/Services/IFileStorageService.cs",
+      "id": "IFileStorageService",
+      "label": "IFileStorageService"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/ProfileUsers/Commands/DeleteProfileUser/DeleteProfileUserCommandHandler.cs",
+      "id": "DeleteProfileUserCommandHandler",
+      "label": "DeleteProfileUserCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/OrderState/Commands/UpdateOrderStatus/UpdateOrderStatusCommandHandler.cs",
+      "id": "UpdateOrderStatusCommandHandler",
+      "label": "UpdateOrderStatusCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Customers/Commands/RegisterB2C/RegisterB2CCommandValidator.cs",
+      "id": "RegisterB2CCommandValidator",
+      "label": "RegisterB2CCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/MarkOrderAsInTransit/MarkOrderAsInTransitCommandValidator.cs",
+      "id": "MarkOrderAsInTransitCommandValidator",
+      "label": "MarkOrderAsInTransitCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Api/Controllers/StoreBannersController.cs",
+      "id": "StoreBannersController",
+      "label": "StoreBannersController"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/ProfileUsers/Queries/GetProfileUserById/GetProfileUserByIdQueryHandler.cs",
+      "id": "GetProfileUserByIdQueryHandler",
+      "label": "GetProfileUserByIdQueryHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/ProfileUsers/Queries/GetProfileUsersByTenant/GetProfileUsersByTenantQueryHandler.cs",
+      "id": "GetProfileUsersByTenantQueryHandler",
+      "label": "GetProfileUsersByTenantQueryHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/DependencyInjection.cs",
+      "id": "DependencyInjection",
+      "label": "DependencyInjection"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Tenants/Queries/GetTenantById/GetTenantByIdQueryHandler.cs",
+      "id": "GetTenantByIdQueryHandler",
+      "label": "GetTenantByIdQueryHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Products/Queries/GetPaginatedProducts/GetPaginatedProductsQueryHandler.cs",
+      "id": "GetPaginatedProductsQueryHandler",
+      "label": "GetPaginatedProductsQueryHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/OrderStateHistories/Commands/DeactivateOrderHistory/DeactivateOrderHistoryCommandValidator.cs",
+      "id": "DeactivateOrderHistoryCommandValidator",
+      "label": "DeactivateOrderHistoryCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/OrderState/Commands/CreateOrderStatus/CreateOrderStatusCommandHandler.cs",
+      "id": "CreateOrderStatusCommandHandler",
+      "label": "CreateOrderStatusCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Store/Queries/GetStoreBanners/GetStoreBannersQueryHandler.cs",
+      "id": "GetStoreBannersQueryHandler",
+      "label": "GetStoreBannersQueryHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/CancelOrder/CancelOrderCommandValidator.cs",
+      "id": "CancelOrderCommandValidator",
+      "label": "CancelOrderCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/MarkOrderAsDelivered/MarkOrderAsDeliveredCommandValidator.cs",
+      "id": "MarkOrderAsDeliveredCommandValidator",
+      "label": "MarkOrderAsDeliveredCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/UpdatePaymentApproved/UpdatePaymentApprovedCommandHandler.cs",
+      "id": "UpdatePaymentApprovedCommandHandler",
+      "label": "UpdatePaymentApprovedCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/ProfileUsers/Commands/UpdateProfileUser/UpdateProfileUserCommandHandler.cs",
+      "id": "UpdateProfileUserCommandHandler",
+      "label": "UpdateProfileUserCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/Auth/Commands/Login/LoginEmployeeCommandValidator.cs",
+      "id": "LoginEmployeeCommandValidator",
+      "label": "LoginEmployeeCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Queries/GetPaginatedTenantOrders/GetPaginatedTenantOrdersQueryValidator.cs",
+      "id": "GetPaginatedTenantOrdersQueryValidator",
+      "label": "GetPaginatedTenantOrdersQueryValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Products/Commands/DeleteProduct/DeleteProductCommandHandler.cs",
+      "id": "DeleteProductCommandHandler",
+      "label": "DeleteProductCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Queries/GetOrderById/GetOrderByIdQueryHandler.cs",
+      "id": "GetOrderByIdQueryHandler",
+      "label": "GetOrderByIdQueryHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Departments/Commands/UpdateDepartment/UpdateDepartmentCommandHandler.cs",
+      "id": "UpdateDepartmentCommandHandler",
+      "label": "UpdateDepartmentCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/EmployeeUsers/Commands/DeleteEmployeeUser/DeleteEmployeeUserCommandValidator.cs",
+      "id": "DeleteEmployeeUserCommandValidator",
+      "label": "DeleteEmployeeUserCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/Profiles/Queries/GetProfilesByTenant/GetProfilesByTenantQueryValidator.cs",
+      "id": "GetProfilesByTenantQueryValidator",
+      "label": "GetProfilesByTenantQueryValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/ShipOrder/ShipOrderCommandHandler.cs",
+      "id": "ShipOrderCommandHandler",
+      "label": "ShipOrderCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Queries/GetTenantOrders/GetTenantOrdersQueryHandler.cs",
+      "id": "GetTenantOrdersQueryHandler",
+      "label": "GetTenantOrdersQueryHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/GenerateShippingLabel/GenerateShippingLabelCommandValidator.cs",
+      "id": "GenerateShippingLabelCommandValidator",
+      "label": "GenerateShippingLabelCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/OrderSector/Commands/ToggleOrderSectorStatus/ToggleOrderSectorStatusCommandValidator.cs",
+      "id": "ToggleOrderSectorStatusCommandValidator",
+      "label": "ToggleOrderSectorStatusCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Api/Controllers/OrdersController.cs",
+      "id": "OrdersController",
+      "label": "OrdersController"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Customers/Commands/UpdateB2CProfile/UpdateB2CProfileCommandHandler.cs",
+      "id": "UpdateB2CProfileCommandHandler",
+      "label": "UpdateB2CProfileCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Customers/Commands/UpdateB2BProfile/UpdateB2BProfileCommandHandler.cs",
+      "id": "UpdateB2BProfileCommandHandler",
+      "label": "UpdateB2BProfileCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Customers/Commands/ChangeCustomerEmail/ChangeCustomerEmailCommandHandler.cs",
+      "id": "ChangeCustomerEmailCommandHandler",
+      "label": "ChangeCustomerEmailCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/Auth/Commands/Login/LoginEmployeeCommandHandler.cs",
+      "id": "LoginEmployeeCommandHandler",
+      "label": "LoginEmployeeCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Queries/GetOrderTimeline/GetOrderTimelineQueryHandler.cs",
+      "id": "GetOrderTimelineQueryHandler",
+      "label": "GetOrderTimelineQueryHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/ApprovePayment/ApprovePaymentCommandValidator.cs",
+      "id": "ApprovePaymentCommandValidator",
+      "label": "ApprovePaymentCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/OrderState/Commands/CreateOrderStatus/CreateOrderStatusCommandValidator.cs",
+      "id": "CreateOrderStatusCommandValidator",
+      "label": "CreateOrderStatusCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Departments/Commands/DeleteDepartment/DeleteDepartmentCommandHandler.cs",
+      "id": "DeleteDepartmentCommandHandler",
+      "label": "DeleteDepartmentCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/Employees/Commands/DeleteEmployee/DeleteEmployeeCommandValidator.cs",
+      "id": "DeleteEmployeeCommandValidator",
+      "label": "DeleteEmployeeCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Abstractions/Data/IOrderSectorRepository.cs",
+      "id": "IOrderSectorRepository",
+      "label": "IOrderSectorRepository"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/ApprovePayment/ApprovePaymentCommandHandler.cs",
+      "id": "ApprovePaymentCommandHandler",
+      "label": "ApprovePaymentCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Api/Controllers/ProductsController.cs",
+      "id": "ProductsController",
+      "label": "ProductsController"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/Profiles/Commands/CreateProfile/CreateProfileCommandValidator.cs",
+      "id": "CreateProfileCommandValidator",
+      "label": "CreateProfileCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Abstractions/Data/IEmployeeRepository.cs",
+      "id": "IEmployeeRepository",
+      "label": "IEmployeeRepository"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Abstractions/Data/IUnitOfWork.cs",
+      "id": "IUnitOfWork",
+      "label": "IUnitOfWork"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Products/Commands/UpdateProductLocation/UpdateProductLocationCommandHandler.cs",
+      "id": "UpdateProductLocationCommandHandler",
+      "label": "UpdateProductLocationCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/OrderSector/Queries/GetOrderSectorsQueryHandler.cs",
+      "id": "GetOrderSectorsQueryHandler",
+      "label": "GetOrderSectorsQueryHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Abstractions/Data/ISqlConnectionFactory.cs",
+      "id": "ISqlConnectionFactory",
+      "label": "ISqlConnectionFactory"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Customers/Queries/GetCustomerProfile/GetCustomerProfileQueryHandler.cs",
+      "id": "GetCustomerProfileQueryHandler",
+      "label": "GetCustomerProfileQueryHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/ProfileUsers/Commands/CreateProfileUser/CreateProfileUserCommandHandler.cs",
+      "id": "CreateProfileUserCommandHandler",
+      "label": "CreateProfileUserCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/DeclinePayment/DeclinePaymentCommandHandler.cs",
+      "id": "DeclinePaymentCommandHandler",
+      "label": "DeclinePaymentCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Api/Controllers/BackofficeController.cs",
+      "id": "BackofficeController",
+      "label": "BackofficeController"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Customers/Commands/UpdateCustomerAddress/UpdateCustomerAddressCommandHandler.cs",
+      "id": "UpdateCustomerAddressCommandHandler",
+      "label": "UpdateCustomerAddressCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Abstractions/Data/IEmployeeUserRepository.cs",
+      "id": "IEmployeeUserRepository",
+      "label": "IEmployeeUserRepository"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/RefundPayment/RefundPaymentCommandHandler.cs",
+      "id": "RefundPaymentCommandHandler",
+      "label": "RefundPaymentCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/EmployeeUsers/Commands/CreateEmployeeUser/CreateEmployeeUserCommandHandler.cs",
+      "id": "CreateEmployeeUserCommandHandler",
+      "label": "CreateEmployeeUserCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Products/Commands/AddProductStock/AddProductStockCommandHandler.cs",
+      "id": "AddProductStockCommandHandler",
+      "label": "AddProductStockCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/UpdatePaymentDecline/UpdatePaymentDeclinedCommandValidator.cs",
+      "id": "UpdatePaymentDeclinedCommandValidator",
+      "label": "UpdatePaymentDeclinedCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/DirectCheckout/DirectCheckoutCommandValidator.cs",
+      "id": "DirectCheckoutItemDtoValidator",
+      "label": "DirectCheckoutItemDtoValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Products/Commands/UploadProductImage/UploadProductImageCommandHandler.cs",
+      "id": "UploadProductImageCommandHandler",
+      "label": "UploadProductImageCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/MarkDeliveryFailed/MarkDeliveryFailedCommandHandler.cs",
+      "id": "MarkDeliveryFailedCommandHandler",
+      "label": "MarkDeliveryFailedCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/StartOrderPacking/StartOrderPackingCommandValidator.cs",
+      "id": "StartOrderPackingCommandValidator",
+      "label": "StartOrderPackingCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/UpdatePaymentApproved/UpdatePaymentApprovedCommandValidator.cs",
+      "id": "UpdatePaymentApprovedCommandValidator",
+      "label": "UpdatePaymentApprovedCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Abstractions/Services/IPasswordHasher.cs",
+      "id": "IPasswordHasher",
+      "label": "IPasswordHasher"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/Profiles/Commands/UpdateProfile/UpdateProfileCommandHandler.cs",
+      "id": "UpdateProfileCommandHandler",
+      "label": "UpdateProfileCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Departments/Queries/GetTenantDepartments/GetTenantDepartmentsQueryHandler.cs",
+      "id": "GetTenantDepartmentsQueryHandler",
+      "label": "GetTenantDepartmentsQueryHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/AddPendingPayment/AddPendingPaymentCommandValidator.cs",
+      "id": "AddPendingPaymentCommandValidator",
+      "label": "AddPendingPaymentCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/StartOrderPacking/StartOrderPackingCommandHandler.cs",
+      "id": "StartOrderPackingCommandHandler",
+      "label": "StartOrderPackingCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Abstractions/Data/ITenantRepository.cs",
+      "id": "ITenantRepository",
+      "label": "ITenantRepository"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Api/Controllers/OrderStatesController.cs",
+      "id": "OrderStatusesController",
+      "label": "OrderStatusesController"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/CancelOrder/CancelOrderCommandHandler.cs",
+      "id": "CancelOrderCommandHandler",
+      "label": "CancelOrderCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Api/Controllers/CartsController.cs",
+      "id": "CartsController",
+      "label": "CartsController"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Abstractions/Data/IProductImageRepository.cs",
+      "id": "IProductImageRepository",
+      "label": "IProductImageRepository"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Customers/Queries/GetPaginatedCustomers/GetPaginatedCustomersQueryHandler.cs",
+      "id": "GetPaginatedCustomersQueryHandler",
+      "label": "GetPaginatedCustomersQueryHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Products/Queries/GetProductBySku/GetProductBySkuQueryHandler.cs",
+      "id": "GetProductBySkuQueryHandler",
+      "label": "GetProductBySkuQueryHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Customers/Commands/RegisterLead/RegisterLeadCommandHandler.cs",
+      "id": "RegisterLeadCommandHandler",
+      "label": "RegisterLeadCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/MarkOrderAsPaid/MarkOrderAsPaidCommandValidator.cs",
+      "id": "MarkOrderAsPaidCommandValidator",
+      "label": "MarkOrderAsPaidCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Store/Commands/DeleteStoreBanner/DeleteStoreBannerCommandHandler.cs",
+      "id": "DeleteStoreBannerCommandHandler",
+      "label": "DeleteStoreBannerCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Queries/GetOrderTimeline/GetOrderTimelineQueryValidator.cs",
+      "id": "GetOrderTimelineQueryValidator",
+      "label": "GetOrderTimelineQueryValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Tenants/Commands/RegisterCompany/RegisterCompanyCommandValidator.cs",
+      "id": "RegisterCompanyCommandValidator",
+      "label": "RegisterCompanyCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/SetOrderTrackingNumber/SetOrderTrackingNumberCommandHandler.cs",
+      "id": "SetOrderTrackingNumberCommandHandler",
+      "label": "SetOrderTrackingNumberCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Api/Controllers/BackofficeController.cs",
+      "id": "IMediator",
+      "label": "IMediator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/UpdatePaymentRefunded/UpdatePaymentRefundedCommandValidator.cs",
+      "id": "UpdatePaymentRefundedCommandValidator",
+      "label": "UpdatePaymentRefundedCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Api/Controllers/OrderStateHistoriesController.cs",
+      "id": "OrderStateHistoriesController",
+      "label": "OrderStateHistoriesController"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Abstractions/Data/IOrderStatusRepository.cs",
+      "id": "IOrderStatusRepository",
+      "label": "IOrderStatusRepository"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Customers/Commands/RegisterGuest/RegisterGuestCommandHandler.cs",
+      "id": "RegisterGuestCommandHandler",
+      "label": "RegisterGuestCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Abstractions/Data/ICartRepository.cs",
+      "id": "ICartRepository",
+      "label": "ICartRepository"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/ProfileUsers/Commands/CreateProfileUser/CreateProfileUserCommandValidator.cs",
+      "id": "CreateProfileUserCommandValidator",
+      "label": "CreateProfileUserCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/EmployeeUsers/Commands/UpdateEmployeeUser/UpdateEmployeeUserCommandHandler.cs",
+      "id": "UpdateEmployeeUserCommandHandler",
+      "label": "UpdateEmployeeUserCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Store/Commands/UpdateStoreBanner/UpdateStoreBannerCommandHandler.cs",
+      "id": "UpdateStoreBannerCommandHandler",
+      "label": "UpdateStoreBannerCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Customers/Commands/UpdateB2CProfile/UpdateB2CProfileCommandValidator.cs",
+      "id": "UpdateB2CProfileCommandValidator",
+      "label": "UpdateB2CProfileCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Store/Commands/CreateStoreBanner/CreateStoreBannerCommandHandler.cs",
+      "id": "CreateStoreBannerCommandHandler",
+      "label": "CreateStoreBannerCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/OrderState/Commands/ToggleOrderStatusStatus/ToggleOrderStatusStatusCommandHandler.cs",
+      "id": "ToggleOrderStatusStatusCommandHandler",
+      "label": "ToggleOrderStatusStatusCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Products/Commands/AdjustInventory/AdjustInventoryCommandHandler.cs",
+      "id": "AdjustInventoryCommandHandler",
+      "label": "AdjustInventoryCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Queries/GetCustomerOrders/GetCustomerOrdersQueryHandler.cs",
+      "id": "GetCustomerOrdersQueryHandler",
+      "label": "GetCustomerOrdersQueryHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Queries/GetPaginatedTenantOrders/GetPaginatedTenantOrdersQueryHandler.cs",
+      "id": "GetPaginatedTenantOrdersQueryHandler",
+      "label": "GetPaginatedTenantOrdersQueryHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/AddPendingPayment/AddPendingPaymentCommandHandler.cs",
+      "id": "AddPendingPaymentCommandHandler",
+      "label": "AddPendingPaymentCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Abstractions/Data/IProfileUserRepository.cs",
+      "id": "IProfileUserRepository",
+      "label": "IProfileUserRepository"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/Profiles/Queries/GetProfileById/GetProfileByIdQueryValidator.cs",
+      "id": "GetProfileByIdQueryValidator",
+      "label": "GetProfileByIdQueryValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/EmployeeUsers/Commands/DeleteEmployeeUser/DeleteEmployeeUserCommandHandler.cs",
+      "id": "DeleteEmployeeUserCommandHandler",
+      "label": "DeleteEmployeeUserCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Tenants/Commands/RegisterCompany/RegisterCompanyCommandHandler.cs",
+      "id": "RegisterCompanyCommandHandler",
+      "label": "RegisterCompanyCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Carts/Queries/GetCartByCustomer/GetCartByCustomerQueryHandler.cs",
+      "id": "GetCartByCustomerQueryHandler",
+      "label": "GetCartByCustomerQueryHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/Checkout/CheckoutCommandHandler.cs",
+      "id": "CheckoutCommandHandler",
+      "label": "CheckoutCommandHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/MarkDeliveryFailed/MarkDeliveryFailedCommandValidator.cs",
+      "id": "MarkDeliveryFailedCommandValidator",
+      "label": "MarkDeliveryFailedCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Api/Controllers/TenantsController.cs",
+      "id": "TenantsController",
+      "label": "TenantsController"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Commands/StartOrderProcessing/StartOrderProcessingCommandValidator.cs",
+      "id": "StartOrderProcessingCommandValidator",
+      "label": "StartOrderProcessingCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/Employees/Queries/GetEmployeeById/GetEmployeeByIdQueryValidator.cs",
+      "id": "GetEmployeeByIdQueryValidator",
+      "label": "GetEmployeeByIdQueryValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Products/Queries/GetProductById/GetProductByIdQueryHandler.cs",
+      "id": "GetProductByIdQueryHandler",
+      "label": "GetProductByIdQueryHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/OrderState/Queries/GetOrderStatusesQueryHandler.cs",
+      "id": "GetOrderStatusesQueryHandler",
+      "label": "GetOrderStatusesQueryHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Api/Controllers/OrderSectorsController.cs",
+      "id": "OrderSectorsController",
+      "label": "OrderSectorsController"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Backoffice/EmployeeUsers/Queries/GetEmployeeUsersByTenant/GetEmployeeUsersByTenantQueryHandler.cs",
+      "id": "GetEmployeeUsersByTenantQueryHandler",
+      "label": "GetEmployeeUsersByTenantQueryHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/Queries/GetTenantOrders/GetTenantOrdersQueryValidator.cs",
+      "id": "GetTenantOrdersQueryValidator",
+      "label": "GetTenantOrdersQueryValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/OrderState/Commands/ToggleOrderStatusStatus/ToggleOrderStatusStatusCommandValidator.cs",
+      "id": "ToggleOrderStatusStatusCommandValidator",
+      "label": "ToggleOrderStatusStatusCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Products/Commands/AdjustInventory/AdjustInventoryCommandValidator.cs",
+      "id": "AdjustInventoryCommandValidator",
+      "label": "AdjustInventoryCommandValidator"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Customers/Queries/GetCustomerAddresses/GetCustomerAddressesQueryHandler.cs",
+      "id": "GetCustomerAddressesQueryHandler",
+      "label": "GetCustomerAddressesQueryHandler"
+    },
+    {
+      "source_file": "3-BackEnd/src/CloudShopping.Application/Features/Orders/ViewModels/OrderViewModels.cs",
+      "id": "PagedList",
+      "label": "PagedList"
+    }
+  ],
+  "edges": [
+    {
+      "relation": "depende da interface injetada",
+      "target": "IEmployeeUserRepository",
+      "source": "LoginEmployeeCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IPasswordHasher",
+      "source": "LoginEmployeeCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IEmployeeRepository",
+      "source": "CreateEmployeeCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "CreateEmployeeCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IEmployeeRepository",
+      "source": "DeleteEmployeeCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "DeleteEmployeeCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IEmployeeRepository",
+      "source": "UpdateEmployeeCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "UpdateEmployeeCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IEmployeeRepository",
+      "source": "GetEmployeeByIdQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IEmployeeRepository",
+      "source": "GetEmployeesByTenantQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IEmployeeUserRepository",
+      "source": "CreateEmployeeUserCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IEmployeeRepository",
+      "source": "CreateEmployeeUserCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IPasswordHasher",
+      "source": "CreateEmployeeUserCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "CreateEmployeeUserCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IEmployeeUserRepository",
+      "source": "DeleteEmployeeUserCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "DeleteEmployeeUserCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IEmployeeUserRepository",
+      "source": "UpdateEmployeeUserCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IPasswordHasher",
+      "source": "UpdateEmployeeUserCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "UpdateEmployeeUserCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IEmployeeUserRepository",
+      "source": "GetEmployeeUserByIdQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IEmployeeUserRepository",
+      "source": "GetEmployeeUsersByTenantQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IProfileRepository",
+      "source": "CreateProfileCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "CreateProfileCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IProfileRepository",
+      "source": "DeleteProfileCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "DeleteProfileCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IProfileRepository",
+      "source": "UpdateProfileCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "UpdateProfileCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IProfileRepository",
+      "source": "GetProfileByIdQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IProfileRepository",
+      "source": "GetProfilesByTenantQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IProfileUserRepository",
+      "source": "CreateProfileUserCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IProfileRepository",
+      "source": "CreateProfileUserCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IEmployeeUserRepository",
+      "source": "CreateProfileUserCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "CreateProfileUserCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IProfileUserRepository",
+      "source": "DeleteProfileUserCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "DeleteProfileUserCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IProfileUserRepository",
+      "source": "UpdateProfileUserCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "UpdateProfileUserCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IProfileUserRepository",
+      "source": "GetProfileUserByIdQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IProfileUserRepository",
+      "source": "GetProfileUsersByTenantQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ICartRepository",
+      "source": "AddCartItemCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IProductRepository",
+      "source": "AddCartItemCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "AddCartItemCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ICartRepository",
+      "source": "GetCartByCustomerQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ICustomerRepository",
+      "source": "AddCustomerAddressCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "AddCustomerAddressCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "AddCustomerAddressCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ICustomerRepository",
+      "source": "ChangeCustomerEmailCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "ChangeCustomerEmailCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "ChangeCustomerEmailCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ICustomerRepository",
+      "source": "CleanupInactiveGuestsCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "CleanupInactiveGuestsCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ICustomerRepository",
+      "source": "RegisterB2BCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "RegisterB2BCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "RegisterB2BCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ICustomerRepository",
+      "source": "RegisterB2CCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "RegisterB2CCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "RegisterB2CCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ICustomerRepository",
+      "source": "RegisterGuestCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "RegisterGuestCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "RegisterGuestCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ICustomerRepository",
+      "source": "RegisterLeadCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "RegisterLeadCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "RegisterLeadCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ICustomerRepository",
+      "source": "UpdateB2BProfileCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "UpdateB2BProfileCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "UpdateB2BProfileCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ICustomerRepository",
+      "source": "UpdateB2CProfileCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "UpdateB2CProfileCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "UpdateB2CProfileCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ICustomerRepository",
+      "source": "UpdateCustomerAddressCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "UpdateCustomerAddressCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ICustomerRepository",
+      "source": "GetCustomerAddressesQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ICustomerRepository",
+      "source": "GetCustomerByIdQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ICustomerRepository",
+      "source": "GetCustomerProfileQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ICustomerRepository",
+      "source": "GetPaginatedCustomersQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "GetPaginatedCustomersQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IDepartmentRepository",
+      "source": "CreateDepartmentCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "CreateDepartmentCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "CreateDepartmentCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IDepartmentRepository",
+      "source": "DeleteDepartmentCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "DeleteDepartmentCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "DeleteDepartmentCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IDepartmentRepository",
+      "source": "UpdateDepartmentCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "UpdateDepartmentCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "UpdateDepartmentCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IDepartmentRepository",
+      "source": "GetTenantDepartmentsQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "GetTenantDepartmentsQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderRepository",
+      "source": "AddPendingPaymentCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "AddPendingPaymentCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderRepository",
+      "source": "ApprovePaymentCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "ApprovePaymentCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderRepository",
+      "source": "CancelOrderCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "CancelOrderCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "CancelOrderCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "CheckoutCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ICartRepository",
+      "source": "CheckoutCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ICustomerRepository",
+      "source": "CheckoutCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IProductRepository",
+      "source": "CheckoutCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderRepository",
+      "source": "CheckoutCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "CheckoutCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderRepository",
+      "source": "DeclinePaymentCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "DeclinePaymentCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "DirectCheckoutCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ICustomerRepository",
+      "source": "DirectCheckoutCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IProductRepository",
+      "source": "DirectCheckoutCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderRepository",
+      "source": "DirectCheckoutCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "DirectCheckoutCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderRepository",
+      "source": "GenerateShippingLabelCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "GenerateShippingLabelCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "GenerateShippingLabelCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderRepository",
+      "source": "MarkDeliveryFailedCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "MarkDeliveryFailedCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "MarkDeliveryFailedCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderRepository",
+      "source": "MarkOrderAsDeliveredCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "MarkOrderAsDeliveredCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "MarkOrderAsDeliveredCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderRepository",
+      "source": "MarkOrderAsInTransitCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "MarkOrderAsInTransitCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "MarkOrderAsInTransitCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderRepository",
+      "source": "MarkOrderAsInvoicedCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "MarkOrderAsInvoicedCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "MarkOrderAsInvoicedCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderRepository",
+      "source": "MarkOrderAsPaidCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "MarkOrderAsPaidCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "MarkOrderAsPaidCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderRepository",
+      "source": "MarkOrderAsReadyToShipCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "MarkOrderAsReadyToShipCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "MarkOrderAsReadyToShipCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderRepository",
+      "source": "RefundPaymentCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "RefundPaymentCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "RefundPaymentCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderRepository",
+      "source": "RequestOrderReturnCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "RequestOrderReturnCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "RequestOrderReturnCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderRepository",
+      "source": "SetOrderTrackingNumberCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "SetOrderTrackingNumberCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "SetOrderTrackingNumberCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderRepository",
+      "source": "ShipOrderCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IProductRepository",
+      "source": "ShipOrderCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IStockMovementRepository",
+      "source": "ShipOrderCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "ShipOrderCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "ShipOrderCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderRepository",
+      "source": "StartOrderPackingCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "StartOrderPackingCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "StartOrderPackingCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderRepository",
+      "source": "StartOrderProcessingCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "StartOrderProcessingCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "StartOrderProcessingCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderRepository",
+      "source": "StartOrderSeparatingCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "StartOrderSeparatingCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "StartOrderSeparatingCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderRepository",
+      "source": "UpdatePaymentApprovedCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "UpdatePaymentApprovedCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "UpdatePaymentApprovedCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderRepository",
+      "source": "UpdatePaymentDeclinedCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "UpdatePaymentDeclinedCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "UpdatePaymentDeclinedCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderRepository",
+      "source": "UpdatePaymentRefundedCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "UpdatePaymentRefundedCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "UpdatePaymentRefundedCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderRepository",
+      "source": "OrderCanceledDomainEventHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IProductRepository",
+      "source": "OrderCanceledDomainEventHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderRepository",
+      "source": "GetCustomerOrdersQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderRepository",
+      "source": "GetOrderByIdQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ISqlConnectionFactory",
+      "source": "GetOrderTimelineQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "GetOrderTimelineQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ISqlConnectionFactory",
+      "source": "GetPaginatedTenantOrdersQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "GetPaginatedTenantOrdersQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ISqlConnectionFactory",
+      "source": "GetTenantOrdersQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "GetTenantOrdersQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderSectorRepository",
+      "source": "CreateOrderSectorCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "CreateOrderSectorCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "CreateOrderSectorCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderSectorRepository",
+      "source": "ToggleOrderSectorStatusCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "ToggleOrderSectorStatusCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderSectorRepository",
+      "source": "UpdateOrderSectorNameCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "UpdateOrderSectorNameCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IDbConnection",
+      "source": "GetOrderSectorsQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderStatusRepository",
+      "source": "CreateOrderStatusCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "CreateOrderStatusCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "CreateOrderStatusCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderStatusRepository",
+      "source": "ToggleOrderStatusStatusCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "ToggleOrderStatusStatusCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderStatusRepository",
+      "source": "UpdateOrderStatusCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "UpdateOrderStatusCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IDbConnection",
+      "source": "GetOrderStatusesQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "GetOrderStatusesQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderStateHistoryRepository",
+      "source": "DeactivateOrderHistoryCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "DeactivateOrderHistoryCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IOrderStateHistoryRepository",
+      "source": "UpdateOrderHistoryNoteCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "UpdateOrderHistoryNoteCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IProductRepository",
+      "source": "AddProductStockCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IStockMovementRepository",
+      "source": "AddProductStockCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "AddProductStockCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "AddProductStockCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IProductRepository",
+      "source": "AdjustInventoryCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IStockMovementRepository",
+      "source": "AdjustInventoryCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "AdjustInventoryCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "AdjustInventoryCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IProductRepository",
+      "source": "CreateProductCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IStockMovementRepository",
+      "source": "CreateProductCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "CreateProductCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "CreateProductCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IProductRepository",
+      "source": "DeleteProductCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "DeleteProductCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IProductRepository",
+      "source": "UpdateProductDetailsCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "UpdateProductDetailsCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "UpdateProductDetailsCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IProductRepository",
+      "source": "UpdateProductLocationCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "UpdateProductLocationCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "UpdateProductLocationCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IProductRepository",
+      "source": "UploadProductImageCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IProductImageRepository",
+      "source": "UploadProductImageCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IFileStorageService",
+      "source": "UploadProductImageCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "UploadProductImageCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "UploadProductImageCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IProductRepository",
+      "source": "GetPaginatedProductsQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "GetPaginatedProductsQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IProductRepository",
+      "source": "GetProductByIdQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IProductRepository",
+      "source": "GetProductBySkuQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IStoreBannerRepository",
+      "source": "CreateStoreBannerCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "CreateStoreBannerCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "CreateStoreBannerCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IStoreBannerRepository",
+      "source": "DeleteStoreBannerCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "DeleteStoreBannerCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IStoreBannerRepository",
+      "source": "UpdateStoreBannerCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "UpdateStoreBannerCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IStoreBannerRepository",
+      "source": "GetStoreBannersQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantProvider",
+      "source": "GetStoreBannersQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantRepository",
+      "source": "CreateTenantCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "CreateTenantCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantRepository",
+      "source": "RegisterCompanyCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IEmployeeRepository",
+      "source": "RegisterCompanyCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IEmployeeUserRepository",
+      "source": "RegisterCompanyCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IProfileRepository",
+      "source": "RegisterCompanyCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IProfileUserRepository",
+      "source": "RegisterCompanyCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IPasswordHasher",
+      "source": "RegisterCompanyCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IUnitOfWork",
+      "source": "RegisterCompanyCommandHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ITenantRepository",
+      "source": "GetTenantByIdQueryHandler",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IMediator",
+      "source": "BackofficeController",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IMediator",
+      "source": "CartsController",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IMediator",
+      "source": "CustomersController",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "ISender",
+      "source": "DepartmentsController",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IMediator",
+      "source": "OrdersController",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IMediator",
+      "source": "OrderSectorsController",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IMediator",
+      "source": "OrderStateHistoriesController",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IMediator",
+      "source": "OrderStatusesController",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IMediator",
+      "source": "ProductsController",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IMediator",
+      "source": "StoreBannersController",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "relation": "depende da interface injetada",
+      "target": "IMediator",
+      "source": "TenantsController",
+      "confidence": "EXTRACTED"
+    }
+  ]
+}

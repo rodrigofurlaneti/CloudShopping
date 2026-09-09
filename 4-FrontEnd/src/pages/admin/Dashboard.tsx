@@ -166,6 +166,7 @@ export function Dashboard() {
 
     return (
         <BackofficeLayout>
+            <p role="status" className="mb-6 rounded-lg bg-amber-50 p-4 text-amber-900">Painel demonstrativo: os indicadores abaixo são exemplos. Consulte Produtos, Clientes e Pedidos para acessar os dados reais da loja.</p>
             {/* Breadcrumb */}
             <div className="text-sm text-slate-500 mb-2 flex items-center gap-1.5">
                 <span>Início</span>

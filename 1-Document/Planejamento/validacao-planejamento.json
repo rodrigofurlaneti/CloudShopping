@@ -1,0 +1,28 @@
+{
+  "cards": 98,
+  "byLayer": {
+    "Definição": 3,
+    "Banco de Dados": 29,
+    "Backend": 36,
+    "Frontend": 30
+  },
+  "byPhase": {
+    "Fundação": 20,
+    "Venda": 41,
+    "Operação": 13,
+    "Evolução": 12,
+    "Condicional": 9,
+    "Lançamento": 3
+  },
+  "dependencyEdges": 246,
+  "topologicalWaves": 15,
+  "missingDependencies": [],
+  "brokenMarkdownLinks": [],
+  "sourceCounts": {
+    "backendCs": 427,
+    "frontendSrcTsTsx": 21,
+    "dumpTables": 27
+  },
+  "dumpSha256": "4209af9970387082b129f620170156fed4f909e56a1443113c4aa0ab8ab115ea",
+  "scope": "Validacao dos artefatos de planejamento; nao executa produto, SQL ou Asaas."
+}

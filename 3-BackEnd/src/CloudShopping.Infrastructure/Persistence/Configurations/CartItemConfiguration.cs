@@ -8,8 +8,9 @@ namespace CloudShopping.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<CartItem> builder)
         {
-            builder.ToTable("CartItems");
+            builder.ToTable("cartitems");
             builder.HasKey(ci => ci.Id);
+            builder.HasIndex(ci => new { ci.CartId, ci.ProductId }).IsUnique();
             builder.Property(ci => ci.CartId)
                 .IsRequired();
             builder.Property(ci => ci.ProductId)

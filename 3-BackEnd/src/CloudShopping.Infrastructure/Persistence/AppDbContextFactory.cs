@@ -27,10 +27,10 @@ namespace CloudShopping.Infrastructure.Persistence
             var configuration = configurationBuilder.Build();
 
             var connectionString = configuration.GetConnectionString("DefaultConnection")
-                ?? "Server=localhost;Database=CloudShoppingDB;Uid=root;Pwd=root;";
+                ?? throw new InvalidOperationException("Configure ConnectionStrings__DefaultConnection.");
 
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-            optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+            optionsBuilder.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 43)));
 
             var tenantProvider = new TenantProvider(new HttpContextAccessor());
 

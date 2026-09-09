@@ -1,4 +1,4 @@
-﻿using CloudShopping.Domain.Entities.Backoffice;
+using CloudShopping.Domain.Entities.Backoffice;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -8,7 +8,7 @@ namespace CloudShopping.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<ProfileUser> builder)
         {
-            builder.ToTable("ProfileUsers");
+            builder.ToTable("profileusers");
             builder.HasKey(pu => pu.Id);
 
             builder.Property(pu => pu.TenantId)

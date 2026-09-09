@@ -34,7 +34,7 @@ namespace CloudShopping.Application.Features.OrderState.Queries
                     Name,
                     IsSystemDefault,
                     IsActive
-                FROM OrderStatus
+                FROM orderstatus
                 WHERE (TenantId = @TenantId OR TenantId IS NULL)
                   AND (@OnlyActive = 0 OR IsActive = 1)
                 ORDER BY OrderSectorId ASC, Id ASC;

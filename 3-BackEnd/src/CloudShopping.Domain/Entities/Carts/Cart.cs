@@ -4,6 +4,7 @@ namespace CloudShopping.Domain.Entities.Carts
 {
     public sealed class Cart : AggregateRoot<int>
     {
+        public int Version { get; private set; } = 1;
         public int CustomerId { get; private set; }
         public DateTime ExpiresAt => UpdatedAt.AddDays(30);
         private readonly List<CartItem> _items = new();
@@ -25,6 +26,11 @@ namespace CloudShopping.Domain.Entities.Carts
                 _items.Add(CartItem.Create(Id, productId, quantity, unitPrice));
             }
             UpdateTimestamp();
+        }
+        public void SetQuantity(int productId, int quantity)
+        {
+            var item = _items.SingleOrDefault(x => x.ProductId == productId) ?? throw new KeyNotFoundException("Item não encontrado.");
+            item.UpdateQuantity(quantity); UpdateTimestamp();
         }
         public void RemoveItem(int productId)
         {

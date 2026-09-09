@@ -1,4 +1,4 @@
-﻿using CloudShopping.Domain.Entities.Products;
+using CloudShopping.Domain.Entities.Products;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -8,7 +8,7 @@ namespace CloudShopping.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<Product> builder)
         {
-            builder.ToTable("Products");
+            builder.ToTable("products");
 
             builder.HasKey(p => p.Id);
 
@@ -40,6 +40,7 @@ namespace CloudShopping.Infrastructure.Persistence.Configurations
             builder.Ignore(p => p.AvailableStock);
 
             builder.Property(p => p.Version)
+                .IsConcurrencyToken()
                 .IsRequired()
                 .HasDefaultValue(1);
 

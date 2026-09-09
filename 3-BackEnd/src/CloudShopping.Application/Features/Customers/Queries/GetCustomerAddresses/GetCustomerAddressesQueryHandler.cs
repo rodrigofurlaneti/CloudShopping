@@ -1,4 +1,4 @@
-﻿using CloudShopping.Application.Abstractions.Data;
+using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Application.Features.Customers.DTO;
 using CloudShopping.Domain.Primitives.Results;
 using MediatR;

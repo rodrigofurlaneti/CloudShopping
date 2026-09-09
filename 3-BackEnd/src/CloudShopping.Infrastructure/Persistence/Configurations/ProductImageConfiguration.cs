@@ -8,7 +8,7 @@ namespace CloudShopping.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<ProductImage> builder)
         {
-            builder.ToTable("ProductImages");
+            builder.ToTable("productimages");
             builder.HasKey(pi => pi.Id);
             builder.Property(pi => pi.ProductId)
                 .IsRequired();

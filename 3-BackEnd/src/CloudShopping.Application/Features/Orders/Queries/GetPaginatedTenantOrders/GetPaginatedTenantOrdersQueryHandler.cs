@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -49,7 +49,7 @@ namespace CloudShopping.Application.Features.Orders.Queries.GetPaginatedTenantOr
             const string sql = @"
                 -- Conta o total para a paginação
                 SELECT COUNT(1)
-                FROM Orders
+                FROM orders
                 WHERE TenantId = @TenantId
                   AND IsActive = 1
                   AND (@StatusFilter IS NULL OR OrderStatusId = @StatusFilter);
@@ -65,12 +65,12 @@ namespace CloudShopping.Application.Features.Orders.Queries.GetPaginatedTenantOr
                     o.OrderStatusId,
                     COALESCE(os.Name, CONCAT('Status #', o.OrderStatusId)) AS StatusName,
                     CAST(COALESCE(SUM(oi.Quantity), 0) AS SIGNED) AS TotalItems
-                FROM Orders o
-                LEFT JOIN OrderItems oi ON o.Id = oi.OrderId
-                LEFT JOIN OrderStatus os ON o.OrderStatusId = os.Id
-                LEFT JOIN Customers c ON o.CustomerId = c.Id
-                LEFT JOIN Individuals ind ON c.Id = ind.CustomerId
-                LEFT JOIN Companies comp ON c.Id = comp.CustomerId
+                FROM orders o
+                LEFT JOIN orderitems oi ON o.Id = oi.OrderId
+                LEFT JOIN orderstatus os ON o.OrderStatusId = os.Id
+                LEFT JOIN customers c ON o.CustomerId = c.Id
+                LEFT JOIN individuals ind ON c.Id = ind.CustomerId
+                LEFT JOIN companies comp ON c.Id = comp.CustomerId
                 WHERE o.TenantId = @TenantId
                   AND o.IsActive = 1
                   AND (@StatusFilter IS NULL OR o.OrderStatusId = @StatusFilter)

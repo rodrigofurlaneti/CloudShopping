@@ -1,0 +1,24 @@
+{
+  "date": "2026-09-09",
+  "scope": "Base + catálogo + carrinho + checkout pendente",
+  "backendBuild": "passed",
+  "frontendBuild": "passed",
+  "mysqlIntegrationTests": {
+    "passed": 8,
+    "failed": 0
+  },
+  "httpSmoke": "passed",
+  "newStorefrontLint": "passed",
+  "globalLint": {
+    "status": "existing-debt",
+    "errors": 10
+  },
+  "browser": "desktop purchase journey and 390px catalog/checkout inspected",
+  "backlog": {
+    "total": 98,
+    "partial": 29,
+    "planned": 69
+  },
+  "productionDeployed": false,
+  "asaasImplemented": false
+}

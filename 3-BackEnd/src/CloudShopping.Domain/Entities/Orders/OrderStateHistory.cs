@@ -6,6 +6,7 @@ namespace CloudShopping.Domain.Entities.Orders
     public sealed class OrderStateHistory : Entity<int>
     {
         public int OrderId { get; private set; }
+        public Order? Order { get; private set; }
         public int OrderStatusId { get; private set; }
         public string? Notes { get; private set; }
 
@@ -35,6 +36,12 @@ namespace CloudShopping.Domain.Entities.Orders
                 UpdatedAt = DateTime.UtcNow
             };
         }
+
+        internal static OrderStateHistory ForOrder(Order order, string notes) => new()
+        {
+            Order = order, OrderId = order.Id, OrderStatusId = order.OrderStatusId,
+            Notes = notes, IsActive = true, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow
+        };
 
         // --- REGRAS DE NEGÓCIO ---
 

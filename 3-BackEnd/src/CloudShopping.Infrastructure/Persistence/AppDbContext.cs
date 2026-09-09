@@ -14,15 +14,16 @@ using System.Threading.Tasks;
 
 namespace CloudShopping.Infrastructure.Persistence
 {
-    public sealed class AppDbContext : DbContext
+    public sealed partial class AppDbContext : DbContext
     {
-        private readonly int _currentTenantId;
+        private readonly ITenantProvider _tenantProvider;
+        private int _currentTenantId => _tenantProvider.GetTenantId();
         private readonly IPublisher? _publisher;
 
         public AppDbContext(DbContextOptions<AppDbContext> options, ITenantProvider tenantProvider, IPublisher? publisher = null)
             : base(options)
         {
-            _currentTenantId = tenantProvider.GetTenantId();
+            _tenantProvider = tenantProvider;
             _publisher = publisher;
         }
 
@@ -56,6 +57,7 @@ namespace CloudShopping.Infrastructure.Persistence
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+            ConfigureTenantScope(modelBuilder);
 
             // Isolamento multi-tenant + soft delete via filtros globais de consulta
             modelBuilder.Entity<Customer>().HasQueryFilter(c => c.IsActive && c.TenantId == _currentTenantId);
@@ -68,6 +70,7 @@ namespace CloudShopping.Infrastructure.Persistence
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
+            await GuardWrites(cancellationToken);
             // Coleta os eventos de domínio de todos os Aggregate Roots rastreados antes de persistir.
             var aggregateRoots = ChangeTracker.Entries()
                 .Select(e => e.Entity)
