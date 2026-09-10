@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using CloudShopping.Domain.Primitives;
@@ -28,7 +28,7 @@ namespace CloudShopping.Domain.Entities.Products
                 throw new ArgumentException("Peso ou dimensões inválidos.");
             if((family==null)!=(variant==null)||family!=null&&(!System.Text.RegularExpressions.Regex.IsMatch(family,"^[A-Za-z0-9_-]{1,50}$")||string.IsNullOrWhiteSpace(variant)||variant.Length>100))
                 throw new ArgumentException("Informe código de família e identificação da variante juntos.");
-            Slug=slug;Description=description;Brand=brand;WeightKg=weight;WidthCm=width;HeightCm=height;LengthCm=length;FamilyCode=family;VariantLabel=variant;AttributesJson=attributesJson;UpdateTimestamp();
+            Slug=slug;Description=description;Brand=brand;WeightKg=weight;WidthCm=width;HeightCm=height;LengthCm=length;FamilyCode=family;VariantLabel=variant;AttributesJson=string.IsNullOrWhiteSpace(attributesJson) ? "{}" : attributesJson;UpdateTimestamp();
         }
         public string Name { get; private set; }
         public decimal Price { get; private set; }
@@ -165,3 +165,4 @@ namespace CloudShopping.Domain.Entities.Products
         }
     }
 }
+
