@@ -11,6 +11,9 @@ namespace CloudShopping.Application
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
             var assembly = Assembly.GetExecutingAssembly();
+            services.AddSingleton(TimeProvider.System);
+            services.AddScoped<Features.Sessions.SessionLifecycle>();
+            services.AddScoped<Features.Sessions.SessionUseCases>();
 
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(assembly));
 

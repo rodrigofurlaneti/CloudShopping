@@ -1,81 +1,58 @@
 using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
-using CloudShopping.Infrastructure.Persistence;
-using CloudShopping.Domain.Entities.Backoffice;
+using CloudShopping.Application.Features.Sessions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.EntityFrameworkCore;
-using MySqlConnector;
 
 namespace CloudShopping.Api.Security;
+
+// HTTP adapter only: cookies, claims, request metadata and HTTP responses.
 public static class StoreSecurity
 {
     public const string Scheme = "StoreSession";
-    public static string Stamp(string? credential) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(credential ?? "")));
     public static int Subject(ClaimsPrincipal user) => int.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
     public static async Task Validate(CookieValidatePrincipalContext ctx)
     {
         var user = ctx.Principal!;
-        if (!int.TryParse(user.FindFirstValue("tenant"), out var tenant)) { ctx.RejectPrincipal(); return; }
+        if (!int.TryParse(user.FindFirstValue("tenant"), out var tenant) ||
+            !int.TryParse(user.FindFirstValue(ClaimTypes.NameIdentifier), out var subject))
+        { ctx.RejectPrincipal(); return; }
         ctx.HttpContext.Items["TenantId"] = tenant;
-        var db = ctx.HttpContext.RequestServices.GetRequiredService<AppDbContext>();
-        var sid = user.FindFirstValue("sid");
-        var session = await db.Set<AuthSession>().SingleOrDefaultAsync(x => x.Id == sid);
-        if (session == null || session.RevokedAt != null || session.ExpiresAt <= DateTime.UtcNow ||
-            session.TenantId != tenant || !await db.Tenants.AnyAsync()) { ctx.RejectPrincipal(); return; }
-        string? credential;
-        bool active;
-        if (session.Kind == "Administrator")
-        {
-            var employee = await db.Set<EmployeeUser>().SingleOrDefaultAsync(x => x.Id == session.SubjectId);
-            active = employee?.IsActive == true && await db.Set<Employee>().AnyAsync(x => x.Id == employee.EmployeeId && x.IsActive);
-            credential = employee?.PasswordHash;
-            active &= (await new CloudShopping.Infrastructure.Services.StorePermissions(db).ForUser(session.SubjectId)).Length > 0;
-        }
-        else
-        {
-            var customer = await db.Customers.SingleOrDefaultAsync(x => x.Id == session.SubjectId);
-            active = customer != null;
-            credential = customer?.PasswordHash ?? customer?.SessionToken.ToString();
-        }
-        if (!active || session.CredentialStamp != Stamp(credential)) ctx.RejectPrincipal();
+        var sessions = ctx.HttpContext.RequestServices.GetRequiredService<SessionLifecycle>();
+        if (!await sessions.Validate(tenant, user.FindFirstValue("sid"), subject,
+            user.FindFirstValue(ClaimTypes.Role) ?? "", ctx.HttpContext.RequestAborted)) ctx.RejectPrincipal();
     }
-    public static async Task SignIn(HttpContext http, AppDbContext db, int id, string role, string name, string credential, bool isGuest = false)
+
+    public static async Task SignIn(HttpContext http, SessionLogin result)
     {
-        var session = new AuthSession { TenantId = db.CurrentTenantId, SubjectId = id, Kind = role,
-            CredentialStamp = Stamp(credential), ExpiresAt = DateTime.UtcNow.AddHours(8) };
-        db.Add(session); await db.SaveChangesAsync();
+        if (result.Session is not { } session) return;
         var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
-            new Claim(ClaimTypes.NameIdentifier, id.ToString()), new Claim(ClaimTypes.Name, name),
-            new Claim(ClaimTypes.Role, role), new Claim("tenant", db.CurrentTenantId.ToString()), new Claim("sid", session.Id), new Claim("guest", isGuest ? "true" : "false")
+            new Claim(ClaimTypes.NameIdentifier, result.Id.ToString()), new Claim(ClaimTypes.Name, result.Name),
+            new Claim(ClaimTypes.Role, result.Role), new Claim("tenant", session.TenantId.ToString()), new Claim("sid", session.Id), new Claim("guest", result.IsGuest ? "true" : "false")
         }, Scheme));
         await http.SignInAsync(Scheme, principal, new AuthenticationProperties { ExpiresUtc = session.ExpiresAt, IsPersistent = false });
     }
+
     public static async Task ResolveTenant(HttpContext http, RequestDelegate next)
     {
-        if(http.GetEndpoint()?.Metadata.GetMetadata<CloudShopping.Api.Controllers.AsaasWebhookAttribute>() != null) {await next(http);return;}
-        if (!http.Request.Path.StartsWithSegments("/api")) { await next(http); return; }
+        if (http.GetEndpoint()?.Metadata.GetMetadata<Controllers.AsaasWebhookAttribute>() != null || !http.Request.Path.StartsWithSegments("/api"))
+        { await next(http); return; }
         var config = http.RequestServices.GetRequiredService<IConfiguration>();
-        int tenant = 0;
-        if (http.User.Identity?.IsAuthenticated == true) int.TryParse(http.User.FindFirstValue("tenant"), out tenant);
         var env = http.RequestServices.GetRequiredService<IHostEnvironment>();
-        int requested = 0;
+        int tenant = 0, requested = 0;
+        if (http.User.Identity?.IsAuthenticated == true) int.TryParse(http.User.FindFirstValue("tenant"), out tenant);
         if (env.IsDevelopment()) int.TryParse(http.Request.Headers["X-Tenant-Id"], out requested);
         else int.TryParse(config[$"Storefront:Hosts:{http.Request.Host.Host.ToLowerInvariant()}"], out requested);
-        if (tenant > 0 && requested > 0 && tenant != requested) { http.Response.StatusCode = 403; return; }
-        tenant = tenant > 0 ? tenant : requested;
-        if (tenant <= 0) { http.Response.StatusCode = 400; await http.Response.WriteAsJsonAsync(new { message = "Loja não configurada." }); return; }
-        http.Items["TenantId"] = tenant;
-        // Cookie authentication may already have created a scoped context. Header mismatches were rejected above.
-        if (http.Request.RouteValues.TryGetValue("tenantId", out var route) && route?.ToString() != tenant.ToString())
-        { http.Response.StatusCode = 403; return; }
-        await using var conn = new MySqlConnection(config.GetConnectionString("DefaultConnection"));
-        await conn.OpenAsync(http.RequestAborted);
-        await using var cmd = new MySqlCommand("SELECT COUNT(*) FROM tenants WHERE Id=@id AND IsActive=1", conn);
-        cmd.Parameters.AddWithValue("@id", tenant);
-        if (Convert.ToInt32(await cmd.ExecuteScalarAsync(http.RequestAborted)) != 1) { http.Response.StatusCode = 404; return; }
+        int? routeTenant = http.Request.RouteValues.TryGetValue("tenantId", out var route)
+            ? int.TryParse(route?.ToString(), out var routeId) ? routeId : -1 : null;
+        var result = await http.RequestServices.GetRequiredService<SessionLifecycle>().ResolveTenant(tenant, requested, routeTenant, http.RequestAborted);
+        if (result.Failure != TenantResolutionFailure.None)
+        {
+            http.Response.StatusCode = result.Failure switch { TenantResolutionFailure.Missing => 400, TenantResolutionFailure.Forbidden => 403, _ => 404 };
+            if (result.Failure == TenantResolutionFailure.Missing) await http.Response.WriteAsJsonAsync(new { message = "Loja não configurada." });
+            return;
+        }
+        http.Items["TenantId"] = result.TenantId;
         await next(http);
     }
 }
-

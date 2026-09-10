@@ -25,6 +25,8 @@ public static class DependencyInjection
         services.AddScoped<ITenantProvider, TenantProvider>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<ISessionStore, SessionStore>();
+        services.AddScoped<ISessionAccounts, SessionAccounts>();
         services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<ICartRepository, CartRepository>();
