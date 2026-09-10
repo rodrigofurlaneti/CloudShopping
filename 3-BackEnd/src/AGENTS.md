@@ -1061,4 +1061,932 @@ Não utilizar logs como substituto para tratamento correto de erros.
 
 ---
 
-# 35
+# 35. Tratamento de Erros e Exceptions
+
+Erros devem ser tratados na camada apropriada.
+
+O Domain pode lançar exceções relacionadas a violações de regras ou invariantes do domínio.
+
+Exemplos:
+
+```text
+DomainException
+BusinessRuleException
+InvalidOrderStateException
+InvalidQuantityException
+```
+
+Não utilize exceptions como fluxo normal da aplicação.
+
+Não exponha diretamente detalhes internos de exceptions para clientes da API.
+
+ERRADO:
+
+```json
+{
+  "error": "SqlException: Invalid column..."
+}
+```
+
+A API deve transformar erros internos em respostas HTTP apropriadas e seguras.
+
+---
+
+# 36. Result Pattern
+
+Se o projeto já utilizar `Result`, `Result<T>` ou padrão equivalente, mantenha o padrão existente.
+
+Não introduza um segundo mecanismo de tratamento de resultados sem necessidade.
+
+Exemplo conceitual:
+
+```csharp
+Result<Order>
+```
+
+pode representar:
+
+```text
+Success
+Validation Error
+Business Error
+Not Found
+Conflict
+```
+
+Antes de criar uma nova implementação de `Result`, procure uma existente no projeto.
+
+---
+
+# 37. HTTP Status Codes
+
+A API deve utilizar códigos HTTP semanticamente corretos.
+
+Exemplos:
+
+```text
+200 OK
+201 Created
+204 No Content
+400 Bad Request
+401 Unauthorized
+403 Forbidden
+404 Not Found
+409 Conflict
+422 Unprocessable Entity
+500 Internal Server Error
+```
+
+Não retornar `200 OK` para qualquer situação apenas para simplificar o Controller.
+
+A definição final deve respeitar o padrão já existente no projeto.
+
+---
+
+# 38. Segurança
+
+Segurança não pode ser removida para facilitar uma implementação.
+
+É PROIBIDO:
+
+```text
+remover autenticação para fazer endpoint funcionar
+ignorar autorização
+desabilitar validação de JWT
+ignorar TenantId
+expor secrets
+hardcodar credenciais
+registrar senhas em logs
+registrar tokens completos
+commitar API Keys
+```
+
+Credenciais devem utilizar mecanismos de configuração apropriados.
+
+Exemplos:
+
+```text
+Environment Variables
+User Secrets
+Secret Manager
+CI/CD Secrets
+```
+
+Nunca colocar secrets diretamente no código-fonte.
+
+---
+
+# 39. Async/Await
+
+Operações de I/O devem utilizar `async/await` quando aplicável.
+
+Exemplos:
+
+```text
+Database
+HTTP
+Storage
+Messaging
+External APIs
+```
+
+Evite:
+
+```csharp
+.Result
+.Wait()
+.GetAwaiter().GetResult()
+```
+
+quando uma implementação assíncrona for possível.
+
+Propague `CancellationToken` quando o padrão do projeto permitir.
+
+Exemplo:
+
+```csharp
+public async Task<Result> Handle(
+    CreateOrderCommand command,
+    CancellationToken cancellationToken)
+```
+
+---
+
+# 40. CancellationToken
+
+Operações assíncronas devem propagar `CancellationToken` pelas camadas quando aplicável.
+
+Fluxo esperado:
+
+```text
+Controller
+    |
+    v
+Command / Query
+    |
+    v
+Handler
+    |
+    v
+Repository / Integration
+```
+
+Não substituir arbitrariamente:
+
+```csharp
+CancellationToken.None
+```
+
+quando um token já estiver disponível.
+
+---
+
+# 41. Entity Framework / Persistência
+
+Entity Framework é detalhe de Infrastructure.
+
+Configurações de banco devem permanecer na Infrastructure.
+
+Exemplo:
+
+```text
+Infrastructure/
+└── Persistence/
+    ├── AppDbContext.cs
+    └── Configurations/
+        ├── CustomerConfiguration.cs
+        ├── OrderConfiguration.cs
+        └── ProductConfiguration.cs
+```
+
+Entidades do Domain não devem depender diretamente de:
+
+```text
+DbContext
+DbSet
+EntityTypeBuilder
+Entity Framework attributes específicos
+SQL
+```
+
+sempre que a arquitetura existente permitir manter essa separação.
+
+---
+
+# 42. Consultas e Performance
+
+Evite problemas conhecidos de acesso a dados.
+
+Verifique especialmente:
+
+```text
+N+1 Queries
+consultas dentro de loops
+carregamento excessivo de dados
+Include desnecessário
+múltiplas consultas iguais
+materialização precoce
+falta de paginação
+```
+
+Para consultas somente leitura, considere o padrão existente para `AsNoTracking()`.
+
+Não faça otimizações prematuras sem evidência ou necessidade.
+
+---
+
+# 43. Paginação
+
+Endpoints que retornam grandes coleções devem utilizar paginação quando aplicável.
+
+Evite retornar tabelas completas sem necessidade.
+
+Exemplo conceitual:
+
+```text
+page
+pageSize
+totalItems
+totalPages
+items
+```
+
+Siga o contrato de paginação já existente no projeto.
+
+---
+
+# 44. Migrations e Alterações de Banco
+
+Não criar migration automaticamente para qualquer alteração sem verificar primeiro como o projeto gerencia banco de dados.
+
+Antes de alterar schema:
+
+1. analisar entidades;
+2. analisar configurações;
+3. analisar migrations/scripts existentes;
+4. verificar impacto;
+5. verificar TenantId;
+6. verificar índices;
+7. verificar constraints;
+8. verificar relacionamentos;
+9. verificar dados existentes.
+
+Nunca executar migration em banco remoto sem autorização explícita.
+
+---
+
+# 45. Nomenclatura
+
+Siga os padrões existentes no repositório.
+
+Para C# utilizar, quando compatível com o projeto:
+
+```text
+PascalCase -> classes, métodos, propriedades
+camelCase  -> parâmetros e variáveis locais
+IName      -> interfaces
+Async      -> métodos assíncronos quando apropriado
+```
+
+Não renomeie componentes existentes sem necessidade.
+
+Prefira nomes que expressem o domínio.
+
+Exemplo:
+
+```text
+CreateOrderCommand
+CreateOrderHandler
+IOrderRepository
+OrderRepository
+```
+
+em vez de nomes genéricos como:
+
+```text
+OrderManager
+OrderHelper
+OrderUtils
+ProcessData
+```
+
+---
+
+# 46. Código Morto
+
+Não deixe código comentado, implementações antigas ou arquivos temporários após concluir uma alteração.
+
+Evite:
+
+```csharp
+// código antigo
+// talvez usar depois
+// teste temporário
+```
+
+O Git já mantém o histórico.
+
+Também não crie arquivos como:
+
+```text
+temp.cs
+test2.cs
+backup.cs
+old.cs
+```
+
+sem necessidade.
+
+---
+
+# 47. TODOs
+
+Não utilize `TODO` para esconder implementação incompleta.
+
+Se a tarefa exige determinada funcionalidade, ela deve ser concluída.
+
+Um TODO somente deve ser adicionado quando:
+
+1. fizer sentido;
+2. estiver explicitamente fora do escopo;
+3. não comprometer a funcionalidade atual.
+
+---
+
+# 48. Comentários
+
+Comentários devem explicar o **porquê**, não simplesmente repetir o código.
+
+Evite:
+
+```csharp
+// Adiciona o item
+cart.AddItem(item);
+```
+
+Comentários são úteis quando explicam:
+
+```text
+decisão arquitetural
+regra de negócio não óbvia
+restrição de fornecedor externo
+workaround documentado
+motivo de uma implementação específica
+```
+
+---
+
+# 49. Não Alterar Contratos Sem Necessidade
+
+Não altere contratos públicos sem analisar impacto.
+
+Isso inclui:
+
+```text
+Endpoints
+Requests
+Responses
+DTOs
+Interfaces
+Events
+Database Schema
+Message Contracts
+```
+
+Antes de alterar um contrato existente, procure todos os consumidores.
+
+Mudanças incompatíveis devem ser evitadas quando não forem explicitamente solicitadas.
+
+---
+
+# 50. Compatibilidade
+
+Ao modificar código existente, preserve compatibilidade sempre que possível.
+
+Não atualize automaticamente:
+
+```text
+.NET
+NuGet packages
+Entity Framework
+bibliotecas
+Docker images
+Node
+dependências frontend
+```
+
+apenas porque existe uma versão mais nova.
+
+Atualização de dependências deve fazer parte explicitamente da tarefa ou ser necessária para solucionar o problema.
+
+---
+
+# 51. Execução SOMENTE Local
+
+Esta regra é OBRIGATÓRIA.
+
+O agente possui autorização para executar comandos necessários para analisar e validar o projeto **somente no ambiente local de trabalho disponibilizado para a tarefa**.
+
+Pode executar localmente, quando necessário:
+
+```bash
+dotnet restore
+dotnet build
+dotnet test
+```
+
+Também pode executar comandos equivalentes de testes, lint, análise estática e validação utilizados pelo próprio repositório.
+
+Antes de executar um comando, verifique o projeto correto e prefira utilizar a solução existente:
+
+```bash
+dotnet restore <solution>
+dotnet build <solution>
+dotnet test <solution>
+```
+
+O objetivo é validar localmente a alteração realizada.
+
+---
+
+# 52. PROIBIDO Deploy
+
+O agente NÃO possui autorização para realizar deploy.
+
+É PROIBIDO executar automaticamente qualquer ação que altere ambientes externos.
+
+Isso inclui:
+
+```text
+Production
+Staging
+PreProduction
+QA remoto
+Azure
+AWS
+GCP
+Render
+Docker Registry remoto
+GHCR
+Kubernetes remoto
+servidores
+VMs
+bancos remotos
+serviços externos
+```
+
+Mesmo que existam credenciais disponíveis no ambiente, isso NÃO significa autorização para utilizá-las.
+
+---
+
+# 53. GitHub Actions / CI/CD
+
+O agente pode ANALISAR arquivos de CI/CD.
+
+Exemplos:
+
+```text
+.github/workflows/
+Dockerfile
+docker-compose.yml
+deployment scripts
+```
+
+Porém, NÃO deve disparar pipelines remotos.
+
+É proibido, sem autorização explícita:
+
+```text
+workflow_dispatch
+deploy
+release
+publish remoto
+push de imagem
+execução manual de pipeline
+alteração de secrets
+```
+
+Alterações em arquivos de CI/CD somente devem ser realizadas quando fizerem parte da tarefa.
+
+---
+
+# 54. Git
+
+O agente pode analisar:
+
+```bash
+git status
+git diff
+git log
+```
+
+e comandos locais equivalentes necessários para compreender as alterações.
+
+Por padrão, NÃO deve executar:
+
+```bash
+git push
+git push --force
+git tag + push
+gh pr merge
+gh release
+```
+
+Não enviar código para repositório remoto sem autorização explícita.
+
+Também não sobrescrever alterações existentes do desenvolvedor.
+
+Antes de modificar arquivos, verifique mudanças locais existentes quando possível.
+
+---
+
+# 55. Serviços Externos
+
+Não executar operações reais contra fornecedores externos durante testes.
+
+Exemplos:
+
+```text
+Payment Gateway
+Email
+SMS
+Storage
+APIs externas
+Webhooks
+Message Brokers remotos
+```
+
+Utilizar:
+
+```text
+Mocks
+Fakes
+Stubs
+Test Doubles
+ambientes locais
+```
+
+quando apropriado.
+
+Nunca criar cobrança, pagamento ou operação real apenas para validar um teste.
+
+---
+
+# 56. Banco de Dados Local
+
+Testes e validações devem utilizar banco local, em memória, container local ou estratégia de testes existente no projeto.
+
+É PROIBIDO executar:
+
+```text
+DELETE
+UPDATE
+INSERT
+ALTER
+DROP
+TRUNCATE
+migration
+seed destrutivo
+```
+
+em banco remoto sem autorização explícita.
+
+Uma connection string disponível não deve ser considerada autorização.
+
+---
+
+# 57. Docker
+
+Docker pode ser utilizado localmente quando necessário.
+
+Exemplo:
+
+```bash
+docker compose build
+docker compose up
+```
+
+desde que isso opere somente no ambiente local.
+
+Não executar:
+
+```bash
+docker push
+```
+
+ou publicação em registry remoto sem autorização explícita.
+
+---
+
+# 58. Antes de Implementar
+
+Antes de escrever código, execute esta análise:
+
+```text
+[ ] Entendi o requisito?
+[ ] Localizei a camada correta?
+[ ] Procurei implementação semelhante?
+[ ] Procurei interfaces existentes?
+[ ] Procurei Value Objects existentes?
+[ ] Procurei Validators existentes?
+[ ] Procurei Repository existente?
+[ ] Procurei testes existentes?
+[ ] Verifiquei regras de Tenant?
+[ ] Verifiquei autenticação/autorização?
+[ ] A solução respeita DDD?
+[ ] A solução respeita Clean Architecture?
+[ ] A solução respeita CQRS?
+```
+
+Não começar criando arquivos aleatoriamente.
+
+Primeiro compreenda o fluxo existente.
+
+---
+
+# 59. Durante a Implementação
+
+Durante a alteração:
+
+```text
+[ ] Manter regras de negócio no Domain
+[ ] Manter casos de uso na Application
+[ ] Manter detalhes técnicos na Infrastructure
+[ ] Manter Controllers finos
+[ ] Respeitar Repository Contracts
+[ ] Reutilizar Value Objects
+[ ] Respeitar Multi-Tenancy
+[ ] Não duplicar abstrações
+[ ] Não adicionar dependências arquiteturais inválidas
+[ ] Criar/atualizar testes
+[ ] Fazer apenas alterações relacionadas à tarefa
+```
+
+---
+
+# 60. Depois da Implementação
+
+Após concluir o código:
+
+```text
+[ ] Revisar git diff
+[ ] Verificar referências entre projetos
+[ ] Compilar solução localmente
+[ ] Executar testes localmente
+[ ] Verificar novos warnings relevantes
+[ ] Verificar testes falhando
+[ ] Verificar se regra de negócio ficou na camada correta
+[ ] Verificar se Controller continua fino
+[ ] Verificar se Application não depende de Infrastructure
+[ ] Verificar se Domain continua independente
+[ ] Verificar TenantId
+[ ] Verificar tratamento de erros
+[ ] Verificar CancellationToken
+[ ] Verificar código duplicado
+[ ] Verificar código morto
+```
+
+---
+
+# 61. Build
+
+Antes de considerar uma alteração concluída, executar localmente, quando o ambiente permitir:
+
+```bash
+dotnet build
+```
+
+O objetivo é terminar com:
+
+```text
+Build succeeded.
+```
+
+Se o build falhar por causa da alteração realizada, corrija antes de concluir.
+
+Se o build não puder ser executado por limitação do ambiente, informe explicitamente.
+
+Não esconda erros de compilação.
+
+---
+
+# 62. Testes
+
+Após o build, executar localmente:
+
+```bash
+dotnet test
+```
+
+Quando houver múltiplos projetos de teste, executar os projetos relevantes ou a solução completa conforme apropriado.
+
+O objetivo é:
+
+```text
+Failed: 0
+```
+
+Não remova ou ignore testes existentes simplesmente para obter build verde.
+
+Não altere asserts corretos para fazer uma implementação incorreta passar.
+
+---
+
+# 63. Testes Falhando
+
+Se um teste existente falhar:
+
+1. investigar a causa;
+2. verificar se a alteração provocou a falha;
+3. corrigir a implementação quando necessário;
+4. não modificar o teste automaticamente.
+
+Um teste somente deve ser alterado quando o comportamento esperado realmente tiver mudado conforme o requisito.
+
+---
+
+# 64. Warnings
+
+Não introduza novos warnings relevantes.
+
+Não utilize:
+
+```csharp
+#pragma warning disable
+```
+
+ou supressões equivalentes apenas para esconder problemas.
+
+Supressões devem possuir justificativa técnica real.
+
+---
+
+# 65. SonarCloud / Qualidade
+
+Quando a tarefa estiver relacionada ao SonarCloud, trate a causa do problema.
+
+Não faça alterações artificiais apenas para satisfazer a métrica.
+
+Verificar quando aplicável:
+
+```text
+Bugs
+Vulnerabilities
+Security Hotspots
+Code Smells
+Duplications
+Coverage
+Complexity
+Maintainability
+```
+
+Cobertura deve representar testes úteis.
+
+---
+
+# 66. Regra Contra Overengineering
+
+Não transforme uma tarefa simples em uma reconstrução arquitetural.
+
+Evite criar desnecessariamente:
+
+```text
+Factories
+Strategies
+Builders
+Services
+Managers
+Helpers
+Wrappers
+Abstractions
+Interfaces
+Base classes
+```
+
+Uma abstração deve resolver um problema real.
+
+DDD e Clean Architecture não significam criar uma classe para cada linha de código.
+
+---
+
+# 67. Regra Contra Atalhos
+
+Ao mesmo tempo, simplicidade NÃO significa violar arquitetura.
+
+Nunca justificar:
+
+```text
+"É mais simples colocar no Controller."
+"É só uma consulta, então vou usar DbContext direto."
+"Vou referenciar Infrastructure para resolver rápido."
+```
+
+A solução deve ser simples **dentro das regras arquiteturais**.
+
+---
+
+# 68. Prioridade das Decisões
+
+Quando houver mais de uma solução possível, utilizar esta ordem:
+
+```text
+1. Correção funcional
+2. Regra de negócio
+3. Arquitetura existente
+4. Segurança
+5. Consistência com o projeto
+6. Testabilidade
+7. Manutenibilidade
+8. Performance
+9. Menor complexidade
+```
+
+Não sacrificar arquitetura e segurança para economizar poucas linhas de código.
+
+---
+
+# 69. Em Caso de Dúvida
+
+Se houver dúvida arquitetural:
+
+1. NÃO invente;
+2. procure exemplos existentes;
+3. procure testes;
+4. procure documentação;
+5. analise dependências;
+6. escolha a solução mais consistente com o repositório.
+
+Se ainda existir uma decisão importante e ambígua que possa alterar comportamento do negócio, apresente a dúvida antes de realizar uma mudança destrutiva ou arquiteturalmente significativa.
+
+---
+
+# 70. Critério de Conclusão — Definition of Done
+
+Uma tarefa somente pode ser considerada concluída quando:
+
+```text
+[ ] Requisito implementado
+[ ] Regra de negócio na camada correta
+[ ] Clean Architecture preservada
+[ ] DDD preservado
+[ ] CQRS preservado
+[ ] SOLID respeitado
+[ ] Multi-Tenancy preservado
+[ ] Segurança preservada
+[ ] Testes criados/atualizados quando necessários
+[ ] Build local executado com sucesso
+[ ] Testes locais executados com sucesso
+[ ] Nenhum erro conhecido escondido
+[ ] Nenhuma dependência arquitetural indevida adicionada
+[ ] Nenhum deploy realizado
+[ ] Nenhum ambiente remoto alterado
+```
+
+---
+
+# 71. Regra Final para o Agente
+
+Antes de alterar qualquer código deste repositório:
+
+> **ENTENDA PRIMEIRO. IMPLEMENTE DEPOIS.**
+
+Nunca assuma que uma nova implementação deve substituir a arquitetura existente.
+
+Sempre:
+
+```text
+ANALISAR
+   ↓
+ENTENDER
+   ↓
+LOCALIZAR O PADRÃO EXISTENTE
+   ↓
+DEFINIR A CAMADA CORRETA
+   ↓
+IMPLEMENTAR A MENOR ALTERAÇÃO
+   ↓
+CRIAR/ATUALIZAR TESTES
+   ↓
+BUILD LOCAL
+   ↓
+TESTES LOCAIS
+   ↓
+REVISAR
+```
+
+A regra fundamental deste projeto é:
+
+> **Domain contém o negócio.  
+> Application contém os casos de uso.  
+> Infrastructure contém detalhes técnicos e implementações.  
+> API contém somente a interface HTTP e composição necessária.**
+
+E, acima de tudo:
+
+> **NUNCA coloque Infrastructure dentro de Controller.  
+> NUNCA coloque regra de negócio no Controller.  
+> NUNCA faça Application depender de Infrastructure.  
+> NUNCA faça Domain depender das outras camadas.  
+> NUNCA faça deploy ou altere ambiente remoto sem autorização explícita.**
+
+Quando a implementação parecer exigir a violação de uma dessas regras, **pare e reavalie o design** em vez de contornar a arquitetura.
