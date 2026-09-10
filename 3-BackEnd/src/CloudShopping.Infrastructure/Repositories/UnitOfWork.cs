@@ -1,5 +1,7 @@
 ﻿using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 namespace CloudShopping.Infrastructure.Repositories
 {
     public sealed class UnitOfWork : IUnitOfWork
@@ -13,7 +15,18 @@ namespace CloudShopping.Infrastructure.Repositories
 
         public async Task<int> CommitAsync(CancellationToken cancellationToken = default)
         {
-            return await _context.SaveChangesAsync(cancellationToken);
+            try
+            {
+                return await _context.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateConcurrencyException exception)
+            {
+                throw new InvalidOperationException("Registro alterado por outra operação. Recarregue antes de salvar.", exception);
+            }
+            catch (DbUpdateException exception) when (exception.InnerException is MySqlException { Number: 1062 })
+            {
+                throw new InvalidOperationException("Já existe um registro com estes dados únicos nesta loja.", exception);
+            }
         }
     }
 }

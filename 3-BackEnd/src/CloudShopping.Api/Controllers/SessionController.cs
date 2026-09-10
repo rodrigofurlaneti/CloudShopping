@@ -1,3 +1,10 @@
+using MediatR;
+using CloudShopping.Application.Features.Sessions.Queries.GetSessionPermissions;
+using CloudShopping.Application.Features.Sessions.Commands.AdminSessionLogin;
+using CloudShopping.Application.Features.Sessions.Commands.CustomerSessionLogin;
+using CloudShopping.Application.Features.Sessions.Commands.CreateGuestSession;
+using CloudShopping.Application.Features.Sessions.Commands.RegisterSessionAccount;
+using CloudShopping.Application.Features.Sessions.Commands.LogoutSession;
 using System.ComponentModel.DataAnnotations;
 using CloudShopping.Api.Security;
 using CloudShopping.Application.Abstractions.Services;
@@ -9,7 +16,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CloudShopping.Api.Controllers;
 
 [ApiController, Route("api/v1/session")]
-public sealed class SessionController(SessionUseCases sessions, ITenantProvider tenant, IAntiforgery csrf) : ControllerBase
+public sealed class SessionController(ISender sender, ITenantProvider tenant, IAntiforgery csrf) : ControllerBase
 {
     private SessionCaller Caller => new(User.Identity?.IsAuthenticated == true ? StoreSecurity.Subject(User) : 0,
         User.Identity?.IsAuthenticated == true ? User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value : null, User.FindFirst("sid")?.Value);
@@ -19,14 +26,16 @@ public sealed class SessionController(SessionUseCases sessions, ITenantProvider 
         csrfToken = csrf.GetAndStoreTokens(HttpContext).RequestToken,
         user = User.Identity?.IsAuthenticated == true ? new {
             id = Caller.Id, name = User.Identity.Name, role = Caller.Role, tenantId = tenant.GetTenantId(),
-            isGuest = User.FindFirst("guest")?.Value == "true", permissions = await sessions.Permissions(Caller, ct)
+            isGuest = User.FindFirst("guest")?.Value == "true", permissions = await sender.Send(new GetSessionPermissionsQuery(Caller),ct)
         } : null
     });
 
     [HttpPost("admin/login"), AllowAnonymous]
     public async Task<IActionResult> AdminLogin(LoginInput input, CancellationToken ct)
     {
-        var result = await sessions.AdminLogin(Caller, input.Username, input.Password, ct);
+        var outcome = await sender.Send(new AdminSessionLoginCommand(Caller,input.Username,input.Password),ct);
+        if(!outcome.IsSuccess)return CommandResults.Respond(outcome,_=>NoContent());
+        var result=outcome.Value;
         if (result == null) return Unauthorized(new { message = "Credenciais inválidas." });
         await StoreSecurity.SignIn(HttpContext, result);
         return Ok(new { id = result.Id, name = result.Name, role = result.Role, tenantId = tenant.GetTenantId() });
@@ -35,7 +44,9 @@ public sealed class SessionController(SessionUseCases sessions, ITenantProvider 
     [HttpPost("guest"), AllowAnonymous]
     public async Task<IActionResult> Guest(CancellationToken ct)
     {
-        var result = await sessions.Guest(Caller, ct);
+        var outcome = await sender.Send(new CreateGuestSessionCommand(Caller),ct);
+        if(!outcome.IsSuccess)return CommandResults.Respond(outcome,_=>NoContent());
+        var result=outcome.Value;
         await StoreSecurity.SignIn(HttpContext, result);
         return Ok(new { id = result.Id });
     }
@@ -43,7 +54,9 @@ public sealed class SessionController(SessionUseCases sessions, ITenantProvider 
     [HttpPost("register"), AllowAnonymous]
     public async Task<IActionResult> Register(RegisterInput input, CancellationToken ct)
     {
-        var result = await sessions.Register(Caller, input.Email, input.Password, ct);
+        var outcome = await sender.Send(new RegisterSessionAccountCommand(Caller,input.Email,input.Password),ct);
+        if(!outcome.IsSuccess)return CommandResults.Respond(outcome,_=>NoContent());
+        var result=outcome.Value;
         await StoreSecurity.SignIn(HttpContext, result);
         return Ok(new { id = result.Id });
     }
@@ -51,7 +64,9 @@ public sealed class SessionController(SessionUseCases sessions, ITenantProvider 
     [HttpPost("login"), AllowAnonymous]
     public async Task<IActionResult> CustomerLogin(LoginInput input, CancellationToken ct)
     {
-        var result = await sessions.CustomerLogin(Caller, input.Username, input.Password, ct);
+        var outcome = await sender.Send(new CustomerSessionLoginCommand(Caller,input.Username,input.Password),ct);
+        if(!outcome.IsSuccess)return CommandResults.Respond(outcome,_=>NoContent());
+        var result=outcome.Value;
         if (result == null) return Unauthorized(new { message = "Credenciais inválidas." });
         await StoreSecurity.SignIn(HttpContext, result);
         return Ok(new { id = result.Id });
@@ -60,7 +75,8 @@ public sealed class SessionController(SessionUseCases sessions, ITenantProvider 
     [HttpPost("logout"), Authorize]
     public async Task<IActionResult> Logout(CancellationToken ct)
     {
-        await sessions.Logout(Caller, ct);
+        var outcome=await sender.Send(new LogoutSessionCommand(Caller),ct);
+        if(!outcome.IsSuccess)return CommandResults.Respond(outcome,_=>NoContent());
         await HttpContext.SignOutAsync(StoreSecurity.Scheme);
         return NoContent();
     }

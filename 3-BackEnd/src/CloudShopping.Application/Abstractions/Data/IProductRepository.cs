@@ -10,5 +10,6 @@ namespace CloudShopping.Application.Abstractions.Data
         Task<(IEnumerable<Product> Items, int TotalCount)> GetPaginatedAsync(int tenantId, int page, int pageSize, string? searchTerm, CancellationToken cancellationToken = default);
         Task<Product?> GetBySkuAsync(string sku, CancellationToken cancellationToken = default);
         Task<IEnumerable<Product>> GetByIdsAsync(IEnumerable<int> ids, CancellationToken cancellationToken = default);
+        Task<bool> IsSlugOrVariantInUseAsync(int exceptProductId, string slug, string? familyCode, string? variantLabel, CancellationToken cancellationToken = default);
     }
 }

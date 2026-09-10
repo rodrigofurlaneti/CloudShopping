@@ -1,143 +1,87 @@
 using System.ComponentModel.DataAnnotations;
 using CloudShopping.Api.Security;
-using CloudShopping.Domain.Enums;
-using CloudShopping.Domain.Entities.Customers;
-using CloudShopping.Infrastructure.Persistence;
-using CloudShopping.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using MediatR;
+using CloudShopping.Application.Features.Storefront.Queries.GetStoreContext;
+using CloudShopping.Application.Features.Storefront.Queries.GetStoreDepartments;
+using CloudShopping.Application.Features.Storefront.Queries.GetStoreProducts;
+using CloudShopping.Application.Features.Storefront.Queries.GetStoreProduct;
+using CloudShopping.Application.Features.Storefront.Queries.GetStoreCart;
+using CloudShopping.Application.Features.Storefront.Queries.GetStoreProfile;
+using CloudShopping.Application.Features.Storefront.Queries.GetStoreAddresses;
+using CloudShopping.Application.Features.Storefront.Queries.GetStoreShipping;
+using CloudShopping.Application.Features.Storefront.Queries.PreviewStoreCheckout;
+using CloudShopping.Application.Features.Storefront.Queries.GetStoreOrders;
+using CloudShopping.Application.Features.Storefront.Queries.GetStoreOrder;
+using CloudShopping.Application.Features.Storefront.Queries.GetStoreAdminShipping;
+using CloudShopping.Application.Features.Storefront.Commands.ChangeStoreCart;
+using CloudShopping.Application.Features.Storefront.Commands.UpdateStoreProfile;
+using CloudShopping.Application.Features.Storefront.Commands.AddStoreAddress;
+using CloudShopping.Application.Features.Storefront.Commands.ConfirmStoreCheckout;
+using CloudShopping.Application.Features.Storefront.Commands.CancelStoreOrder;
+using CloudShopping.Application.Features.Storefront.Commands.AddStoreShipping;
+using CloudShopping.Application.Features.Storefront.Commands.DisableStoreShipping;
 namespace CloudShopping.Api.Controllers;
-
 [ApiController, Route("api/v1/store")]
-public sealed class StorefrontController(AppDbContext db, StoreCommerceService commerce, CloudShopping.Infrastructure.Payments.AsaasPayments payments) : ControllerBase
+public sealed class StorefrontController(ISender sender) : ControllerBase
 {
     private int CustomerId => StoreSecurity.Subject(User);
     [HttpGet("context"), AllowAnonymous]
-    public async Task<IActionResult> Context(CancellationToken ct) => Ok(await db.Tenants.Select(x => new { x.Id, x.CompanyName }).SingleAsync(ct));
-
+    public async Task<IActionResult> Context(CancellationToken ct) => Ok(await sender.Send(new GetStoreContextQuery(), ct));
     [HttpGet("departments"), AllowAnonymous]
-    public async Task<IActionResult> Departments(CancellationToken ct) => Ok(await db.Departments.OrderBy(x => x.Name)
-        .Select(x => new { x.Id, x.Name, x.Slug }).ToListAsync(ct));
-
+    public async Task<IActionResult> Departments(CancellationToken ct) => Ok(await sender.Send(new GetStoreDepartmentsQuery(), ct));
     [HttpGet("products"), AllowAnonymous]
     public async Task<IActionResult> Products(string? search = null, int? departmentId = null, int page = 1, int pageSize = 12, CancellationToken ct = default)
-    {
-        pageSize = Math.Clamp(pageSize, 1, 100);
-        var q = db.Products.AsNoTracking();
-        if (!string.IsNullOrWhiteSpace(search)) q = q.Where(x => x.Name.Contains(search) || x.Sku.Contains(search));
-        if (departmentId != null) q = q.Where(x => x.DepartmentId == departmentId);
-        var count = await q.CountAsync(ct);
-        var items = await q.OrderBy(x => x.Name).ThenBy(x => x.Id).Skip((page - 1) * pageSize).Take(pageSize)
-            .Select(x => new { x.Id, x.Name, sku = x.Sku, x.Price, x.DepartmentId, availableStock = x.PhysicalStock - x.ReservedStock,
-                image = x.Images.Where(i => i.IsActive).OrderByDescending(i => i.IsPrimary).ThenBy(i => i.DisplayOrder).Select(i => i.FilePath).FirstOrDefault() })
-            .ToListAsync(ct);
-        return Ok(new { items, totalCount = count, page, pageSize, totalPages = (int)Math.Ceiling((double)count / pageSize) });
-    }
+        => Ok(await sender.Send(new GetStoreProductsQuery(search, departmentId, page, Math.Clamp(pageSize,1,100)), ct));
     [HttpGet("products/{id:int}"), AllowAnonymous]
-    public async Task<IActionResult> Product(int id, CancellationToken ct)
-    {
-        var p=await db.Products.AsNoTracking().Include(x=>x.Images).SingleOrDefaultAsync(x=>x.Id==id,ct);
-        if(p==null)return NotFound(new{message="Produto não encontrado."});
-        var variants=await db.Products.Where(x=>p.FamilyCode!=null&&x.FamilyCode==p.FamilyCode).OrderBy(x=>x.VariantLabel)
-            .Select(x=>new{x.Id,x.Slug,x.VariantLabel,x.Price,availableStock=x.PhysicalStock-x.ReservedStock}).ToListAsync(ct);
-        return Ok(new{p.Id,p.Name,p.Sku,p.Slug,p.Price,p.DepartmentId,p.Description,p.Brand,p.WeightKg,p.WidthCm,p.HeightCm,p.LengthCm,p.FamilyCode,p.VariantLabel,
-            attributes=System.Text.Json.JsonSerializer.Deserialize<Dictionary<string,string>>(p.AttributesJson),variants,availableStock=p.PhysicalStock-p.ReservedStock,
-            images=p.Images.Where(i=>i.IsActive).OrderByDescending(i=>i.IsPrimary).ThenBy(i=>i.DisplayOrder).Select(i=>i.FilePath).ToArray()});
+    public async Task<IActionResult> Product(int id, CancellationToken ct) {
+        var product = await sender.Send(new GetStoreProductQuery(id, null), ct);
+        return product == null ? NotFound(new { message = "Produto não encontrado." }) : Ok(product);
     }
-    [HttpGet("products/by-slug/{slug}"),AllowAnonymous]
-    public async Task<IActionResult> ProductBySlug(string slug,CancellationToken ct)
-    {
-        var id=await db.Products.Where(x=>x.Slug==slug).Select(x=>(int?)x.Id).SingleOrDefaultAsync(ct);
-        return id.HasValue?await Product(id.Value,ct):NotFound(new{message="Produto não encontrado."});
+    [HttpGet("products/by-slug/{slug}"), AllowAnonymous]
+    public async Task<IActionResult> ProductBySlug(string slug, CancellationToken ct) {
+        var product = await sender.Send(new GetStoreProductQuery(null, slug), ct);
+        return product == null ? NotFound(new { message = "Produto não encontrado." }) : Ok(product);
     }
     [HttpGet("cart"), Authorize(Roles = "Customer")]
-    public async Task<IActionResult> Cart(CancellationToken ct) => Ok(await commerce.ViewCart(CustomerId, ct));
+    public async Task<IActionResult> Cart(CancellationToken ct) => Ok(await sender.Send(new GetStoreCartQuery(CustomerId), ct));
     [HttpPost("cart/items"), Authorize(Roles = "Customer")]
-    public async Task<IActionResult> Add(ItemInput input, CancellationToken ct) => Ok(await commerce.ChangeCart(CustomerId, input.ProductId, input.Quantity, "add", ct));
+    public async Task<IActionResult> Add(ItemInput input, CancellationToken ct) => CommandResults.Respond(await sender.Send(new ChangeStoreCartCommand(CustomerId,input.ProductId,input.Quantity,"add"), ct), value => Ok(value));
     [HttpPut("cart/items/{id:int}"), Authorize(Roles = "Customer")]
-    public async Task<IActionResult> Set(int id, QuantityInput input, CancellationToken ct) => Ok(await commerce.ChangeCart(CustomerId, id, input.Quantity, "set", ct));
+    public async Task<IActionResult> Set(int id, QuantityInput input, CancellationToken ct) => CommandResults.Respond(await sender.Send(new ChangeStoreCartCommand(CustomerId,id,input.Quantity,"set"), ct), value => Ok(value));
     [HttpDelete("cart/items/{id:int}"), Authorize(Roles = "Customer")]
-    public async Task<IActionResult> Remove(int id, CancellationToken ct) => Ok(await commerce.ChangeCart(CustomerId, id, 0, "remove", ct));
+    public async Task<IActionResult> Remove(int id, CancellationToken ct) => CommandResults.Respond(await sender.Send(new ChangeStoreCartCommand(CustomerId,id,0,"remove"), ct), value => Ok(value));
     [HttpDelete("cart"), Authorize(Roles = "Customer")]
-    public async Task<IActionResult> Clear(CancellationToken ct) => Ok(await commerce.ChangeCart(CustomerId, 0, 0, "clear", ct));
-
+    public async Task<IActionResult> Clear(CancellationToken ct) => CommandResults.Respond(await sender.Send(new ChangeStoreCartCommand(CustomerId,0,0,"clear"), ct), value => Ok(value));
     [HttpGet("profile"), Authorize(Roles = "Customer")]
-    public async Task<IActionResult> Profile(CancellationToken ct)
-    {
-        var c = await db.Customers.Include(x => x.Individual).Include(x => x.Company).SingleAsync(x => x.Id == CustomerId, ct);
-        return Ok(new { c.Email, type = c.Company == null ? "B2C" : "B2B",
-            name = c.Individual?.FullName ?? c.Company?.CompanyName ?? "", taxId = c.Individual?.TaxId ?? c.Company?.BusinessTaxId ?? "" });
-    }
+    public async Task<IActionResult> Profile(CancellationToken ct) => Ok(await sender.Send(new GetStoreProfileQuery(CustomerId), ct));
     [HttpPut("profile"), Authorize(Roles = "Customer")]
-    public async Task<IActionResult> UpdateProfile(ProfileInput input, CancellationToken ct)
-    {
-        if (!TaxDocument.IsValid(input.TaxId) || (input.Type == "B2C" ? input.TaxId.Length != 11 : input.TaxId.Length != 14))
-            return BadRequest(new { message = "CPF/CNPJ inválido." });
-        var email = input.Email.Trim().ToLowerInvariant();
-        if (await db.Customers.IgnoreQueryFilters().AnyAsync(x => x.TenantId == db.CurrentTenantId && x.Email == email && x.Id != CustomerId, ct))
-            return Conflict(new { message = "Email já cadastrado. Entre com sua conta antes de continuar." });
-        var c = await db.Customers.Include(x => x.Individual).Include(x => x.Company).SingleAsync(x => x.Id == CustomerId, ct);
-        c.ChangeEmail(email);
-        if (input.Type == "B2C")
-        {
-            if (c.Individual == null) c.RegisterAsB2C(input.TaxId, input.Name.Trim(), null);
-            else { if (c.Individual.TaxId != input.TaxId) return Conflict(new { message = "O documento cadastrado não pode ser trocado nesta tela." }); c.UpdateB2CProfile(input.Name.Trim(), c.Individual.BirthDate); }
-        }
-        else
-        {
-            if (c.Company == null) c.RegisterAsB2B(input.TaxId, input.Name.Trim(), null);
-            else { if (c.Company.BusinessTaxId != input.TaxId) return Conflict(new { message = "O documento cadastrado não pode ser trocado nesta tela." }); c.UpdateB2BProfile(input.Name.Trim(), c.Company.StateTaxId); }
-        }
-        await db.SaveChangesAsync(ct); return NoContent();
+    public async Task<IActionResult> UpdateProfile(ProfileInput input, CancellationToken ct) {
+        return CommandResults.Respond(await sender.Send(new UpdateStoreProfileCommand(CustomerId,input.Email,input.Name,input.Type,input.TaxId), ct), _ => NoContent());
     }
-
     [HttpGet("addresses"), Authorize(Roles = "Customer")]
-    public async Task<IActionResult> Addresses(CancellationToken ct) => Ok(await db.Addresses.Where(x => x.CustomerId == CustomerId && x.IsActive)
-        .Select(x => new { x.Id, x.Street, x.Number, x.Neighborhood, x.City, x.State, x.ZipCode, x.IsDefault }).ToListAsync(ct));
+    public async Task<IActionResult> Addresses(CancellationToken ct) => Ok(await sender.Send(new GetStoreAddressesQuery(CustomerId), ct));
     [HttpPost("addresses"), Authorize(Roles = "Customer")]
-    public async Task<IActionResult> AddAddress(AddressInput input, CancellationToken ct)
-    {
-        var a = Address.Create(CustomerId, AddressType.Shipping, input.Street, input.Number, input.Neighborhood,
-            input.City, input.State, input.ZipCode, false);
-        db.Add(a); await db.SaveChangesAsync(ct); return Ok(new { a.Id });
-    }
-
+    public async Task<IActionResult> AddAddress(AddressInput input, CancellationToken ct) => CommandResults.Respond(await sender.Send(new AddStoreAddressCommand(CustomerId,input.Street,input.Number,input.Neighborhood,input.City,input.State,input.ZipCode), ct), id => Ok(new { id }));
     [HttpGet("shipping-options"), Authorize(Roles = "Customer")]
-    public async Task<IActionResult> Shipping(int addressId, CancellationToken ct)
-    {
-        var address = await db.Addresses.SingleOrDefaultAsync(x => x.Id == addressId && x.CustomerId == CustomerId && x.IsActive, ct);
-        if (address == null) return NotFound();
-        return Ok(await db.Set<ShippingOption>().Where(x => x.IsActive && address.ZipCode.StartsWith(x.PostalCodePrefix))
-            .Select(x => new { x.Id, x.Name, x.Amount, x.EstimatedDays }).ToListAsync(ct));
-    }
+    public async Task<IActionResult> Shipping(int addressId, CancellationToken ct) => Ok(await sender.Send(new GetStoreShippingQuery(CustomerId,addressId), ct));
     [HttpPost("checkout/preview"), Authorize(Roles = "Customer")]
-    public async Task<IActionResult> Preview(PreviewInput input, CancellationToken ct) => Ok(await commerce.Preview(CustomerId, input.AddressId, input.ShippingId, ct,input.CouponCode));
+    public async Task<IActionResult> Preview(PreviewInput input, CancellationToken ct) => Ok(await sender.Send(new PreviewStoreCheckoutQuery(CustomerId,input.AddressId,input.ShippingId,input.CouponCode), ct));
     [HttpPost("checkout/confirm"), Authorize(Roles = "Customer")]
-    public async Task<IActionResult> Confirm(ConfirmInput input, CancellationToken ct) => Ok(await commerce.Confirm(CustomerId, input.Key, input.Token, ct));
+    public async Task<IActionResult> Confirm(ConfirmInput input, CancellationToken ct) => CommandResults.Respond(await sender.Send(new ConfirmStoreCheckoutCommand(CustomerId,input.Key,input.Token), ct), value => Ok(value));
     [HttpGet("orders"), Authorize(Roles = "Customer")]
-    public async Task<IActionResult> Orders(int page = 1, CancellationToken ct = default) => Ok(await db.Orders.Where(x => x.CustomerId == CustomerId)
-        .OrderByDescending(x => x.Id).Skip((page - 1) * 20).Take(20).Select(x => new { x.Id, x.TotalAmount, x.OrderStatusId, x.ReservationState, x.ReservationExpiresAt }).ToListAsync(ct));
+    public async Task<IActionResult> Orders(int page = 1, CancellationToken ct = default) => Ok(await sender.Send(new GetStoreOrdersQuery(CustomerId,page), ct));
     [HttpGet("orders/{id:int}"), Authorize(Roles = "Customer")]
-    public async Task<IActionResult> Order(int id, CancellationToken ct) => Ok(await commerce.GetOrder(CustomerId, id, ct));
+    public async Task<IActionResult> Order(int id, CancellationToken ct) => Ok(await sender.Send(new GetStoreOrderQuery(CustomerId,id), ct));
     [HttpPost("orders/{id:int}/cancel"), Authorize(Roles = "Customer")]
-    public async Task<IActionResult> Cancel(int id, CancellationToken ct) { await payments.Reconcile(id, CustomerId, ct,"cancel","Customer:"+CustomerId); return NoContent(); }
-
+    public async Task<IActionResult> Cancel(int id, CancellationToken ct) { return CommandResults.Respond(await sender.Send(new CancelStoreOrderCommand(CustomerId,id), ct), _ => NoContent()); }
     [HttpGet("admin/shipping-options"), Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> AdminShipping(CancellationToken ct) => Ok(await db.Set<ShippingOption>().ToListAsync(ct));
+    public async Task<IActionResult> AdminShipping(CancellationToken ct) => Ok(await sender.Send(new GetStoreAdminShippingQuery(), ct));
     [HttpPost("admin/shipping-options"), Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> SaveShipping(ShippingInput input, CancellationToken ct)
-    {
-        var option = new ShippingOption { TenantId = db.CurrentTenantId, Name = input.Name.Trim(), Amount = input.Amount,
-            EstimatedDays = input.EstimatedDays, PostalCodePrefix = input.PostalCodePrefix };
-        db.Add(option); await db.SaveChangesAsync(ct); return Ok(new { option.Id });
-    }
+    public async Task<IActionResult> SaveShipping(ShippingInput input, CancellationToken ct) => CommandResults.Respond(await sender.Send(new AddStoreShippingCommand(input.Name,input.Amount,input.EstimatedDays,input.PostalCodePrefix), ct), id => Ok(new { id }));
     [HttpDelete("admin/shipping-options/{id:int}"), Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> DisableShipping(int id, CancellationToken ct)
-    {
-        var option = await db.Set<ShippingOption>().SingleOrDefaultAsync(x => x.Id == id, ct);
-        if (option == null) return NotFound(); option.IsActive = false; await db.SaveChangesAsync(ct); return NoContent();
-    }
+    public async Task<IActionResult> DisableShipping(int id, CancellationToken ct) { return CommandResults.Respond(await sender.Send(new DisableStoreShippingCommand(id), ct), _ => NoContent()); }
 }
 public sealed record ItemInput([Range(1,int.MaxValue)] int ProductId, [Range(1,999)] int Quantity);
 public sealed record QuantityInput([Range(1,999)] int Quantity);
@@ -151,19 +95,3 @@ public sealed record PreviewInput([Range(1,int.MaxValue)] int AddressId, [Range(
 public sealed record ConfirmInput([Required, MaxLength(64)] string Key, [Required, MaxLength(16000)] string Token);
 public sealed record ShippingInput([Required, MaxLength(100)] string Name, [Range(typeof(decimal),"0","999999.99")] decimal Amount,
     [RegularExpression("^[0-9]{0,8}$")] string PostalCodePrefix, [Range(0,365)] int EstimatedDays);
-internal static class TaxDocument
-{
-    public static bool IsValid(string value)
-    {
-        if (value.Length is not (11 or 14) || !value.All(char.IsAsciiDigit) || value.Distinct().Count() == 1) return false;
-        int Calculate(int length) {
-            var sum = 0;
-            for (int i = 0; i < length; i++) {
-                int weight = value.Length == 11 ? length + 1 - i : (length - 1 - i) % 8 + 2;
-                sum += (value[i] - '0') * weight;
-            }
-            int rest = sum % 11; return rest < 2 ? 0 : 11 - rest;
-        }
-        return Calculate(value.Length - 2) == value[^2] - '0' && Calculate(value.Length - 1) == value[^1] - '0';
-    }
-}

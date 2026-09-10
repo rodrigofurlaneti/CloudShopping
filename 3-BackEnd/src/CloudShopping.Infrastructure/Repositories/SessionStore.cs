@@ -1,3 +1,4 @@
+using CloudShopping.Domain.Entities.Security;
 using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Domain.Entities.Backoffice;
 using CloudShopping.Infrastructure.Persistence;
@@ -25,7 +26,7 @@ public sealed class SessionStore(AppDbContext db) : ISessionStore
                 where membership.TenantId == tenantId && profile.TenantId == tenantId && membership.EmployeeUserId == subjectId && membership.IsActive && profile.IsActive
                 select profile;
             var permitted = await profiles.AnyAsync(x => x.Name == "Administrador Geral", ct) ||
-                await db.Set<Services.ProfilePermission>().IgnoreQueryFilters().AnyAsync(x => x.TenantId == tenantId && profiles.Any(p => p.Id == x.ProfileId), ct);
+                await db.Set<ProfilePermission>().IgnoreQueryFilters().AnyAsync(x => x.TenantId == tenantId && profiles.Any(p => p.Id == x.ProfileId), ct);
             return new(user.PasswordHash, user.IsActive && employeeActive, permitted);
         }
         var customer = await db.Customers.IgnoreQueryFilters().AsNoTracking().SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == subjectId, ct);
@@ -34,8 +35,9 @@ public sealed class SessionStore(AppDbContext db) : ISessionStore
 
     public async Task Add(StoredSession session, CancellationToken ct)
     {
-        db.Add(new AuthSession { Id = session.Id, TenantId = session.TenantId, SubjectId = session.SubjectId, Kind = session.Kind,
-            CredentialStamp = session.CredentialStamp, ExpiresAt = session.ExpiresAt, RevokedAt = session.RevokedAt });
+        var entity = AuthSession.Create(session.TenantId, session.SubjectId, session.Kind, session.CredentialStamp, session.ExpiresAt, session.Id);
+        if (session.RevokedAt.HasValue) entity.Revoke(session.RevokedAt);
+        db.Add(entity);
         await db.SaveChangesAsync(ct);
     }
 
@@ -43,7 +45,7 @@ public sealed class SessionStore(AppDbContext db) : ISessionStore
     {
         var session = await db.Set<AuthSession>().SingleOrDefaultAsync(x => x.TenantId == tenantId && x.Id == sessionId, ct);
         if (session == null || session.RevokedAt != null) return;
-        session.RevokedAt = DateTime.UtcNow;
+        session.Revoke();
         await db.SaveChangesAsync(ct);
     }
 }

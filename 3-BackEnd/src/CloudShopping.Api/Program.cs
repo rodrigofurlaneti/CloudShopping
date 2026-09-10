@@ -1,3 +1,4 @@
+using CloudShopping.Domain.Exceptions;
 using Microsoft.AspNetCore.DataProtection;
 using CloudShopping.Application;
 using CloudShopping.Infrastructure;
@@ -24,14 +25,14 @@ builder.Services.AddScoped<RequestGuards>();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped<StoreCommerceService>();
-builder.Services.AddScoped<AccountSecurity>();
+
 builder.Services.AddHostedService<ReservationExpiryWorker>();
 builder.Services.AddHttpClient<IAsaasGateway,AsaasGateway>().RedactLoggedHeaders(_=>true).ConfigurePrimaryHttpMessageHandler(()=>new HttpClientHandler {AllowAutoRedirect=false});
 builder.Services.AddScoped<AsaasAccounts>();
 builder.Services.AddScoped<AsaasPayments>();
 builder.Services.AddScoped<CloudShopping.Infrastructure.Operations.OrderOperations>();
 builder.Services.AddScoped<CloudShopping.Infrastructure.Operations.CustomerEngagement>();
-builder.Services.AddScoped<CloudShopping.Infrastructure.Operations.StoreReports>();
+
 builder.Services.AddHostedService<CloudShopping.Infrastructure.Operations.NotificationWorker>();
 builder.Services.AddHostedService<CloudShopping.Infrastructure.Operations.ImportWorker>();
 builder.Services.AddSingleton<AsaasInbox>();

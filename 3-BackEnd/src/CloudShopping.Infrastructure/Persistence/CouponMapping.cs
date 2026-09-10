@@ -1,3 +1,4 @@
+using CloudShopping.Domain.Entities.Promotions;
 using CloudShopping.Infrastructure.Operations;
 using Microsoft.EntityFrameworkCore;
 namespace CloudShopping.Infrastructure.Persistence;

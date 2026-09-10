@@ -1,3 +1,4 @@
+using CloudShopping.Domain.Exceptions;
 using CloudShopping.Infrastructure.Operations;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
@@ -26,6 +27,6 @@ public sealed partial class CommerceTests
  {
   await using var db=Db(1);var service=new CatalogImportService(db);await service.Preview("sku,name,departmentId,price,physicalStock\nNEW,Invalid department,9999,20.00,1","Administrator:1",default);
   var job=await db.Set<CatalogImport>().SingleAsync();Assert.Equal("Invalid",(await db.Set<CatalogImportRow>().SingleAsync()).State);
-  await Assert.ThrowsAsync<CloudShopping.Infrastructure.Services.CommerceConflictException>(()=>service.Queue(job.Id,default));Assert.Single(await db.Products.ToListAsync());
+  await Assert.ThrowsAsync<CloudShopping.Domain.Exceptions.CommerceConflictException>(()=>service.Queue(job.Id,default));Assert.Single(await db.Products.ToListAsync());
  }
 }

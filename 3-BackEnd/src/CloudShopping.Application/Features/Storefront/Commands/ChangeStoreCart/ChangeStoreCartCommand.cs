@@ -1,0 +1,10 @@
+using CloudShopping.Domain.Primitives.Results;
+using CloudShopping.Application.Abstractions.Data;
+using CloudShopping.Application.Abstractions.Services;
+using CloudShopping.Application.Features.Storefront.Contracts;
+using CloudShopping.Domain.Entities.Customers;
+using CloudShopping.Domain.Enums;
+using MediatR;
+using System.Text.Json;
+namespace CloudShopping.Application.Features.Storefront.Commands.ChangeStoreCart;
+public sealed record ChangeStoreCartCommand(int CustomerId, int ProductId, int Quantity, string Operation) : IRequest<Result<CartView>>;

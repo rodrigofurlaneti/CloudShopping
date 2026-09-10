@@ -1,3 +1,4 @@
+using CloudShopping.Domain.Exceptions;
 using CloudShopping.Infrastructure.Persistence;
 using CloudShopping.Infrastructure.Services;
 using CloudShopping.Domain.Entities.Orders;

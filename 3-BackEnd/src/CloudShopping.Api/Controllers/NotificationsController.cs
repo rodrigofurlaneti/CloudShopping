@@ -1,21 +1,25 @@
 using CloudShopping.Api.Security;
-using CloudShopping.Infrastructure.Operations;
-using CloudShopping.Infrastructure.Persistence;
+using CloudShopping.Application.Features.Notifications.Commands.MarkNotificationRead;
+using CloudShopping.Application.Features.Notifications.Commands.RetryNotification;
+using CloudShopping.Application.Features.Notifications.Queries.GetCustomerNotifications;
+using CloudShopping.Application.Features.Notifications.Queries.GetNotificationOutbox;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 namespace CloudShopping.Api.Controllers;
-[ApiController,Route("api/v1/store/notifications"),Authorize(Roles="Customer")]
-public sealed class NotificationsController(AppDbContext db):ControllerBase
+[ApiController, Route("api/v1/store/notifications"), Authorize(Roles="Customer")]
+public sealed class NotificationsController(ISender sender) : ControllerBase
 {
- [HttpGet]public async Task<object> List(int page=1,CancellationToken ct=default)=>await db.Set<CustomerNotification>().Where(x=>x.CustomerId==StoreSecurity.Subject(User)).OrderByDescending(x=>x.CreatedAt).Skip((page-1)*20).Take(20).Select(x=>new{x.Id,x.OrderId,x.Kind,x.CreatedAt,x.ReadAt}).ToListAsync(ct);
- [HttpPost("{id}/read")]public async Task<IActionResult> Read(string id,CancellationToken ct)
- {var n=await db.Set<CustomerNotification>().SingleOrDefaultAsync(x=>x.Id==id&&x.CustomerId==StoreSecurity.Subject(User),ct)??throw new KeyNotFoundException();n.ReadAt??=DateTime.UtcNow;await db.SaveChangesAsync(ct);return NoContent();}
+    [HttpGet]
+    public async Task<IActionResult> List(int page=1,CancellationToken ct=default) => Ok(await sender.Send(new GetCustomerNotificationsQuery(StoreSecurity.Subject(User),page),ct));
+    [HttpPost("{id}/read")]
+    public async Task<IActionResult> Read(string id,CancellationToken ct) => CommandResults.Respond(await sender.Send(new MarkNotificationReadCommand(StoreSecurity.Subject(User),id),ct),_=>NoContent());
 }
-[ApiController,Route("api/v1/notifications"),Authorize(Roles="Administrator")]
-public sealed class NotificationAdminController(AppDbContext db):ControllerBase
+[ApiController, Route("api/v1/notifications"), Authorize(Roles="Administrator")]
+public sealed class NotificationAdminController(ISender sender) : ControllerBase
 {
- [HttpGet]public async Task<object> List(int page=1,CancellationToken ct=default)=>await db.Set<CommerceOutbox>().OrderByDescending(x=>x.CreatedAt).Skip((page-1)*20).Take(20).Select(x=>new{x.Id,x.OrderId,x.Kind,x.State,x.Attempts,x.LastError,x.CreatedAt,x.ProcessedAt}).ToListAsync(ct);
- [HttpPost("{id}/retry")]public async Task<IActionResult> Retry(string id,CancellationToken ct)
- {var n=await db.Set<CommerceOutbox>().SingleOrDefaultAsync(x=>x.Id==id,ct)??throw new KeyNotFoundException();if(n.State=="Failed"){n.State="Pending";n.AvailableAt=DateTime.UtcNow;n.Attempts=0;await db.SaveChangesAsync(ct);}return NoContent();}
+    [HttpGet]
+    public async Task<IActionResult> List(int page=1,CancellationToken ct=default) => Ok(await sender.Send(new GetNotificationOutboxQuery(page),ct));
+    [HttpPost("{id}/retry")]
+    public async Task<IActionResult> Retry(string id,CancellationToken ct) => CommandResults.Respond(await sender.Send(new RetryNotificationCommand(id),ct),_=>NoContent());
 }

@@ -1,10 +1,18 @@
+using CloudShopping.Domain.Exceptions;
+using CloudShopping.Domain.Entities.Promotions;
 using CloudShopping.Infrastructure.Operations;
 using CloudShopping.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 public sealed partial class CommerceTests
 {
- private async Task<Coupon> TestCoupon(CloudShopping.Infrastructure.Persistence.AppDbContext db)=>await new Coupons(db).Create(new("TENOFF","Percent",10,50,1,1,DateTime.UtcNow.AddHours(-1),DateTime.UtcNow.AddDays(1)),default);
+ private async Task<Coupon> TestCoupon(CloudShopping.Infrastructure.Persistence.AppDbContext db)
+ {
+  var handler=new CloudShopping.Application.Features.Coupons.Commands.CreateCoupon.CreateCouponCommandHandler(new CloudShopping.Infrastructure.Repositories.CouponRepository(db),new CloudShopping.Infrastructure.Repositories.UnitOfWork(db),new TestTenant(1));
+  var result=await handler.Handle(new("TENOFF","Percent",10,50,1,1,DateTime.UtcNow.AddHours(-1),DateTime.UtcNow.AddDays(1)),default);
+  Assert.True(result.IsSuccess);
+  return await db.Set<Coupon>().SingleAsync();
+ }
  [Fact]
  public async Task Coupon_snapshot_replay_and_unpaid_cancellation_reconcile_usage()
  {
@@ -21,7 +29,7 @@ public sealed partial class CommerceTests
  public async Task Coupon_disabled_after_preview_is_rejected_without_order_or_consumption()
  {
   await using var db=Db(1);await TestCoupon(db);await Prepare(db);var p=await Service(db).Preview(customerId,addressId,shippingId,default,"TENOFF");
-  var c=await db.Set<Coupon>().SingleAsync();c.Enabled=false;await db.SaveChangesAsync();
+  var c=await db.Set<Coupon>().SingleAsync();c.SetEnabled(false);await db.SaveChangesAsync();
   await Assert.ThrowsAsync<CommerceConflictException>(()=>Service(db).Confirm(customerId,Guid.NewGuid().ToString(),p.Token,default));
   Assert.Empty(await db.Orders.ToListAsync());Assert.Empty(await db.Set<CouponRedemption>().ToListAsync());
   Assert.Equal(0,(await db.Products.SingleAsync()).ReservedStock);

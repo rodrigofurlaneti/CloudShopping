@@ -1,4 +1,4 @@
-using CloudShopping.Infrastructure.Services;
+using CloudShopping.Domain.Entities.Backoffice;
 using Microsoft.EntityFrameworkCore;
 namespace CloudShopping.Infrastructure.Persistence;
 public sealed partial class AppDbContext

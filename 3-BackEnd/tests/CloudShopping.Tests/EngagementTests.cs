@@ -1,3 +1,4 @@
+using CloudShopping.Domain.Exceptions;
 using System.Text.Json;
 using CloudShopping.Infrastructure.Operations;
 using CloudShopping.Infrastructure.Services;
@@ -48,9 +49,9 @@ public sealed partial class CommerceTests
  {
   await using var db=Db(1);var gateway=new FakeAsaas();var id=await PaymentOrder(db,gateway);
   await Payments(db,gateway).Start(id,customerId,"PIX",default);gateway.Status="RECEIVED";await Payments(db,gateway).Reconcile(id,customerId,default);
-  var today=DateOnly.FromDateTime(DateTime.UtcNow);var report=JsonSerializer.SerializeToElement(await new StoreReports(db).Summary(today,today,default));
-  Assert.Equal(115m,report.Money("approvedGross"));Assert.Equal(1,report.GetProperty("orderCount").GetInt32());
-  await using var other=Db(2);var otherReport=JsonSerializer.SerializeToElement(await new StoreReports(other).Summary(today,today,default));Assert.Equal(0,otherReport.GetProperty("orderCount").GetInt32());
-  Assert.StartsWith("\"'",StoreReports.CsvCell(" =HYPERLINK(\"test\")"));
+  var today=DateOnly.FromDateTime(DateTime.UtcNow);var report=JsonSerializer.SerializeToElement(await new CloudShopping.Application.Features.Reports.Queries.GetReportSummary.GetReportSummaryQueryHandler(new CloudShopping.Infrastructure.Repositories.ReportRepository(db)).Handle(new(today,today),default));
+  Assert.Equal(115m,report.Money("ApprovedGross"));Assert.Equal(1,report.GetProperty("OrderCount").GetInt32());
+  await using var other=Db(2);var otherReport=JsonSerializer.SerializeToElement(await new CloudShopping.Application.Features.Reports.Queries.GetReportSummary.GetReportSummaryQueryHandler(new CloudShopping.Infrastructure.Repositories.ReportRepository(other)).Handle(new(today,today),default));Assert.Equal(0,otherReport.GetProperty("OrderCount").GetInt32());
+  Assert.StartsWith("\"'",CloudShopping.Application.Features.Reports.ReportCsv.Cell(" =HYPERLINK(\"test\")"));
  }
 }

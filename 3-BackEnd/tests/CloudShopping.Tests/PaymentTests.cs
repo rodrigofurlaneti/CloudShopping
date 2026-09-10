@@ -1,3 +1,4 @@
+using CloudShopping.Domain.Exceptions;
 using CloudShopping.Infrastructure.Payments;
 using CloudShopping.Infrastructure.Persistence;
 using Microsoft.AspNetCore.DataProtection;
@@ -43,7 +44,7 @@ public sealed partial class CommerceTests
         await using var db=Db(1);var gateway=new FakeAsaas {LoseCreationResponse=true,HidePayments=true};var id=await PaymentOrder(db,gateway);
         await Payments(db,gateway).Start(id,customerId,"PIX",default);
         gateway.OverrideAmount=999;
-        await Assert.ThrowsAsync<CloudShopping.Infrastructure.Services.CommerceConflictException>(()=>Payments(db,gateway).Recover(id,"pay_test","Administrator:42",default));
+        await Assert.ThrowsAsync<CloudShopping.Domain.Exceptions.CommerceConflictException>(()=>Payments(db,gateway).Recover(id,"pay_test","Administrator:42",default));
         gateway.OverrideAmount=null;
         await Payments(db,gateway).Recover(id,"pay_test","Administrator:42",default);
         Assert.Equal(1,gateway.PaymentCreates);

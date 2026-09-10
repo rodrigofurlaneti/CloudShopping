@@ -1,0 +1,10 @@
+using CloudShopping.Domain.Primitives.Results;
+using CloudShopping.Application.Abstractions.Data;
+using CloudShopping.Application.Abstractions.Services;
+using CloudShopping.Application.Features.Storefront.Contracts;
+using CloudShopping.Domain.Entities.Customers;
+using CloudShopping.Domain.Enums;
+using MediatR;
+using System.Text.Json;
+namespace CloudShopping.Application.Features.Storefront.Commands.UpdateStoreProfile;
+public sealed record UpdateStoreProfileCommand(int CustomerId, string Email, string Name, string Type, string TaxId) : IRequest<Result<Unit>>;

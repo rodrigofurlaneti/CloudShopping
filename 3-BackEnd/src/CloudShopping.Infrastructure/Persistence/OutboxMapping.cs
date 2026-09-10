@@ -1,3 +1,4 @@
+using CloudShopping.Domain.Entities.Notifications;
 using CloudShopping.Infrastructure.Operations;
 using CloudShopping.Domain.Entities.Orders;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +28,7 @@ public sealed partial class AppDbContext
    }
    foreach(var kind in kinds)
     if(!Set<CommerceOutbox>().Local.Any(x=>x.Order==o&&x.OrderVersion==o.Version&&x.Kind==kind))
-     Add(new CommerceOutbox {TenantId=o.TenantId,Order=o,OrderVersion=o.Version,Kind=kind});
+     Add(CommerceOutbox.Create(o,kind));
   }
  }
 }

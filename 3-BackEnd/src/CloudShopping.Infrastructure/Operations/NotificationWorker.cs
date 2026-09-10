@@ -1,3 +1,4 @@
+using CloudShopping.Domain.Entities.Notifications;
 using CloudShopping.Application.Abstractions.Services;
 using CloudShopping.Infrastructure.Payments;
 using CloudShopping.Infrastructure.Persistence;
@@ -36,8 +37,8 @@ public sealed class NotificationWorker(IServiceProvider services,IConfiguration 
     if(message.State!="Pending")continue;
     var order=await db.Orders.SingleAsync(x=>x.Id==message.OrderId,ct);
     if(!await db.Set<CustomerNotification>().AnyAsync(x=>x.EventId==message.Id,ct))
-     db.Add(new CustomerNotification {TenantId=row.Tenant,CustomerId=order.CustomerId,OrderId=order.Id,EventId=message.Id,Kind=message.Kind});
-    message.State="Processed";message.ProcessedAt=DateTime.UtcNow;message.LastError=null;
+     db.Add(CustomerNotification.Create(row.Tenant,order.CustomerId,order.Id,message.Id,message.Kind));
+    message.MarkProcessed();
     await db.SaveChangesAsync(ct);await tx.CommitAsync(ct);
    }
    catch(Exception e)when(e is not OperationCanceledException)

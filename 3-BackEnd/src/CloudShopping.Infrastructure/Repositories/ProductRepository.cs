@@ -45,6 +45,13 @@ namespace CloudShopping.Infrastructure.Repositories
             await _context.Products.AddAsync(product, cancellationToken);
         }
 
+        public Task<bool> IsSlugOrVariantInUseAsync(int exceptProductId, string slug, string? familyCode, string? variantLabel, CancellationToken cancellationToken = default)
+        {
+            var tenantId = _tenantProvider.GetTenantId();
+            return _context.Products.IgnoreQueryFilters().AnyAsync(x => x.TenantId == tenantId && x.Id != exceptProductId &&
+                (x.Slug == slug || familyCode != null && x.FamilyCode == familyCode && x.VariantLabel == variantLabel), cancellationToken);
+        }
+
         public void Update(Product product)
         {
             _context.Products.Update(product);

@@ -1,3 +1,4 @@
+using CloudShopping.Domain.Exceptions;
 using CloudShopping.Infrastructure.Operations;
 using CloudShopping.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
