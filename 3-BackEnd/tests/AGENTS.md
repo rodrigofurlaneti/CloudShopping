@@ -1,5 +1,4 @@
 AGENTS.md
-
 CloudShopping — Regras para a Camada de Testes
 
 Este documento define as regras obrigatórias que qualquer agente de IA deve seguir ao analisar, criar, alterar, corrigir ou refatorar código dentro de:
