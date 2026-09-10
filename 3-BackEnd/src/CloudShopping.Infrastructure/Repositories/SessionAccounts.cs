@@ -13,7 +13,7 @@ public sealed class SessionAccounts(AppDbContext db) : ISessionAccounts
 {
     public Task<EmployeeUser?> EmployeeLogin(string username, CancellationToken ct) => db.Set<EmployeeUser>().SingleOrDefaultAsync(x => x.Username == username && x.IsActive, ct);
     public Task<bool> EmployeeActive(int id, CancellationToken ct) => db.Set<Employee>().AnyAsync(x => x.Id == id && x.IsActive, ct);
-    public Task<string[]> Permissions(int userId, CancellationToken ct) => new StorePermissions(db).ForUser(userId, ct);
+    public Task<string[]> Permissions(int userId, CancellationToken ct) => new AccessRepository(db).ForUser(userId, ct);
     public Task<Customer?> CustomerByEmail(string email, CancellationToken ct) => db.Customers.SingleOrDefaultAsync(x => x.Email == email, ct);
     public Task<Customer?> CustomerById(int id, CancellationToken ct) => db.Customers.SingleOrDefaultAsync(x => x.Id == id, ct);
     public Task<bool> EmailUsed(string email, int exceptCustomer, CancellationToken ct) => db.Customers.IgnoreQueryFilters().AnyAsync(x => x.TenantId == db.CurrentTenantId && x.Email == email && x.Id != exceptCustomer, ct);

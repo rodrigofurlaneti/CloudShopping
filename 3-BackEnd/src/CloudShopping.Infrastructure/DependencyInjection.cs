@@ -1,4 +1,4 @@
-﻿using CloudShopping.Application.Abstractions.Data;
+using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Application.Abstractions.Services;
 using CloudShopping.Infrastructure.Persistence;
 using CloudShopping.Infrastructure.Repositories;
@@ -25,6 +25,7 @@ public static class DependencyInjection
         services.AddScoped<ITenantProvider, TenantProvider>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IAccessRepository, AccessRepository>();
         services.AddScoped<ISessionStore, SessionStore>();
         services.AddScoped<ISessionAccounts, SessionAccounts>();
         services.AddScoped<ICustomerRepository, CustomerRepository>();

@@ -1,3 +1,8 @@
+using CloudShopping.Domain.Entities.Security;
+using CloudShopping.Application.Features.AccountSecurity;
+using CloudShopping.Application.Features.Access;
+using CloudShopping.Application.Features.Access.Commands.ReplaceProfilePermissions;
+using CloudShopping.Infrastructure.Repositories;
 using CloudShopping.Domain.Entities.Backoffice;
 using CloudShopping.Infrastructure.Persistence;
 using CloudShopping.Infrastructure.Services;
@@ -10,16 +15,16 @@ public sealed partial class CommerceTests
     {
         var customer = await db.Customers.SingleAsync(x => x.Id == customerId);
         customer.SetPassword(new PasswordHasher().Hash(password));
-        var session = new AuthSession { TenantId = 1, SubjectId = customerId, Kind = "Customer", CredentialStamp = AccountSecurity.Stamp(customer.PasswordHash!), ExpiresAt = DateTime.UtcNow.AddHours(1) };
+        var session = AuthSession.Create(1, customerId, "Customer", AccountSecurity.Stamp(customer.PasswordHash!), DateTime.UtcNow.AddHours(1));
         db.Add(session); await db.SaveChangesAsync(); return session.Id;
     }
     [Fact]
     public async Task Password_change_revokes_all_sessions_and_rejects_old_session()
     {
         await using var db = Db(1); var sid = await AccountSession(db);
-        var second = new AuthSession { TenantId = 1, SubjectId = customerId, Kind = "Customer", ExpiresAt = DateTime.UtcNow.AddHours(1), CredentialStamp = (await db.Set<AuthSession>().SingleAsync()).CredentialStamp };
+        var second = AuthSession.Create(1, customerId, "Customer", (await db.Set<AuthSession>().SingleAsync()).CredentialStamp, DateTime.UtcNow.AddHours(1));
         db.Add(second); await db.SaveChangesAsync();
-        var security = new AccountSecurity(db, new PasswordHasher());
+        var security = new AccountSecurity(new AccountSecurityRepository(db), new UnitOfWork(db), new PasswordHasher());
         await Assert.ThrowsAsync<ArgumentException>(() => security.ChangePassword(customerId, "Customer", sid, "wrong", "Changed-Password-2026!", default));
         Assert.Equal(2, await db.Set<AuthSession>().CountAsync(x => x.RevokedAt == null));
         await security.ChangePassword(customerId, "Customer", sid, "Current-Password-2026!", "Changed-Password-2026!", default);
@@ -31,14 +36,14 @@ public sealed partial class CommerceTests
     public async Task Session_revocation_is_owner_kind_and_tenant_scoped()
     {
         await using var db = Db(1); var sid = await AccountSession(db);
-        var foreign = new AuthSession { TenantId = 1, SubjectId = customerId + 10, Kind = "Customer", ExpiresAt = DateTime.UtcNow.AddHours(1) };
-        var staff = new AuthSession { TenantId = 1, SubjectId = customerId, Kind = "Administrator", ExpiresAt = DateTime.UtcNow.AddHours(1) };
-        db.AddRange(foreign, staff); await db.SaveChangesAsync(); var security = new AccountSecurity(db, new PasswordHasher());
+        var foreign = AuthSession.Create(1, customerId + 10, "Customer", "", DateTime.UtcNow.AddHours(1));
+        var staff = AuthSession.Create(1, customerId, "Administrator", "", DateTime.UtcNow.AddHours(1));
+        db.AddRange(foreign, staff); await db.SaveChangesAsync(); var security = new AccountSecurity(new AccountSecurityRepository(db), new UnitOfWork(db), new PasswordHasher());
         Assert.Single(await security.Sessions(customerId, "Customer", sid, default));
         await Assert.ThrowsAsync<KeyNotFoundException>(() => security.Revoke(customerId, "Customer", sid, foreign.Id, default));
         await Assert.ThrowsAsync<KeyNotFoundException>(() => security.Revoke(customerId, "Customer", sid, staff.Id, default));
         await using var other = Db(2);
-        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => new AccountSecurity(other, new PasswordHasher()).Revoke(customerId, "Customer", sid, null, default));
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => new AccountSecurity(new AccountSecurityRepository(other), new UnitOfWork(other), new PasswordHasher()).Revoke(customerId, "Customer", sid, null, default));
         await security.Revoke(customerId, "Customer", sid, null, default);
         Assert.Equal(3, await db.Set<AuthSession>().CountAsync(x => x.RevokedAt == null));
     }
@@ -52,15 +57,16 @@ public sealed partial class CommerceTests
         var admin = EmployeeUser.Create(1, employee.Id, "test-admin", "test-hash"); var staff = EmployeeUser.Create(1, employee.Id, "test-staff", "test-hash");
         db.AddRange(admin, staff); await db.SaveChangesAsync();
         db.AddRange(ProfileUser.Create(1, adminProfile.Id, admin.Id), ProfileUser.Create(1, profile.Id, staff.Id)); await db.SaveChangesAsync();
-        var service = new StorePermissions(db);
-        await service.Replace(admin.Id, profile.Id, [], ["catalog.read"], default);
-        Assert.Equal(new[] { "catalog.read" }, await service.ForUser(staff.Id));
-        Assert.False(StorePermissions.Allows(await service.ForUser(staff.Id), "stock.write"));
-        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => service.Replace(staff.Id, profile.Id, ["catalog.read"], ["finance.read"], default));
-        await Assert.ThrowsAsync<InvalidOperationException>(() => service.Replace(admin.Id, profile.Id, [], ["finance.read"], default));
-        await service.Replace(admin.Id, profile.Id, ["catalog.read"], [], default);
-        Assert.Empty(await service.ForUser(staff.Id)); Assert.Equal(2, await db.Set<AccessChange>().CountAsync());
-        await using var other = Db(2); Assert.Empty(await new StorePermissions(other).ForUser(staff.Id));
+        var repository = new AccessRepository(db);
+        var handler = new ReplaceProfilePermissionsCommandHandler(repository);
+        Assert.True((await handler.Handle(new(admin.Id, profile.Id, [], ["catalog.read"]), default)).IsSuccess);
+        Assert.Equal(new[] { "catalog.read" }, await repository.ForUser(staff.Id, default));
+        Assert.False(PermissionPolicy.Allows(await repository.ForUser(staff.Id, default), "stock.write"));
+        Assert.Equal("Command.Forbidden", (await handler.Handle(new(staff.Id, profile.Id, ["catalog.read"], ["finance.read"]), default)).Error.Code);
+        Assert.Equal("Command.Conflict", (await handler.Handle(new(admin.Id, profile.Id, [], ["finance.read"]), default)).Error.Code);
+        Assert.True((await handler.Handle(new(admin.Id, profile.Id, ["catalog.read"], []), default)).IsSuccess);
+        Assert.Empty(await repository.ForUser(staff.Id, default)); Assert.Equal(2, await db.Set<AccessChange>().CountAsync());
+        await using var other = Db(2); Assert.Empty(await new AccessRepository(other).ForUser(staff.Id, default));
         Assert.Empty(await other.Set<AccessChange>().ToListAsync());
     }
 }
@@ -76,6 +82,6 @@ public sealed class AccessPolicyTests
     public void Sensitive_operations_and_unknown_controllers_do_not_inherit_read_access(string controller, string action, bool read, string required)
     {
         Assert.Contains(required, AccessRequirements.For(controller, action, read));
-        Assert.False(AccessRequirements.For(controller, action, read).All(x => StorePermissions.Allows(["catalog.read", "finance.read"], x)));
+        Assert.False(AccessRequirements.For(controller, action, read).All(x => PermissionPolicy.Allows(["catalog.read", "finance.read"], x)));
     }
 }

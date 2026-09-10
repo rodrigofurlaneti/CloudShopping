@@ -1,12 +1,14 @@
-using CloudShopping.Infrastructure.Persistence;
+using CloudShopping.Application.Abstractions.Services;
+using CloudShopping.Application.Features.Access;
+using CloudShopping.Application.Features.Access.Queries.GetUserPermissions;
+using CloudShopping.Domain.Entities.Backoffice;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Controllers;
-using CloudShopping.Infrastructure.Services;
 namespace CloudShopping.Api.Security;
-public sealed class RequestGuards(AppDbContext db) : IAsyncActionFilter, IOrderedFilter
+public sealed class RequestGuards(ISender sender, ITenantProvider tenant) : IAsyncActionFilter, IOrderedFilter
 {
     public int Order => -3000;
     public async Task OnActionExecutionAsync(ActionExecutingContext ctx, ActionExecutionDelegate next)
@@ -14,15 +16,15 @@ public sealed class RequestGuards(AppDbContext db) : IAsyncActionFilter, IOrdere
         if (ctx.HttpContext.User.IsInRole("Administrator") && ctx.HttpContext.GetEndpoint()?.Metadata.GetMetadata<IAllowAnonymous>() == null)
         {
             var descriptor = (ControllerActionDescriptor)ctx.ActionDescriptor;
-            var permissions = await new StorePermissions(db).ForUser(StoreSecurity.Subject(ctx.HttpContext.User), ctx.HttpContext.RequestAborted);
+            var permissions = await sender.Send(new GetUserPermissionsQuery(StoreSecurity.Subject(ctx.HttpContext.User)), ctx.HttpContext.RequestAborted);
             var required = AccessRequirements.For(descriptor.ControllerName, descriptor.ActionName, HttpMethods.IsGet(ctx.HttpContext.Request.Method) || HttpMethods.IsHead(ctx.HttpContext.Request.Method));
-            if (required.Any(x => !StorePermissions.Allows(permissions, x)))
+            if (required.Any(x => !PermissionPolicy.Allows(permissions, x)))
             { ctx.Result = new ObjectResult(new { message = "Seu perfil não possui permissão para esta operação." }) { StatusCode = 403 }; return; }
         }
         foreach (var value in ctx.ActionArguments.Values)
         {
             var prop = value?.GetType().GetProperty("TenantId");
-            if (prop?.GetValue(value) is int requested && requested > 0 && requested != db.CurrentTenantId)
+            if (prop?.GetValue(value) is int requested && requested > 0 && requested != tenant.GetTenantId())
             { ctx.Result = new ForbidResult(); return; }
         }
         foreach (var name in new[] { "page", "pageSize" })
