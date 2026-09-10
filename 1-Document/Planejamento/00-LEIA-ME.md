@@ -6,6 +6,8 @@ Preparado em 09/09/2026 com leitura estática do backend, frontend, documentaç�
 
 Após a análise, foi implementado e testado o recorte **base, catálogo, carrinho e checkout**. Leia [a entrega 1 e suas evidências](06-entrega-base-catalogo-checkout.md). O diagnóstico original é histórico; os testes de runtime posteriores estão registrados nessa entrega.
 
+A terceira entrega implementa operação assistida, devoluções, notificações no portal, cupons, favoritos/avaliações, suporte, indicadores, importação e ficha de variantes. Consulte [entrega 3](08-entrega-operacao-e-modulos.md) e [saldo para concluir o escopo](09-saldo-escopo-completo.md). O projeto ainda não atingiu 100% dos critérios mapeados.
+
 ## Comece aqui
 
 A segunda entrega acrescenta os dois modelos de recebimento Asaas, pagamentos e conciliação. Consulte [entrega 2, configuração e homologação pendente](07-entrega-pagamentos-asaas.md). Os resultados da entrega 1 permanecem como registro histórico.

@@ -2,6 +2,8 @@ using System.Data;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using CloudShopping.Infrastructure.Operations;
+using CloudShopping.Infrastructure.Payments;
 using CloudShopping.Domain.Entities.Carts;
 using CloudShopping.Domain.Entities.Orders;
 using CloudShopping.Infrastructure.Persistence;
@@ -14,10 +16,10 @@ public sealed class CommerceConflictException(string message) : Exception(messag
 public sealed record CartLine(int ProductId, string Name, string Sku, decimal Price, int Quantity, int AvailableStock, string? Image);
 public sealed record CartView(int Id, int Version, DateTime ExpiresAt, IReadOnlyList<CartLine> Items, decimal Subtotal);
 public sealed record Quote(int TenantId, int CustomerId, int CartId, int CartVersion, int AddressId, int ShippingId,
-    string Fingerprint, decimal Total, DateTime ExpiresAt);
-public sealed record CheckoutPreview(string Token, CartView Cart, string ShippingName, decimal ShippingAmount, decimal Total, DateTime ExpiresAt);
+    string Fingerprint, decimal Total, DateTime ExpiresAt,string? CouponCode=null,decimal Discount=0,string CouponFingerprint="");
+public sealed record CheckoutPreview(string Token, CartView Cart, string ShippingName, decimal ShippingAmount, decimal Total, DateTime ExpiresAt,decimal DiscountAmount=0,string? CouponCode=null);
 public sealed record PlacedOrder(int Id, decimal TotalAmount, decimal ShippingAmount, string? ShippingMethod,
-    int OrderStatusId, string ReservationState, DateTime? ReservationExpiresAt, object[] Items, object? Address);
+    int OrderStatusId, string ReservationState, DateTime? ReservationExpiresAt, object[] Items, object? Address,decimal DiscountAmount=0,string? CouponCode=null);
 
 public sealed class StoreCommerceService(AppDbContext db, IDataProtectionProvider protection, IConfiguration config)
 {
@@ -87,14 +89,16 @@ public sealed class StoreCommerceService(AppDbContext db, IDataProtectionProvide
         }));
         return (cart, shipping, fingerprint);
     }
-    public async Task<CheckoutPreview> Preview(int customerId, int addressId, int shippingId, CancellationToken ct)
+    public async Task<CheckoutPreview> Preview(int customerId, int addressId, int shippingId, CancellationToken ct,string? couponCode=null)
     {
         var evaluated = await Evaluate(customerId, addressId, shippingId, ct);
-        var total = evaluated.Cart.Subtotal + evaluated.Shipping.Amount;
+        var coupon=await new Coupons(db).Evaluate(customerId,evaluated.Cart.Subtotal,couponCode,ct);
+        var total = evaluated.Cart.Subtotal + evaluated.Shipping.Amount-coupon.Discount;
+        if(total<=0)throw new ArgumentException("Este checkout exige total maior que zero.");
         var q = new Quote(db.CurrentTenantId, customerId, evaluated.Cart.Id, evaluated.Cart.Version, addressId,
-            shippingId, evaluated.Fingerprint, total, DateTime.UtcNow.AddMinutes(10));
+            shippingId, evaluated.Fingerprint, total, DateTime.UtcNow.AddMinutes(10),coupon.Coupon?.Code,coupon.Discount,coupon.Fingerprint);
         return new(protector.Protect(JsonSerializer.Serialize(q)), evaluated.Cart, evaluated.Shipping.Name,
-            evaluated.Shipping.Amount, total, q.ExpiresAt);
+            evaluated.Shipping.Amount, total, q.ExpiresAt,coupon.Discount,coupon.Coupon?.Code);
     }
     public async Task<PlacedOrder> Confirm(int customerId, string key, string token, CancellationToken ct)
     {
@@ -103,6 +107,8 @@ public sealed class StoreCommerceService(AppDbContext db, IDataProtectionProvide
         try { q = JsonSerializer.Deserialize<Quote>(protector.Unprotect(token))!; }
         catch (Exception ex) when (ex is CryptographicException or JsonException) { throw new ArgumentException("Resumo inválido. Revise a compra."); }
         if (q == null || q.TenantId != db.CurrentTenantId || q.CustomerId != customerId) throw new UnauthorizedAccessException();
+        await using var checkoutLock=await PaymentLock.Acquire(db.Database.GetConnectionString()!,"checkout:"+db.CurrentTenantId+":"+customerId+":"+key,ct);
+        db.ChangeTracker.Clear();
         var hash = Hash(token);
         var existing = await db.Orders.SingleOrDefaultAsync(x => x.CustomerId == customerId && x.CheckoutKey == key, ct);
         if (existing != null)
@@ -115,7 +121,8 @@ public sealed class StoreCommerceService(AppDbContext db, IDataProtectionProvide
         try
         {
             var e = await Evaluate(customerId, q.AddressId, q.ShippingId, ct);
-            if (e.Fingerprint != q.Fingerprint || e.Cart.Subtotal + e.Shipping.Amount != q.Total)
+            var coupon=await new Coupons(db).Evaluate(customerId,e.Cart.Subtotal,q.CouponCode,ct);
+            if (e.Fingerprint != q.Fingerprint || e.Cart.Subtotal + e.Shipping.Amount-coupon.Discount != q.Total||coupon.Discount!=q.Discount||coupon.Fingerprint!=q.CouponFingerprint)
                 throw new CommerceConflictException("Preço, carrinho ou entrega mudou. Revise a compra.");
             var address = await db.Addresses.SingleAsync(x => x.Id == q.AddressId && x.CustomerId == customerId, ct);
             var products = await db.Products.Where(x => e.Cart.Items.Select(i => i.ProductId).Contains(x.Id)).ToListAsync(ct);
@@ -124,6 +131,8 @@ public sealed class StoreCommerceService(AppDbContext db, IDataProtectionProvide
                 e.Cart.Items.Select(x => (x.ProductId, x.Quantity, x.Price)), address);
             order.ConfigureCheckout(key, hash, e.Shipping.Amount, e.Shipping.Name,
                 DateTime.UtcNow.AddMinutes(Math.Clamp(config.GetValue<int?>("Checkout:ReservationMinutes") ?? 30, 5, 1440)));
+            order.ApplyCoupon(coupon.Coupon?.Code,coupon.Discount);
+            new Coupons(db).Redeem(order,customerId,coupon);
             foreach (var item in order.OrderItems)
             {
                 var p = products.Single(x => x.Id == item.ProductId); item.SetSnapshot(p.Name, p.Sku);
@@ -151,7 +160,7 @@ public sealed class StoreCommerceService(AppDbContext db, IDataProtectionProvide
         order.ShippingMethod, order.OrderStatusId, order.ReservationState, order.ReservationExpiresAt,
         order.OrderItems.Select(x => (object)new { x.ProductId, name = x.ProductName, x.Sku, x.Quantity, x.UnitPrice }).ToArray(),
         order.OrderAddress == null ? null : new { order.OrderAddress.Street, order.OrderAddress.Number,
-            order.OrderAddress.Neighborhood, order.OrderAddress.City, order.OrderAddress.State, order.OrderAddress.ZipCode });
+            order.OrderAddress.Neighborhood, order.OrderAddress.City, order.OrderAddress.State, order.OrderAddress.ZipCode },order.DiscountAmount,order.CouponCode);
     public async Task Release(int orderId, int? customerId, CancellationToken ct, bool paymentResolved = false)
     {
         await using var tx = await db.Database.BeginTransactionAsync(ct);
@@ -167,6 +176,7 @@ public sealed class StoreCommerceService(AppDbContext db, IDataProtectionProvide
             product.ReleaseReservedStock(item.Quantity);
         }
         order.ReleaseReservation();
+        await new Coupons(db).Release(order.Id,ct);
         await db.SaveChangesAsync(ct); await tx.CommitAsync(ct);
     }
 }

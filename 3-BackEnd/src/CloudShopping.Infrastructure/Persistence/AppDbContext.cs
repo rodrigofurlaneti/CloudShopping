@@ -59,6 +59,11 @@ namespace CloudShopping.Infrastructure.Persistence
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
             ConfigureTenantScope(modelBuilder);
             ConfigurePayments(modelBuilder);
+            ConfigureOperations(modelBuilder);
+            ConfigureEngagement(modelBuilder);
+            ConfigureOutbox(modelBuilder);
+            ConfigureCoupons(modelBuilder);
+            ConfigureImports(modelBuilder);
 
             // Isolamento multi-tenant + soft delete via filtros globais de consulta
             modelBuilder.Entity<Customer>().HasQueryFilter(c => c.IsActive && c.TenantId == _currentTenantId);
@@ -72,6 +77,7 @@ namespace CloudShopping.Infrastructure.Persistence
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             await GuardWrites(cancellationToken);
+            CaptureCommerceEvents();
             // Coleta os eventos de domínio de todos os Aggregate Roots rastreados antes de persistir.
             var aggregateRoots = ChangeTracker.Entries()
                 .Select(e => e.Entity)

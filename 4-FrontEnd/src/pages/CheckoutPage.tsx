@@ -8,6 +8,7 @@ export function CheckoutPage() {
     const [profile,setProfile]=useState<Profile>({email:'',name:'',type:'B2C',taxId:''});
     const [addresses,setAddresses]=useState<Address[]>([]);const [addressId,setAddressId]=useState(0);
     const [selectedShippingId,setShippingId]=useState(0);
+    const [couponCode,setCouponCode]=useState('');
     const shippingResource=useResource<Shipping[]>(addressId?'/v1/store/shipping-options?addressId='+addressId:null);
     const shipping=shippingResource.data||[];const shippingId=shipping.some(s=>s.id===selectedShippingId)?selectedShippingId:shipping[0]?.id||0;
     const [preview,setPreview]=useState<Preview>();const [error,setError]=useState('');const [status,setStatus]=useState('');
@@ -49,9 +50,10 @@ export function CheckoutPage() {
                 </form></details>
             </section>
             <section className="form-card"><h2>3. Entrega</h2>{shippingResource.loading?<p>Consultando entrega…</p>:shippingResource.error?<p role="alert">{shippingResource.error}</p>:addressId&&!shipping.length?<p>Nenhuma opção disponível para este CEP. A loja precisa configurar a entrega.</p>:shipping.map(s=><label className="radio-option" key={s.id}><input type="radio" name="shipping" checked={shippingId===s.id} onChange={()=>{setShippingId(s.id);setPreview(undefined);}}/>{s.name} · {money(s.amount)} · até {s.estimatedDays} dia(s)</label>)}
-                <button disabled={busy||!shippingId||!addressId} onClick={()=>void run(async()=>{setPreview(await post<Preview>('/v1/store/checkout/preview',{addressId,shippingId}));})}>Revisar pedido</button>
+                <label>Cupom (opcional)<input maxLength={40} value={couponCode} onChange={e=>{setCouponCode(e.target.value);setPreview(undefined);}}/></label>
+                <button disabled={busy||!shippingId||!addressId} onClick={()=>void run(async()=>{setPreview(await post<Preview>('/v1/store/checkout/preview',{addressId,shippingId,couponCode}));})}>Revisar pedido</button>
             </section>
-        </div><aside className="form-card order-review"><h2>4. Revisão</h2>{preview?<><ul>{preview.cart.items.map(i=><li key={i.productId}>{i.quantity} × {i.name}<strong>{money(i.price*i.quantity)}</strong></li>)}</ul><p>Subtotal <strong>{money(preview.cart.subtotal)}</strong></p><p>{preview.shippingName} <strong>{money(preview.shippingAmount)}</strong></p><p className="total">Total <strong>{money(preview.total)}</strong></p><p className="muted">Valores válidos até {new Date(preview.expiresAt.endsWith('Z')?preview.expiresAt:preview.expiresAt+'Z').toLocaleTimeString('pt-BR')}.</p><button className="primary" disabled={busy||!!pending} onClick={()=>void run(()=>confirm({key:crypto.randomUUID(),token:preview.token}))}>{busy?'Confirmando…':'Confirmar pedido'}</button></>:<p>Salve seus dados, selecione endereço e entrega e clique em revisar.</p>}<Link to="/cart">Voltar ao carrinho</Link></aside></div>}
+        </div><aside className="form-card order-review"><h2>4. Revisão</h2>{preview?<><ul>{preview.cart.items.map(i=><li key={i.productId}>{i.quantity} × {i.name}<strong>{money(i.price*i.quantity)}</strong></li>)}</ul><p>Subtotal <strong>{money(preview.cart.subtotal)}</strong></p><p>{preview.shippingName} <strong>{money(preview.shippingAmount)}</strong></p>{preview.discountAmount>0&&<p>Cupom {preview.couponCode} <strong>−{money(preview.discountAmount)}</strong></p>}<p className="total">Total <strong>{money(preview.total)}</strong></p><p className="muted">Valores válidos até {new Date(preview.expiresAt.endsWith('Z')?preview.expiresAt:preview.expiresAt+'Z').toLocaleTimeString('pt-BR')}.</p><button className="primary" disabled={busy||!!pending} onClick={()=>void run(()=>confirm({key:crypto.randomUUID(),token:preview.token}))}>{busy?'Confirmando…':'Confirmar pedido'}</button></>:<p>Salve seus dados, selecione endereço e entrega e clique em revisar.</p>}<Link to="/cart">Voltar ao carrinho</Link></aside></div>}
     </StoreLayout>;
 }
 

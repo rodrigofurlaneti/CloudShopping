@@ -30,6 +30,9 @@ export function StoreLayout({ children }: { children: ReactNode }) {
             <nav aria-label="Conta e compras">
                 <Link to="/account">{user ? 'Minha conta' : 'Entrar'}</Link>
                 <Link to="/orders">Meus pedidos</Link>
+                <Link to="/favorites">Favoritos</Link>
+                <Link to="/support">Atendimento</Link>
+                <Link to="/notifications">Notificações</Link>
                 <Link to="/cart">Carrinho ({count})</Link>
                 {user && <button onClick={() => void logout().catch(e => setError(e.message))}>Sair</button>}
             </nav>

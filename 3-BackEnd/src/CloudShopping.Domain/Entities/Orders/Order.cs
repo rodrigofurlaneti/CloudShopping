@@ -15,6 +15,13 @@ namespace CloudShopping.Domain.Entities.Orders
         public DateTime OrderDate { get; private set; }
         public decimal TotalAmount { get; private set; }
         public decimal ShippingAmount { get; private set; }
+        public decimal DiscountAmount { get; private set; }
+        public string? CouponCode { get; private set; }
+        public void ApplyCoupon(string? code,decimal discount)
+        {
+            if(discount<0||discount>TotalAmount-ShippingAmount||TotalAmount-discount<=0)throw new ArgumentException("Desconto inválido para este pedido.");
+            CouponCode=code;DiscountAmount=discount;TotalAmount-=discount;
+        }
         public string? ShippingMethod { get; private set; }
         public string? CheckoutKey { get; private set; }
         public string? CheckoutHash { get; private set; }
@@ -23,6 +30,15 @@ namespace CloudShopping.Domain.Entities.Orders
         public int Version { get; private set; } = 1;
         public string FinancialState { get; private set; } = "Unpaid";
         public bool FulfillmentBlocked { get; private set; }
+        public string FulfillmentState { get; private set; } = "Unstarted";
+        public void SetFulfillment(string state)
+        {
+            if (state != "Delivered" && (FinancialState != "Paid" || FulfillmentBlocked || ReservationState != "Consumed"))
+                throw new InvalidOperationException("Pedido sem liberação financeira para expedição.");
+            if (state is not ("Processing" or "Picking" or "Packed" or "PartiallyShipped" or "Shipped" or "Delivered"))
+                throw new ArgumentException("Etapa operacional inválida.");
+            FulfillmentState=state; UpdateTimestamp();
+        }
         public void SchedulePayment(DateTime until)
         {
             if (OrderStatusId != 1 || ReservationState != "Reserved") throw new InvalidOperationException("Pedido não aceita pagamento.");

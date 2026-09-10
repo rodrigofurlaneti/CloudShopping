@@ -1,5 +1,12 @@
 import { AsaasSettings } from './pages/admin/AsaasSettings';
 import { FinancePayments } from './pages/admin/FinancePayments';
+import { SupportPage } from './pages/SupportPage';
+import { FavoritesPage } from './pages/FavoritesPage';
+import { NotificationsPage } from './pages/NotificationsPage';
+import { CouponsPage } from './pages/admin/CouponsPage';
+import { ImportsPage } from './pages/admin/ImportsPage';
+import { CatalogDetailsPage } from './pages/admin/CatalogDetailsPage';
+import { ReviewModeration } from './pages/admin/ReviewModeration';
 import { SessionProvider, AdminOnly } from './components/SessionProvider';
 import { CartPage } from './pages/CartPage';
 import { CheckoutPage } from './pages/CheckoutPage';
@@ -17,17 +24,27 @@ import { OrderSectors } from './pages/admin/OrderSectors';
 import { OrderStatuses } from './pages/admin/OrderStatuses';
 import { Customers } from './pages/admin/Customers';
 import { Products } from './pages/admin/Products';
-import { OrdersKanban } from './pages/admin/OrdersKanban';
+import { OrderOperationsPage } from './pages/admin/OrderOperationsPage';
 
 function App() {
     return (
         <BrowserRouter>
             <SessionProvider><Routes>
+                <Route path="/support" element={<SupportPage/>}/>
+                <Route path="/favorites" element={<FavoritesPage/>}/>
+                <Route path="/notifications" element={<NotificationsPage/>}/>
+                <Route path="/admin/notifications" element={<AdminOnly><NotificationsPage admin/></AdminOnly>}/>
+                <Route path="/admin/coupons" element={<AdminOnly><CouponsPage/></AdminOnly>}/>
+                <Route path="/admin/imports" element={<AdminOnly><ImportsPage/></AdminOnly>}/>
+                <Route path="/admin/catalog-details" element={<AdminOnly><CatalogDetailsPage/></AdminOnly>}/>
+                <Route path="/admin/support" element={<AdminOnly><SupportPage admin/></AdminOnly>}/>
+                <Route path="/admin/reviews" element={<AdminOnly><ReviewModeration/></AdminOnly>}/>
                 <Route path="/admin/asaas" element={<AdminOnly><AsaasSettings /></AdminOnly>} />
                 <Route path="/admin/payments" element={<AdminOnly><FinancePayments /></AdminOnly>} />
                 {/* Rotas públicas da Loja Virtual */}
                 <Route path="/" element={<StoreHome />} />
                 <Route path="/product/:id" element={<ProductDetail />} />
+                <Route path="/p/:slug" element={<ProductDetail />} />
                 <Route path="/cart" element={<CartPage />} />
                 <Route path="/checkout" element={<CheckoutPage />} />
                 <Route path="/account" element={<AccountPage />} />
@@ -50,7 +67,7 @@ function App() {
                 <Route path="/admin/order-statuses" element={<AdminOnly><OrderStatuses /></AdminOnly>} />
                 <Route path="/admin/customers" element={<AdminOnly><Customers /></AdminOnly>} />
                 <Route path="/admin/products" element={<AdminOnly><Products /></AdminOnly>} />
-                <Route path="/admin/orders" element={<AdminOnly><OrdersKanban /></AdminOnly>} />
+                <Route path="/admin/orders" element={<AdminOnly><OrderOperationsPage /></AdminOnly>} />
             </Routes></SessionProvider>
         </BrowserRouter>
     );

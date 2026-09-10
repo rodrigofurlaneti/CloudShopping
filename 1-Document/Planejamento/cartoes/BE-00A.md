@@ -3,7 +3,7 @@
 **Módulo:** 01-base  
 **Camada:** Backend  
 **Etapa:** Fundação · **Prioridade:** P0  
-**Estado:** Planejado — não iniciado  
+**Estado:** Parcial — consulte evidências de entrega; aceite integral pendente.
 **Responsável:** desenvolvedor da camada; revisão de domínio/integração pelo responsável técnico.
 
 ## Contexto
@@ -36,3 +36,8 @@ Entregar implementação/contrato OpenAPI atualizado, testes dos cenários de ac
 **Desbloqueia:** [BE-09](BE-09.md), [BE-11B](BE-11B.md), [BE-11C](BE-11C.md), [BE-16](BE-16.md)
 
 
+
+
+## Progresso da entrega 3
+
+**Parcial.** Outbox transacional e consumidor idempotente do portal; e-mail e dispatcher externo pendentes. Consulte [implementação e evidências](../08-entrega-operacao-e-modulos.md). Os critérios completos deste cartão continuam pendentes de aceite.

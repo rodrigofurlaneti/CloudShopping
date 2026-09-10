@@ -1,15 +1,15 @@
 import { post, request, resetCsrf } from './http';
 export interface SessionUser { id: number; name: string; role: 'Customer' | 'Administrator'; tenantId: number; isGuest: boolean }
 export interface Session { user: SessionUser | null; csrfToken: string }
-export interface Product { id: number; name: string; sku: string; price: number; departmentId: number; availableStock: number; image?: string; images?: string[] }
+export interface Product { slug?: string; description?: string; brand?: string; variantLabel?: string; attributes?: Record<string,string>; variants?: {id:number;slug:string;variantLabel:string;price:number;availableStock:number}[]; id: number; name: string; sku: string; price: number; departmentId: number; availableStock: number; image?: string; images?: string[] }
 export interface Page<T> { items: T[]; page: number; totalCount: number; totalPages: number }
 export interface CartLine { productId: number; name: string; sku: string; price: number; quantity: number; availableStock: number; image?: string }
 export interface Cart { id: number; version: number; expiresAt: string; items: CartLine[]; subtotal: number }
 export interface Address { id: number; street: string; number: string; neighborhood?: string; city: string; state: string; zipCode: string }
 export interface Profile { email: string; name: string; type: 'B2C' | 'B2B'; taxId: string }
 export interface Shipping { id: number; name: string; amount: number; estimatedDays: number; postalCodePrefix?: string; isActive?: boolean }
-export interface Preview { token: string; cart: Cart; shippingName: string; shippingAmount: number; total: number; expiresAt: string }
-export interface Order { id: number; totalAmount: number; shippingAmount: number; shippingMethod: string; orderStatusId: number; reservationState: string; reservationExpiresAt: string; items: { productId: number; name: string; sku: string; quantity: number; unitPrice: number }[]; address: Address }
+export interface Preview { discountAmount: number; couponCode?: string; token: string; cart: Cart; shippingName: string; shippingAmount: number; total: number; expiresAt: string }
+export interface Order { discountAmount: number; couponCode?: string; id: number; totalAmount: number; shippingAmount: number; shippingMethod: string; orderStatusId: number; reservationState: string; reservationExpiresAt: string; items: { productId: number; name: string; sku: string; quantity: number; unitPrice: number }[]; address: Address }
 export const money = (n: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(n);
 let guestPromise: Promise<void> | undefined;
 export function ensureCustomer() {

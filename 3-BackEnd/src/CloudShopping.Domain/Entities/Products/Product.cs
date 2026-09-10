@@ -10,6 +10,26 @@ namespace CloudShopping.Domain.Entities.Products
         public int TenantId { get; private set; }
         public int DepartmentId { get; private set; }
         public string Sku { get; private set; }
+        public string Slug { get; private set; } = "produto-"+Guid.NewGuid().ToString("N");
+        public string Description { get; private set; } = "";
+        public string? Brand { get; private set; }
+        public decimal WeightKg { get; private set; }
+        public decimal WidthCm { get; private set; }
+        public decimal HeightCm { get; private set; }
+        public decimal LengthCm { get; private set; }
+        public string? FamilyCode { get; private set; }
+        public string? VariantLabel { get; private set; }
+        public string AttributesJson { get; private set; } = "{}";
+        public void ConfigureCatalog(string slug,string description,string? brand,decimal weight,decimal width,decimal height,decimal length,string? family,string? variant,string attributesJson)
+        {
+            if(!System.Text.RegularExpressions.Regex.IsMatch(slug??"","^[a-z0-9]+(?:-[a-z0-9]+)*$")||slug!.Length is <3 or >150||description==null||description.Length>10000||brand?.Length>100)
+                throw new ArgumentException("Descrição, marca ou URL do produto inválida.");
+            if(weight<0||weight>10000||width<0||width>10000||height<0||height>10000||length<0||length>10000||decimal.Round(weight,3)!=weight||decimal.Round(width,2)!=width||decimal.Round(height,2)!=height||decimal.Round(length,2)!=length)
+                throw new ArgumentException("Peso ou dimensões inválidos.");
+            if((family==null)!=(variant==null)||family!=null&&(!System.Text.RegularExpressions.Regex.IsMatch(family,"^[A-Za-z0-9_-]{1,50}$")||string.IsNullOrWhiteSpace(variant)||variant.Length>100))
+                throw new ArgumentException("Informe código de família e identificação da variante juntos.");
+            Slug=slug;Description=description;Brand=brand;WeightKg=weight;WidthCm=width;HeightCm=height;LengthCm=length;FamilyCode=family;VariantLabel=variant;AttributesJson=attributesJson;UpdateTimestamp();
+        }
         public string Name { get; private set; }
         public decimal Price { get; private set; }
         public int PhysicalStock { get; private set; }

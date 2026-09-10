@@ -3,7 +3,7 @@
 **Módulo:** 00-decisoes  
 **Camada:** Definição  
 **Etapa:** Fundação · **Prioridade:** P0  
-**Estado:** Planejado — não iniciado  
+**Estado:** Parcial — consulte evidências de entrega; aceite integral pendente.
 **Responsável:** desenvolvedor da camada; revisão de domínio/integração pelo responsável técnico.
 
 ## Contexto

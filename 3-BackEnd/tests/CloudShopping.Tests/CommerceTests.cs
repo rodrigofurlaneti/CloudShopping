@@ -49,6 +49,8 @@ public sealed partial class CommerceTests : IAsyncLifetime
         await using var conn = new MySqlConnection(b.ConnectionString); await conn.OpenAsync();
         if (!database.StartsWith("cloudshopping_test_") || database.Length != 51) throw new InvalidOperationException("Nome de teste inválido.");
         await new MySqlCommand($"DROP DATABASE {database}", conn).ExecuteNonQueryAsync();
+        // Each test owns a distinct schema/pool. Do not retain idle connections for dropped schemas.
+        using var testPool=new MySqlConnection(connection);MySqlConnection.ClearPool(testPool);
     }
     private AppDbContext Db(int tenant) => new(new DbContextOptionsBuilder<AppDbContext>()
         .UseMySql(connection, new MySqlServerVersion(new Version(8,0,43))).Options, new TestTenant(tenant));

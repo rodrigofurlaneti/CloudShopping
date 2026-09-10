@@ -1,4 +1,5 @@
 import { PaymentPanel } from '../components/PaymentPanel';
+import { FulfillmentPanel } from '../components/FulfillmentPanel';
 import { useResource } from '../services/useResource';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
@@ -13,9 +14,10 @@ export function OrdersPage() {
         {loading?<p role="status">Carregando pedidos…</p>:id&&detail?<section className="form-card">
             <p className="notice">{detail.orderStatusId===16?'Pedido cancelado.':detail.orderStatusId===1?'Pedido criado. Confira a situação financeira abaixo.':detail.orderStatusId===2?'Pedido pago.':detail.orderStatusId===15?'Pedido estornado.':'Status do pedido: '+detail.orderStatusId}</p>
             <PaymentPanel orderId={detail.id} pending={detail.orderStatusId===1} onChanged={()=>setVersion(v=>v+1)} />
+            <FulfillmentPanel key={detail.id} orderId={detail.id}/>
             {detail.reservationExpiresAt&&<p>Reserva até {new Date(detail.reservationExpiresAt.endsWith('Z')?detail.reservationExpiresAt:detail.reservationExpiresAt+'Z').toLocaleString('pt-BR')} · {detail.reservationState==='Reserved'?'Reservado':detail.reservationState==='Released'?'Liberado':'Sem reserva ativa'}</p>}
             <ul className="order-items">{detail.items.map((i,n)=><li key={n}>{i.quantity} × {i.name||i.sku||'Produto '+i.productId}<strong>{money(i.unitPrice*i.quantity)}</strong></li>)}</ul>
-            <p>Entrega: {detail.shippingMethod} · {money(detail.shippingAmount)}</p><p className="total">Total {money(detail.totalAmount)}</p>
+            <p>Entrega: {detail.shippingMethod} · {money(detail.shippingAmount)}</p>{detail.discountAmount>0&&<p>Cupom {detail.couponCode}: −{money(detail.discountAmount)}</p>}<p className="total">Total {money(detail.totalAmount)}</p>
             {detail.address&&<address>{detail.address.street}, {detail.address.number}<br/>{detail.address.city}/{detail.address.state} · CEP {detail.address.zipCode}</address>}
             {detail.orderStatusId===1&&detail.reservationState==='Reserved'&&<button disabled={busy} onClick={async()=>{setBusy(true);try{await post('/v1/store/orders/'+id+'/cancel');setVersion(v=>v+1);}catch(e){setError((e as Error).message);}finally{setBusy(false);}}}>Solicitar cancelamento do pedido</button>}
             <Link to="/orders">Ver todos os pedidos</Link>

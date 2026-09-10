@@ -47,6 +47,17 @@ assert c.call('/asaas/orders/'+str(order['id']))['configured'] is False
 c.call('/asaas/orders/'+str(order['id']), 'POST', {'method':'PIX'}, expected=400, csrf=False)
 c.call('/asaas/orders/'+str(order['id']), 'POST', {'method':'INVALID'}, expected=400)
 c.call('/asaas/admin/payments', expected=403)
+assert c.call('/store/orders/'+str(order['id'])+'/fulfillment')['fulfillmentState']=='Unstarted'
+other.call('/store/orders/'+str(order['id'])+'/fulfillment',expected=404)
+c.call('/operations/orders',expected=403)
+c.call('/store/favorites/'+str(product['id']),'PUT',{},expected=204)
+c.call('/store/favorites/'+str(product['id']),'PUT',{},expected=204)
+assert len(c.call('/store/favorites'))==1
+c.call('/store/favorites/'+str(product['id']),'DELETE',expected=204)
+ticket=c.call('/store/support','POST',{'key':str(uuid.uuid4()),'subject':'Teste de atendimento','category':'Question','orderId':order['id'],'content':'Dados sintéticos de teste'})
+ticket_id=ticket['ticket']['id']
+other.call('/store/support/'+ticket_id,expected=404)
+assert c.call('/store/products/'+str(product['id'])+'/reviews')['count']==0
 c.call('/store/orders/'+str(order['id'])+'/cancel','POST',{}, expected=204)
 c.call('/store/orders/'+str(order['id'])+'/cancel','POST',{}, expected=204)
 c.call('/session/logout','POST',{}, expected=204); assert c.session()['user'] is None
@@ -72,5 +83,21 @@ admin.call('/asaas/orders/'+str(order['id']), expected=403)
 print('PASS: Asaas customer ownership, administrator isolation, unconfigured state, CSRF and method validation')
 admin.call('/store/cart',expected=403)
 admin.call('/orders/1/cancel','POST',{},expected=409)
+admin.call('/operations/orders?page=1')
+detail=admin.call('/operations/orders/'+str(order['id']))
+assert detail['allowedActions']==[]
+admin.call('/operations/orders/'+str(order['id'])+'/transition','POST',{'key':str(uuid.uuid4()),'version':detail['version'],'action':'Processing','notes':''},expected=409)
+admin.call('/operations/orders/'+str(order['id'])+'/transition','POST',{'key':str(uuid.uuid4()),'version':detail['version'],'action':'Note','notes':'Registro sintético de teste'})
+admin.call('/engagement/support/'+ticket_id)
+admin.call('/catalog-imports')
+admin.call('/catalog-details')
+admin.call('/coupons')
+admin.call('/notifications')
+import datetime
+today=datetime.datetime.now(datetime.timezone.utc).date().isoformat()
+report=admin.call('/reports?from='+today+'&to='+today)
+assert report['orderCount']>=1 and report['timeZone']=='UTC'
+assert 'Pedido,Data UTC' in admin.call('/reports/export?from='+today+'&to='+today)['content']
+print('PASS: operations, unpaid shipment guard, notes, favorites, support ownership, catalog details, reports, imports, coupons and notifications routes')
 admin.call('/session/logout','POST',{},expected=204)
 print('PASS: registration preserves guest identity, customer login merges cart, administrator login, role isolation, legacy payment guards')

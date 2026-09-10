@@ -37,11 +37,19 @@ public sealed class StorefrontController(AppDbContext db, StoreCommerceService c
     [HttpGet("products/{id:int}"), AllowAnonymous]
     public async Task<IActionResult> Product(int id, CancellationToken ct)
     {
-        var p = await db.Products.AsNoTracking().Where(x => x.Id == id).Select(x => new {
-            x.Id, x.Name, sku = x.Sku, x.Price, x.DepartmentId, availableStock = x.PhysicalStock - x.ReservedStock,
-            images = x.Images.Where(i => i.IsActive).OrderByDescending(i => i.IsPrimary).ThenBy(i => i.DisplayOrder).Select(i => i.FilePath).ToArray()
-        }).SingleOrDefaultAsync(ct);
-        return p == null ? NotFound(new { message = "Produto não encontrado." }) : Ok(p);
+        var p=await db.Products.AsNoTracking().Include(x=>x.Images).SingleOrDefaultAsync(x=>x.Id==id,ct);
+        if(p==null)return NotFound(new{message="Produto não encontrado."});
+        var variants=await db.Products.Where(x=>p.FamilyCode!=null&&x.FamilyCode==p.FamilyCode).OrderBy(x=>x.VariantLabel)
+            .Select(x=>new{x.Id,x.Slug,x.VariantLabel,x.Price,availableStock=x.PhysicalStock-x.ReservedStock}).ToListAsync(ct);
+        return Ok(new{p.Id,p.Name,p.Sku,p.Slug,p.Price,p.DepartmentId,p.Description,p.Brand,p.WeightKg,p.WidthCm,p.HeightCm,p.LengthCm,p.FamilyCode,p.VariantLabel,
+            attributes=System.Text.Json.JsonSerializer.Deserialize<Dictionary<string,string>>(p.AttributesJson),variants,availableStock=p.PhysicalStock-p.ReservedStock,
+            images=p.Images.Where(i=>i.IsActive).OrderByDescending(i=>i.IsPrimary).ThenBy(i=>i.DisplayOrder).Select(i=>i.FilePath).ToArray()});
+    }
+    [HttpGet("products/by-slug/{slug}"),AllowAnonymous]
+    public async Task<IActionResult> ProductBySlug(string slug,CancellationToken ct)
+    {
+        var id=await db.Products.Where(x=>x.Slug==slug).Select(x=>(int?)x.Id).SingleOrDefaultAsync(ct);
+        return id.HasValue?await Product(id.Value,ct):NotFound(new{message="Produto não encontrado."});
     }
     [HttpGet("cart"), Authorize(Roles = "Customer")]
     public async Task<IActionResult> Cart(CancellationToken ct) => Ok(await commerce.ViewCart(CustomerId, ct));
@@ -104,7 +112,7 @@ public sealed class StorefrontController(AppDbContext db, StoreCommerceService c
             .Select(x => new { x.Id, x.Name, x.Amount, x.EstimatedDays }).ToListAsync(ct));
     }
     [HttpPost("checkout/preview"), Authorize(Roles = "Customer")]
-    public async Task<IActionResult> Preview(PreviewInput input, CancellationToken ct) => Ok(await commerce.Preview(CustomerId, input.AddressId, input.ShippingId, ct));
+    public async Task<IActionResult> Preview(PreviewInput input, CancellationToken ct) => Ok(await commerce.Preview(CustomerId, input.AddressId, input.ShippingId, ct,input.CouponCode));
     [HttpPost("checkout/confirm"), Authorize(Roles = "Customer")]
     public async Task<IActionResult> Confirm(ConfirmInput input, CancellationToken ct) => Ok(await commerce.Confirm(CustomerId, input.Key, input.Token, ct));
     [HttpGet("orders"), Authorize(Roles = "Customer")]
@@ -139,7 +147,7 @@ public sealed record ProfileInput([Required, EmailAddress, MaxLength(100)] strin
 public sealed record AddressInput([Required, MaxLength(150)] string Street, [Required, MaxLength(10)] string Number,
     [MaxLength(50)] string? Neighborhood, [Required, MaxLength(50)] string City,
     [Required, RegularExpression("^[A-Za-z]{2}$")] string State, [Required, RegularExpression("^[0-9]{8}$")] string ZipCode);
-public sealed record PreviewInput([Range(1,int.MaxValue)] int AddressId, [Range(1,int.MaxValue)] int ShippingId);
+public sealed record PreviewInput([Range(1,int.MaxValue)] int AddressId, [Range(1,int.MaxValue)] int ShippingId,[MaxLength(40)]string? CouponCode=null);
 public sealed record ConfirmInput([Required, MaxLength(64)] string Key, [Required, MaxLength(16000)] string Token);
 public sealed record ShippingInput([Required, MaxLength(100)] string Name, [Range(typeof(decimal),"0","999999.99")] decimal Amount,
     [RegularExpression("^[0-9]{0,8}$")] string PostalCodePrefix, [Range(0,365)] int EstimatedDays);

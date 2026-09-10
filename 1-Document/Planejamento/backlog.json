@@ -1,7 +1,7 @@
 {
   "date": "2026-09-09",
   "kind": "proposta-planejamento",
-  "note": "Dependências da proposta, não grafo de imports. Progresso nas entregas 06 e 07; critérios amplos e homologação externa permanecem pendentes.",
+  "note": "Escopo completo autorizado. Implementações parciais nas entregas 06, 07 e 08; saldo dos 98 cartões em 09-saldo-escopo-completo.md. Não representa conclusão de 100% nem produção homologada.",
   "cards": [
     {
       "id": "DEC-01",
@@ -409,7 +409,7 @@
       ],
       "evidence": "CloudShopping.Domain/Entities/Products/Product.cs; CloudShopping.Infrastructure/Persistence/Configurations/ProductConfiguration.cs",
       "priority": "P1",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "BE-04",
@@ -419,7 +419,9 @@
         "DB-18",
         "DB-20",
         "DB-28"
-      ]
+      ],
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Ficha comercial, slug, atributos e família de SKUs; ciclo amplo de imagens/filtros pendente."
     },
     {
       "id": "BE-04",
@@ -453,7 +455,9 @@
         "BE-20",
         "BE-28"
       ],
-      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md",
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Ficha comercial, slug, atributos e família de SKUs; ciclo amplo de imagens/filtros pendente."
     },
     {
       "id": "FE-04",
@@ -486,7 +490,9 @@
         "FE-20",
         "FE-28"
       ],
-      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md",
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Ficha comercial, slug, atributos e família de SKUs; ciclo amplo de imagens/filtros pendente."
     },
     {
       "id": "DB-05",
@@ -1421,14 +1427,16 @@
       ],
       "evidence": "CloudShopping.Domain/Enums/OrderStatusEnum.cs; CloudShopping.Domain/Entities/Orders/OrderStateHistory.cs",
       "priority": "P1",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "BE-12",
         "DB-13",
         "DB-21",
         "DB-26"
-      ]
+      ],
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Fluxo operacional auditado e paginado; equivalência legada/customizações e kanban por coluna pendentes."
     },
     {
       "id": "BE-12",
@@ -1453,7 +1461,7 @@
       ],
       "evidence": "CloudShopping.Api/Controllers/OrdersController.cs; CloudShopping.Application/Features/Orders",
       "priority": "P1",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "FE-12",
@@ -1461,7 +1469,9 @@
         "BE-14",
         "BE-21",
         "BE-26"
-      ]
+      ],
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Fluxo operacional auditado e paginado; equivalência legada/customizações e kanban por coluna pendentes."
     },
     {
       "id": "FE-12",
@@ -1495,7 +1505,9 @@
         "FE-15",
         "FE-26"
       ],
-      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md",
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Fluxo operacional auditado e paginado; equivalência legada/customizações e kanban por coluna pendentes."
     },
     {
       "id": "DB-13",
@@ -1520,13 +1532,15 @@
       ],
       "evidence": "CloudShopping.Domain/Entities/Orders/Order.cs",
       "priority": "P1",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "BE-13",
         "DB-15",
         "DB-26"
-      ]
+      ],
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Remessas parciais e rastreio assistido; adaptador, etiqueta e conferência ampliada pendentes."
     },
     {
       "id": "BE-13",
@@ -1552,13 +1566,15 @@
       ],
       "evidence": "CloudShopping.Application/Features/Orders; módulo novo",
       "priority": "P1",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "FE-13",
         "BE-15",
         "BE-26"
-      ]
+      ],
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Remessas parciais e rastreio assistido; adaptador, etiqueta e conferência ampliada pendentes."
     },
     {
       "id": "FE-13",
@@ -1583,11 +1599,13 @@
       ],
       "evidence": "4-FrontEnd/src/pages/admin/OrdersKanban.tsx",
       "priority": "P1",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "FE-26"
-      ]
+      ],
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Remessas parciais e rastreio assistido; adaptador, etiqueta e conferência ampliada pendentes."
     },
     {
       "id": "DB-14",
@@ -1701,12 +1719,14 @@
       ],
       "evidence": "CloudShopping.Domain/Entities/Orders/Order.cs",
       "priority": "P1",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "BE-15",
         "DB-26"
-      ]
+      ],
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Solicitação por item e inspeção com reposição idempotente; troca/logística reversa/reembolso parcial pendentes."
     },
     {
       "id": "BE-15",
@@ -1732,12 +1752,14 @@
       ],
       "evidence": "CloudShopping.Application/Features/Orders; módulo novo",
       "priority": "P1",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "FE-15",
         "BE-26"
-      ]
+      ],
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Solicitação por item e inspeção com reposição idempotente; troca/logística reversa/reembolso parcial pendentes."
     },
     {
       "id": "FE-15",
@@ -1762,11 +1784,13 @@
       ],
       "evidence": "4-FrontEnd/src/pages/admin/OrdersKanban.tsx; módulo novo",
       "priority": "P1",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "FE-26"
-      ]
+      ],
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Solicitação por item e inspeção com reposição idempotente; troca/logística reversa/reembolso parcial pendentes."
     },
     {
       "id": "DB-16",
@@ -1791,11 +1815,13 @@
       ],
       "evidence": "módulo novo",
       "priority": "P1",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "BE-16"
-      ]
+      ],
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Notificações reais no portal com outbox; e-mail, templates e preferências pendentes."
     },
     {
       "id": "BE-16",
@@ -1822,12 +1848,14 @@
       ],
       "evidence": "módulo novo; CloudShopping.Infrastructure/Persistence/AppDbContext.cs",
       "priority": "P1",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "FE-16",
         "BE-26"
-      ]
+      ],
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Notificações reais no portal com outbox; e-mail, templates e preferências pendentes."
     },
     {
       "id": "FE-16",
@@ -1853,11 +1881,13 @@
       ],
       "evidence": "módulo novo",
       "priority": "P1",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "FE-26"
-      ]
+      ],
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Notificações reais no portal com outbox; e-mail, templates e preferências pendentes."
     },
     {
       "id": "DB-17",
@@ -1881,11 +1911,13 @@
       ],
       "evidence": "Dump20260909 (1).sql; módulo novo",
       "priority": "P2",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "BE-17"
-      ]
+      ],
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Cupons com vigência, limites e snapshot no pedido; segmentação/campanhas pendentes."
     },
     {
       "id": "BE-17",
@@ -1911,11 +1943,13 @@
       ],
       "evidence": "módulo novo",
       "priority": "P2",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "FE-17"
-      ]
+      ],
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Cupons com vigência, limites e snapshot no pedido; segmentação/campanhas pendentes."
     },
     {
       "id": "FE-17",
@@ -1940,9 +1974,11 @@
       ],
       "evidence": "4-FrontEnd/src/layouts/BackofficeLayout.tsx",
       "priority": "P2",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
-      "unlocks": []
+      "unlocks": [],
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Cupons com vigência, limites e snapshot no pedido; segmentação/campanhas pendentes."
     },
     {
       "id": "DB-18",
@@ -2144,11 +2180,13 @@
       ],
       "evidence": "módulo novo",
       "priority": "P2",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "BE-20"
-      ]
+      ],
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Favoritos e avaliação verificada moderada; denúncia e ciclo completo de autoria pendentes."
     },
     {
       "id": "BE-20",
@@ -2174,11 +2212,13 @@
       ],
       "evidence": "módulo novo",
       "priority": "P2",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "FE-20"
-      ]
+      ],
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Favoritos e avaliação verificada moderada; denúncia e ciclo completo de autoria pendentes."
     },
     {
       "id": "FE-20",
@@ -2204,9 +2244,11 @@
       ],
       "evidence": "4-FrontEnd/src/pages/ProductDetail.tsx; módulo novo",
       "priority": "P2",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
-      "unlocks": []
+      "unlocks": [],
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Favoritos e avaliação verificada moderada; denúncia e ciclo completo de autoria pendentes."
     },
     {
       "id": "DB-21",
@@ -2231,12 +2273,14 @@
       ],
       "evidence": "4-FrontEnd/src/pages/admin/Dashboard.tsx; módulo novo",
       "priority": "P1",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "BE-21",
         "DB-26"
-      ]
+      ],
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Indicadores por período e CSV reais; taxas/líquido/estornos parciais e desempenho pendentes."
     },
     {
       "id": "BE-21",
@@ -2262,12 +2306,14 @@
       ],
       "evidence": "módulo novo",
       "priority": "P1",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "FE-21",
         "BE-26"
-      ]
+      ],
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Indicadores por período e CSV reais; taxas/líquido/estornos parciais e desempenho pendentes."
     },
     {
       "id": "FE-21",
@@ -2292,11 +2338,13 @@
       ],
       "evidence": "4-FrontEnd/src/pages/admin/Dashboard.tsx",
       "priority": "P1",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "FE-26"
-      ]
+      ],
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Indicadores por período e CSV reais; taxas/líquido/estornos parciais e desempenho pendentes."
     },
     {
       "id": "DB-22",
@@ -2321,12 +2369,14 @@
       ],
       "evidence": "módulo novo",
       "priority": "P1",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "BE-22",
         "DB-26"
-      ]
+      ],
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Atendimento e protocolo de privacidade; consentimentos/exportação/anonimização/anexos pendentes."
     },
     {
       "id": "BE-22",
@@ -2352,12 +2402,14 @@
       ],
       "evidence": "módulo novo",
       "priority": "P1",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "FE-22",
         "BE-26"
-      ]
+      ],
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Atendimento e protocolo de privacidade; consentimentos/exportação/anonimização/anexos pendentes."
     },
     {
       "id": "FE-22",
@@ -2383,11 +2435,13 @@
       ],
       "evidence": "4-FrontEnd/src/layouts/BackofficeLayout.tsx; módulo novo",
       "priority": "P1",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "FE-26"
-      ]
+      ],
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Atendimento e protocolo de privacidade; consentimentos/exportação/anonimização/anexos pendentes."
     },
     {
       "id": "DB-23",
@@ -2882,11 +2936,13 @@
       ],
       "evidence": "módulo novo",
       "priority": "P2",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "BE-28"
-      ]
+      ],
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Importação CSV assistida com prévia e worker; ERP e vínculos externos pendentes."
     },
     {
       "id": "BE-28",
@@ -2913,11 +2969,13 @@
       ],
       "evidence": "módulo novo",
       "priority": "P2",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "FE-28"
-      ]
+      ],
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Importação CSV assistida com prévia e worker; ERP e vínculos externos pendentes."
     },
     {
       "id": "FE-28",
@@ -2942,9 +3000,11 @@
       ],
       "evidence": "módulo novo",
       "priority": "P2",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
-      "unlocks": []
+      "unlocks": [],
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Importação CSV assistida com prévia e worker; ERP e vínculos externos pendentes."
     },
     {
       "id": "BE-00",
@@ -3055,14 +3115,16 @@
       ],
       "evidence": "CloudShopping.Infrastructure/Persistence/AppDbContext.cs:78",
       "priority": "P0",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "DB-09",
         "DB-11",
         "DB-16",
         "BE-00A"
-      ]
+      ],
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Outbox transacional e consumidor idempotente do portal; e-mail e dispatcher externo pendentes."
     },
     {
       "id": "BE-00A",
@@ -3087,14 +3149,16 @@
       ],
       "evidence": "CloudShopping.Infrastructure/Persistence/AppDbContext.cs; CloudShopping.Application/Features/Orders/Event/OrderCanceledDomainEventHandler.cs",
       "priority": "P0",
-      "status": "Planejado",
+      "status": "Parcial",
       "blockedByDecision": false,
       "unlocks": [
         "BE-09",
         "BE-11B",
         "BE-11C",
         "BE-16"
-      ]
+      ],
+      "operationsDeliveryEvidence": "08-entrega-operacao-e-modulos.md",
+      "operationsDeliveryNote": "Outbox transacional e consumidor idempotente do portal; e-mail e dispatcher externo pendentes."
     }
   ],
   "topologicalWaves": [
@@ -3226,5 +3290,14 @@
     [
       "FE-26"
     ]
-  ]
+  ],
+  "externalProviderDecisions": {
+    "shipping": "a definir pelo usuário",
+    "fiscal": "a definir pelo usuário",
+    "email": "a definir pelo usuário",
+    "asaasReceivingModes": [
+      "Direct",
+      "PlatformSplit"
+    ]
+  }
 }

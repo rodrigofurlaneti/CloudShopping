@@ -1,0 +1,12 @@
+import {useState} from 'react';
+import {useResource} from '../services/useResource';
+import {post,request} from '../services/http';
+import {useSession} from '../services/sessionContext';
+export function ProductReviews({productId}:{productId:number}){
+ const [page,setPage]=useState(1);const [orderId,setOrderId]=useState('');const [rating,setRating]=useState(5);const [content,setContent]=useState('');const [message,setMessage]=useState('');const [busy,setBusy]=useState(false);const {user}=useSession();
+ const result=useResource<{count:number;average:number|null;items:{id:string;rating:number;content:string}[]}>(`/v1/store/products/${productId}/reviews?page=${page}`);
+ return <section className="form-card"><h2>Avaliações de compradores</h2>{(message||result.error)&&<p role="status">{message||result.error}</p>}<p>{result.data?.count||0} avaliações publicadas{result.data?.average!=null?' · Média '+result.data.average.toFixed(1)+'/5':''}</p>{result.data?.items.map(r=><article key={r.id}><strong>{r.rating}/5 · Compra verificada</strong><p style={{whiteSpace:'pre-wrap'}}>{r.content}</p></article>)}
+ <nav className="pagination"><button disabled={page===1} onClick={()=>setPage(p=>p-1)}>Anterior</button><span>Página {page}</span><button disabled={page*20>=(result.data?.count||0)} onClick={()=>setPage(p=>p+1)}>Próxima</button></nav>
+ {user?.role==='Customer'?<><button disabled={busy} onClick={()=>{setBusy(true);void request('/v1/store/favorites/'+productId,{method:'PUT'}).then(()=>setMessage('Produto salvo nos favoritos.')).catch(e=>setMessage(e.message)).finally(()=>setBusy(false));}}>Salvar nos favoritos</button><form onSubmit={e=>{e.preventDefault();setBusy(true);void post('/v1/store/products/'+productId+'/reviews',{orderId:Number(orderId),rating,content}).then(()=>{setMessage('Avaliação recebida e aguardando moderação.');setContent('');}).catch(e=>setMessage(e.message)).finally(()=>setBusy(false));}}><h3>Avaliar uma compra entregue</h3><label>Número do pedido<input required type="number" min="1" value={orderId} onChange={e=>setOrderId(e.target.value)}/></label><label>Nota<select value={rating} onChange={e=>setRating(Number(e.target.value))}>{[1,2,3,4,5].map(n=><option key={n}>{n}</option>)}</select></label><label>Seu relato<textarea required maxLength={2000} value={content} onChange={e=>setContent(e.target.value)}/></label><button disabled={busy}>Enviar avaliação</button></form></>:<p>Entre na sua conta para salvar favoritos e avaliar compras entregues.</p>}
+ </section>;
+}

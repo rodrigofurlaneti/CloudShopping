@@ -1,0 +1,33 @@
+{
+  "date": "2026-09-09",
+  "scope": "Operação, atendimento, notificações de portal, cupons, indicadores, importação e catálogo",
+  "allMappedScopeComplete": false,
+  "backendBuild": "passed",
+  "frontendBuild": "passed",
+  "fullAutomatedSuite": {
+    "passed": 45,
+    "failed": 0,
+    "mysqlScenarios": 43,
+    "gatewayUnitTests": 2
+  },
+  "additionalCouponTests": {
+    "passed": 3,
+    "failed": 0,
+    "distinctProductsForSharedCouponLimit": true
+  },
+  "httpSmoke": "passed",
+  "changedFilesLint": "passed",
+  "globalLint": {
+    "status": "existing-debt",
+    "errors": 10
+  },
+  "browser": "Login, dashboard e detalhe operacional desktop; ficha comercial em viewport 390px; não E2E completo",
+  "migrations": "005-010 aplicadas em cloudshopping_dev e bancos descartáveis de testes",
+  "backlog": {
+    "Parcial": 72,
+    "Planejado": 26
+  },
+  "externalAsaasHomologated": false,
+  "productionDeployed": false,
+  "realFinancialTransactions": false
+}
