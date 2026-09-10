@@ -1,4 +1,4 @@
-using CloudShopping.Application.Behaviors;
+﻿using CloudShopping.Application.Behaviors;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,6 +12,7 @@ namespace CloudShopping.Application
         {
             var assembly = Assembly.GetExecutingAssembly();
             services.AddSingleton(TimeProvider.System);
+            services.AddScoped<Features.LogTrackers.ProcessingLogRecorder>();
             services.AddScoped<Features.AccountSecurity.AccountSecurity>();
             services.AddScoped<Features.Sessions.SessionLifecycle>();
             services.AddScoped<Features.Sessions.SessionUseCases>();

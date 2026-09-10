@@ -1,4 +1,4 @@
-using CloudShopping.Application.Abstractions.Data;
+﻿using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Application.Abstractions.Services;
 using CloudShopping.Infrastructure.Persistence;
 using CloudShopping.Infrastructure.Repositories;
@@ -27,6 +27,8 @@ public static class DependencyInjection
         services.AddScoped<ITenantProvider, TenantProvider>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<ILogTrackerRepository, LogTrackerRepository>();
+        services.AddScoped<IProcessingLogWriter, ProcessingLogWriter>();
         services.AddScoped<IAccountSecurityRepository, AccountSecurityRepository>();
         services.AddScoped<IStorefrontRepository, StorefrontRepository>();
         services.AddScoped<IOrderReadRepository, OrderReadRepository>();

@@ -1,4 +1,4 @@
-using CloudShopping.Application.Features.Tenants.Commands.CreateTenant;
+﻿using CloudShopping.Application.Features.Tenants.Commands.CreateTenant;
 using CloudShopping.Application.Features.Tenants.Commands.RegisterCompany;
 using CloudShopping.Application.Features.Tenants.Queries.GetTenantById;
 using MediatR;
@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 namespace CloudShopping.Api.Controllers
 {
     [ApiController]
+    [ServiceFilter(typeof(CloudShopping.Api.Security.ProcessingLogFilter))]
     [Route("api/v1/tenants")]
     public sealed class TenantsController : ControllerBase
     {

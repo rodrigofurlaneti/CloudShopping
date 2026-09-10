@@ -1,4 +1,4 @@
-using CloudShopping.Domain.Exceptions;
+﻿using CloudShopping.Domain.Exceptions;
 using Microsoft.AspNetCore.DataProtection;
 using CloudShopping.Application;
 using CloudShopping.Infrastructure;
@@ -22,6 +22,7 @@ Directory.CreateDirectory(Path.Combine(builder.Environment.ContentRootPath, "www
 builder.Services.AddControllers(o => o.Filters.Add<RequestGuards>(-3000))
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter()));
 builder.Services.AddScoped<RequestGuards>();
+builder.Services.AddScoped<ProcessingLogFilter>();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 

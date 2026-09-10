@@ -27,6 +27,8 @@ namespace CloudShopping.Infrastructure.Persistence
             _publisher = publisher;
         }
 
+        public DbSet<CloudShopping.Domain.Entities.Diagnostics.LogTracker> LogTrackers => Set<CloudShopping.Domain.Entities.Diagnostics.LogTracker>();
+
         public DbSet<Tenant> Tenants => Set<Tenant>();
 
         public DbSet<Customer> Customers => Set<Customer>();
