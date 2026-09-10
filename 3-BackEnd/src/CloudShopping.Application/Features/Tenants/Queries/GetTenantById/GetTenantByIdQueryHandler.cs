@@ -1,3 +1,5 @@
+using CloudShopping.Domain.Primitives.Results;
+using CloudShopping.Application.Behaviors;
 using CloudShopping.Application.Abstractions.Data;
 using MediatR;
 using System.Threading;
@@ -5,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CloudShopping.Application.Features.Tenants.Queries.GetTenantById
 {
-    public sealed class GetTenantByIdQueryHandler : IRequestHandler<GetTenantByIdQuery, TenantViewModel?>
+    public sealed class GetTenantByIdQueryHandler : IRequestHandler<GetTenantByIdQuery, Result<TenantViewModel?>>
     {
         private readonly ITenantRepository _tenantRepository;
 
@@ -14,7 +16,8 @@ namespace CloudShopping.Application.Features.Tenants.Queries.GetTenantById
             _tenantRepository = tenantRepository;
         }
 
-        public async Task<TenantViewModel?> Handle(GetTenantByIdQuery request, CancellationToken cancellationToken)
+        public Task<Result<TenantViewModel?>> Handle(GetTenantByIdQuery request, CancellationToken cancellationToken) => UseCaseExecution.Run(() => ExecuteAsync(request, cancellationToken), cancellationToken);
+    private async Task<TenantViewModel?> ExecuteAsync(GetTenantByIdQuery request, CancellationToken cancellationToken)
         {
             var tenant = await _tenantRepository.GetByIdAsync(request.Id, cancellationToken);
             if (tenant is null) return null;

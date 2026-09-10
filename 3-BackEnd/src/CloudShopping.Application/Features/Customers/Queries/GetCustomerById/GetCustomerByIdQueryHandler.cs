@@ -1,3 +1,5 @@
+using CloudShopping.Domain.Primitives.Results;
+using CloudShopping.Application.Behaviors;
 using CloudShopping.Application.Abstractions.Data;
 using MediatR;
 using System.Linq;
@@ -6,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace CloudShopping.Application.Features.Customers.Queries.GetCustomerById
 {
-    public sealed class GetCustomerByIdQueryHandler : IRequestHandler<GetCustomerByIdQuery, CustomerViewModel?>
+    public sealed class GetCustomerByIdQueryHandler : IRequestHandler<GetCustomerByIdQuery, Result<CustomerViewModel?>>
     {
         private readonly ICustomerRepository _customerRepository;
 
@@ -15,7 +17,8 @@ namespace CloudShopping.Application.Features.Customers.Queries.GetCustomerById
             _customerRepository = customerRepository;
         }
 
-        public async Task<CustomerViewModel?> Handle(GetCustomerByIdQuery request, CancellationToken cancellationToken)
+        public Task<Result<CustomerViewModel?>> Handle(GetCustomerByIdQuery request, CancellationToken cancellationToken) => UseCaseExecution.Run(() => ExecuteAsync(request, cancellationToken), cancellationToken);
+    private async Task<CustomerViewModel?> ExecuteAsync(GetCustomerByIdQuery request, CancellationToken cancellationToken)
         {
             var customer = await _customerRepository.GetByIdAsync(request.Id, cancellationToken);
             if (customer is null) return null;

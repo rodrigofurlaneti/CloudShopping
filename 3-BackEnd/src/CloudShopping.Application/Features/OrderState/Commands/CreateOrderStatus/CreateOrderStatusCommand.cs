@@ -1,3 +1,4 @@
+using CloudShopping.Domain.Primitives.Results;
 using MediatR;
 
 namespace CloudShopping.Application.Features.OrderState.Commands.CreateOrderStatus
@@ -5,5 +6,5 @@ namespace CloudShopping.Application.Features.OrderState.Commands.CreateOrderStat
     public sealed record CreateOrderStatusCommand(
         int OrderSectorId,
         string Name
-    ) : IRequest<int>; // Retorna o ID do novo status criado
+    ) : IRequest<Result<int>>; // Retorna o ID do novo status criado
 }

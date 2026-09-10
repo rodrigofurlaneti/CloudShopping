@@ -17,8 +17,9 @@ public sealed class RequestGuards(ISender sender, ITenantProvider tenant) : IAsy
         {
             var descriptor = (ControllerActionDescriptor)ctx.ActionDescriptor;
             var permissions = await sender.Send(new GetUserPermissionsQuery(StoreSecurity.Subject(ctx.HttpContext.User)), ctx.HttpContext.RequestAborted);
+            if (permissions.IsFailure) { ctx.Result = CloudShopping.Api.Controllers.CommandResults.Respond(permissions, _ => new ForbidResult()); return; }
             var required = AccessRequirements.For(descriptor.ControllerName, descriptor.ActionName, HttpMethods.IsGet(ctx.HttpContext.Request.Method) || HttpMethods.IsHead(ctx.HttpContext.Request.Method));
-            if (required.Any(x => !PermissionPolicy.Allows(permissions, x)))
+            if (required.Any(x => !PermissionPolicy.Allows(permissions.Value, x)))
             { ctx.Result = new ObjectResult(new { message = "Seu perfil não possui permissão para esta operação." }) { StatusCode = 403 }; return; }
         }
         foreach (var value in ctx.ActionArguments.Values)

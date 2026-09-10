@@ -1,3 +1,5 @@
+using CloudShopping.Domain.Primitives.Results;
+using CloudShopping.Application.Behaviors;
 using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Application.Abstractions.Services;
 using CloudShopping.Application.Features.Storefront.Contracts;
@@ -6,9 +8,10 @@ using CloudShopping.Domain.Enums;
 using MediatR;
 using System.Text.Json;
 namespace CloudShopping.Application.Features.Storefront.Queries.GetStoreProduct;
-public sealed class GetStoreProductQueryHandler(IStorefrontRepository repository) : IRequestHandler<GetStoreProductQuery, StoreProductDetails?>
+public sealed class GetStoreProductQueryHandler(IStorefrontRepository repository) : IRequestHandler<GetStoreProductQuery, Result<StoreProductDetails?>>
 {
-    public async Task<StoreProductDetails?> Handle(GetStoreProductQuery request, CancellationToken ct)
+    public Task<Result<StoreProductDetails?>> Handle(GetStoreProductQuery request, CancellationToken ct) => UseCaseExecution.Run(() => ExecuteAsync(request, ct), ct);
+    private async Task<StoreProductDetails?> ExecuteAsync(GetStoreProductQuery request, CancellationToken ct)
     {
         var p = await repository.Product(request.Id, request.Slug, ct);
         if (p == null) return null;

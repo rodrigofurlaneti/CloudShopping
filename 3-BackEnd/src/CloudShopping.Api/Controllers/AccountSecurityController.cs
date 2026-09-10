@@ -18,7 +18,7 @@ public sealed class AccountSecurityController(ISender sender) : ControllerBase
     private string Current => User.FindFirst("sid")!.Value;
 
     [HttpGet("sessions")]
-    public async Task<IActionResult> Sessions(CancellationToken ct) => Ok(await sender.Send(new GetAccountSessionsQuery(Subject,Kind,Current),ct));
+    public async Task<IActionResult> Sessions(CancellationToken ct) => CommandResults.Respond(await sender.Send(new GetAccountSessionsQuery(Subject,Kind,Current),ct), value => Ok(value));
 
     [HttpPost("sessions/revoke")]
     public async Task<IActionResult> Revoke(RevokeSessionInput input, CancellationToken ct)

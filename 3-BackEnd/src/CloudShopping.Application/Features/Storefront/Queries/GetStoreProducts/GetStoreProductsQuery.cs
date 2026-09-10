@@ -1,3 +1,4 @@
+using CloudShopping.Domain.Primitives.Results;
 using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Application.Abstractions.Services;
 using CloudShopping.Application.Features.Storefront.Contracts;
@@ -6,4 +7,4 @@ using CloudShopping.Domain.Enums;
 using MediatR;
 using System.Text.Json;
 namespace CloudShopping.Application.Features.Storefront.Queries.GetStoreProducts;
-public sealed record GetStoreProductsQuery(string? Search, int? DepartmentId, int Page = 1, int PageSize = 12) : IRequest<StorePage<StoreProductSummary>>;
+public sealed record GetStoreProductsQuery(string? Search, int? DepartmentId, int Page = 1, int PageSize = 12) : IRequest<Result<StorePage<StoreProductSummary>>>;

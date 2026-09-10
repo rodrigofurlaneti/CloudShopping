@@ -1,3 +1,4 @@
+using CloudShopping.Domain.Primitives.Results;
 using System;
 using System.Collections.Generic;
 using MediatR;
@@ -14,5 +15,5 @@ namespace CloudShopping.Application.Features.Customers.Queries.GetCustomerById
         string? CompanyName,
         IReadOnlyCollection<CustomerAddressViewModel> Addresses);
 
-    public sealed record GetCustomerByIdQuery(int Id) : IRequest<CustomerViewModel?>;
+    public sealed record GetCustomerByIdQuery(int Id) : IRequest<Result<CustomerViewModel?>>;
 }

@@ -1,4 +1,4 @@
-﻿using CloudShopping.Application.Features.Carts.Commands.AddCartItem;
+using CloudShopping.Application.Features.Carts.Commands.AddCartItem;
 using CloudShopping.Application.Features.Carts.Queries.GetCartByCustomer;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -26,10 +26,7 @@ namespace CloudShopping.Api.Controllers
             var query = new GetCartByCustomerQuery(customerId);
             var result = await _mediator.Send(query, cancellationToken);
 
-            if (result is null)
-                return NotFound(new { message = "Carrinho não encontrado para este cliente." });
-
-            return Ok(result);
+            return CommandResults.Respond(result, value => value is null ? NotFound(new { message = "Carrinho não encontrado para este cliente." }) : Ok(value));
         }
 
         [HttpPost("{cartId:int}/items")]

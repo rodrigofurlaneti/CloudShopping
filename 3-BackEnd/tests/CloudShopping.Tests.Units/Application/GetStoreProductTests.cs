@@ -23,9 +23,10 @@ public class GetStoreProductTests
         repository.Setup(x => x.Product(1, null, It.IsAny<CancellationToken>())).ReturnsAsync(product);
         repository.Setup(x => x.Variants(null, It.IsAny<CancellationToken>())).ReturnsAsync(Array.Empty<StoreVariantView>());
         var result = await new GetStoreProductQueryHandler(repository.Object).Handle(new(1, null), default);
-        Assert.NotNull(result);
-        Assert.Equal(json?.Contains("Azul") == true ? 1 : 0, result.Attributes.Count);
-        if (result.Attributes.Count > 0) Assert.Equal("Azul", result.Attributes["Cor"]);
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Value);
+        Assert.Equal(json?.Contains("Azul") == true ? 1 : 0, result.Value!.Attributes.Count);
+        if (result.Value!.Attributes.Count > 0) Assert.Equal("Azul", result.Value!.Attributes["Cor"]);
     }
 
     [Theory]

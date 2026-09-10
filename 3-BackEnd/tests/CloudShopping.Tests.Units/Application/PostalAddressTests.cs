@@ -23,7 +23,8 @@ public class PostalAddressTests
         using var source = new CancellationTokenSource();
         lookup.Setup(x => x.FindAsync("01001000", source.Token)).ReturnsAsync(expected);
         var result = await new GetPostalAddressQueryHandler(lookup.Object).Handle(new("01001000"), source.Token);
-        Assert.Same(expected, result);
+        Assert.True(result.IsSuccess);
+        Assert.Same(expected, result.Value);
         lookup.VerifyAll();
     }
 }

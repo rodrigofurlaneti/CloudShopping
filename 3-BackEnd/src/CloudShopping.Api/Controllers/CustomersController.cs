@@ -58,10 +58,7 @@ namespace CloudShopping.Api.Controllers
             var query = new GetCustomerByIdQuery(id);
             var result = await _mediator.Send(query, cancellationToken);
 
-            if (result is null)
-                return NotFound(new { message = "Cliente não encontrado." });
-
-            return Ok(result);
+            return CommandResults.Respond(result, value => value is null ? NotFound(new { message = "Cliente não encontrado." }) : Ok(value));
         }
 
         #endregion
@@ -73,7 +70,7 @@ namespace CloudShopping.Api.Controllers
         public async Task<IActionResult> RegisterGuest(CancellationToken cancellationToken)
         {
             var customerId = await _mediator.Send(new RegisterGuestCommand(), cancellationToken);
-            return CreatedAtAction(nameof(GetById), new { id = customerId }, new { id = customerId });
+            return CommandResults.Respond(customerId, value => CreatedAtAction(nameof(GetById), new { id = value }, new { id = value }));
         }
 
         [HttpPost("{id:int}/lead")]

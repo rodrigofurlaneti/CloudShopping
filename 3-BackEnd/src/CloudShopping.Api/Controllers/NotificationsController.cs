@@ -11,7 +11,7 @@ namespace CloudShopping.Api.Controllers;
 public sealed class NotificationsController(ISender sender) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> List(int page=1,CancellationToken ct=default) => Ok(await sender.Send(new GetCustomerNotificationsQuery(StoreSecurity.Subject(User),page),ct));
+    public async Task<IActionResult> List(int page=1,CancellationToken ct=default) => CommandResults.Respond(await sender.Send(new GetCustomerNotificationsQuery(StoreSecurity.Subject(User),page),ct), value => Ok(value));
     [HttpPost("{id}/read")]
     public async Task<IActionResult> Read(string id,CancellationToken ct) => CommandResults.Respond(await sender.Send(new MarkNotificationReadCommand(StoreSecurity.Subject(User),id),ct),_=>NoContent());
 }
@@ -19,7 +19,7 @@ public sealed class NotificationsController(ISender sender) : ControllerBase
 public sealed class NotificationAdminController(ISender sender) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> List(int page=1,CancellationToken ct=default) => Ok(await sender.Send(new GetNotificationOutboxQuery(page),ct));
+    public async Task<IActionResult> List(int page=1,CancellationToken ct=default) => CommandResults.Respond(await sender.Send(new GetNotificationOutboxQuery(page),ct), value => Ok(value));
     [HttpPost("{id}/retry")]
     public async Task<IActionResult> Retry(string id,CancellationToken ct) => CommandResults.Respond(await sender.Send(new RetryNotificationCommand(id),ct),_=>NoContent());
 }

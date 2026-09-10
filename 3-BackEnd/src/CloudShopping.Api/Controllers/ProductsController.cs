@@ -1,4 +1,4 @@
-﻿using CloudShopping.Application.Features.Products.Commands.AddProductStock;
+using CloudShopping.Application.Features.Products.Commands.AddProductStock;
 using CloudShopping.Application.Features.Products.Commands.AdjustInventory;
 using CloudShopping.Application.Features.Products.Commands.CreateProduct;
 using CloudShopping.Application.Features.Products.Commands.DeleteProduct;
@@ -57,10 +57,7 @@ namespace CloudShopping.Api.Controllers
             var query = new GetProductByIdQuery(id);
             var result = await _mediator.Send(query, cancellationToken);
 
-            if (result is null)
-                return NotFound(new { message = "Produto não encontrado." });
-
-            return Ok(result);
+            return CommandResults.Respond(result, value => value is null ? NotFound(new { message = "Produto não encontrado." }) : Ok(value));
         }
 
         [HttpGet("sku/{sku}")]
@@ -71,10 +68,7 @@ namespace CloudShopping.Api.Controllers
             var query = new GetProductBySkuQuery(sku);
             var result = await _mediator.Send(query, cancellationToken);
 
-            if (result is null)
-                return NotFound(new { message = "Produto não encontrado." });
-
-            return Ok(result);
+            return CommandResults.Respond(result, value => value is null ? NotFound(new { message = "Produto não encontrado." }) : Ok(value));
         }
 
         #endregion

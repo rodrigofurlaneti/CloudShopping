@@ -11,7 +11,7 @@ namespace CloudShopping.Api.Controllers;
 public sealed class CatalogDetailsController(ISender sender) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> List(int page = 1, CancellationToken ct = default) => Ok(await sender.Send(new GetCatalogDetailsQuery(page), ct));
+    public async Task<IActionResult> List(int page = 1, CancellationToken ct = default) => CommandResults.Respond(await sender.Send(new GetCatalogDetailsQuery(page), ct), items => Ok(items));
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, CatalogDetailsInput input, CancellationToken ct)
     {

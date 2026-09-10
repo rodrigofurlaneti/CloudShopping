@@ -1,3 +1,5 @@
+using CloudShopping.Domain.Primitives.Results;
+using CloudShopping.Application.Behaviors;
 using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Application.Abstractions.Services;
 using MediatR;
@@ -7,7 +9,7 @@ using DomainOrderStatus = CloudShopping.Domain.Entities.Orders.OrderStatus;
 
 namespace CloudShopping.Application.Features.OrderState.Commands.CreateOrderStatus
 {
-    public sealed class CreateOrderStatusCommandHandler : IRequestHandler<CreateOrderStatusCommand, int>
+    public sealed class CreateOrderStatusCommandHandler : IRequestHandler<CreateOrderStatusCommand, Result<int>>
     {
         // Repositório dedicado ao OrderStatus não existe ainda no projeto original;
         // reutiliza-se o DbContext através de um IRepository genérico registrado no DI.
@@ -22,7 +24,8 @@ namespace CloudShopping.Application.Features.OrderState.Commands.CreateOrderStat
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<int> Handle(CreateOrderStatusCommand request, CancellationToken cancellationToken)
+        public Task<Result<int>> Handle(CreateOrderStatusCommand request, CancellationToken cancellationToken) => UseCaseExecution.Run(() => ExecuteAsync(request, cancellationToken), cancellationToken);
+    private async Task<int> ExecuteAsync(CreateOrderStatusCommand request, CancellationToken cancellationToken)
         {
             var tenantId = _tenantProvider.GetTenantId();
             var status = DomainOrderStatus.Create(tenantId, request.OrderSectorId, request.Name);

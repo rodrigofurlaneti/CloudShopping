@@ -1,3 +1,5 @@
+using CloudShopping.Domain.Primitives.Results;
+using CloudShopping.Application.Behaviors;
 using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Application.Features.Products.ViewModels;
 using MediatR;
@@ -7,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace CloudShopping.Application.Features.Products.Queries.GetProductBySku
 {
-    public sealed class GetProductBySkuQueryHandler : IRequestHandler<GetProductBySkuQuery, ProductViewModel?>
+    public sealed class GetProductBySkuQueryHandler : IRequestHandler<GetProductBySkuQuery, Result<ProductViewModel?>>
     {
         private readonly IProductRepository _productRepository;
 
@@ -16,7 +18,8 @@ namespace CloudShopping.Application.Features.Products.Queries.GetProductBySku
             _productRepository = productRepository;
         }
 
-        public async Task<ProductViewModel?> Handle(GetProductBySkuQuery request, CancellationToken cancellationToken)
+        public Task<Result<ProductViewModel?>> Handle(GetProductBySkuQuery request, CancellationToken cancellationToken) => UseCaseExecution.Run(() => ExecuteAsync(request, cancellationToken), cancellationToken);
+    private async Task<ProductViewModel?> ExecuteAsync(GetProductBySkuQuery request, CancellationToken cancellationToken)
         {
             var product = await _productRepository.GetBySkuAsync(request.Sku, cancellationToken);
             if (product is null) return null;

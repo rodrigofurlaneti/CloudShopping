@@ -1,12 +1,15 @@
+using CloudShopping.Domain.Primitives.Results;
+using CloudShopping.Application.Behaviors;
 using MediatR;
 using System.Globalization;
 using System.Text;
 using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Application.Features.Reports.ViewModels;
 namespace CloudShopping.Application.Features.Reports.Queries.ExportReport;
-public sealed class ExportReportQueryHandler(IReportRepository repository) : IRequestHandler<ExportReportQuery, ReportExport>
+public sealed class ExportReportQueryHandler(IReportRepository repository) : IRequestHandler<ExportReportQuery, Result<ReportExport>>
 {
-    public async Task<ReportExport> Handle(ExportReportQuery request, CancellationToken ct)
+    public Task<Result<ReportExport>> Handle(ExportReportQuery request, CancellationToken ct) => UseCaseExecution.Run(() => ExecuteAsync(request, ct), ct);
+    private async Task<ReportExport> ExecuteAsync(ExportReportQuery request, CancellationToken ct)
     {
         var (start, end) = ReportPeriod.Range(request.From, request.To);
         var rows = await repository.GetExportOrdersAsync(start, end, 5001, ct);

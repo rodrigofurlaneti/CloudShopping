@@ -1,4 +1,4 @@
-﻿using CloudShopping.Application.Features.Tenants.Commands.CreateTenant;
+using CloudShopping.Application.Features.Tenants.Commands.CreateTenant;
 using CloudShopping.Application.Features.Tenants.Commands.RegisterCompany;
 using CloudShopping.Application.Features.Tenants.Queries.GetTenantById;
 using MediatR;
@@ -27,10 +27,7 @@ namespace CloudShopping.Api.Controllers
             var query = new GetTenantByIdQuery(id);
             var result = await _mediator.Send(query, cancellationToken);
 
-            if (result is null)
-                return NotFound(new { message = "Tenant não encontrado." });
-
-            return Ok(result);
+            return CommandResults.Respond(result, value => value is null ? NotFound(new { message = "Tenant não encontrado." }) : Ok(value));
         }
 
         [HttpPost]

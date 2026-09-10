@@ -12,7 +12,7 @@ public sealed class AccessController(ISender sender) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> List(CancellationToken ct) =>
-        Ok(await sender.Send(new GetAccessProfilesQuery(StoreSecurity.Subject(User)), ct));
+        CommandResults.Respond(await sender.Send(new GetAccessProfilesQuery(StoreSecurity.Subject(User)), ct), value => Ok(value));
 
     [HttpPut("profiles/{id:int}")]
     public async Task<IActionResult> Replace(int id, PermissionsInput input, CancellationToken ct) =>
@@ -21,6 +21,6 @@ public sealed class AccessController(ISender sender) : ControllerBase
 
     [HttpGet("changes")]
     public async Task<IActionResult> Changes(int page = 1, CancellationToken ct = default) =>
-        Ok(await sender.Send(new GetAccessChangesQuery(StoreSecurity.Subject(User), page), ct));
+        CommandResults.Respond(await sender.Send(new GetAccessChangesQuery(StoreSecurity.Subject(User), page), ct), value => Ok(value));
 }
 public sealed record PermissionsInput([Required, MaxLength(30)] string[] Expected, [Required, MaxLength(30)] string[] Permissions);

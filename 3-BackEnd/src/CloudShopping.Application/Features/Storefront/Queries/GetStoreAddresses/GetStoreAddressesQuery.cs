@@ -1,3 +1,4 @@
+using CloudShopping.Domain.Primitives.Results;
 using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Application.Abstractions.Services;
 using CloudShopping.Application.Features.Storefront.Contracts;
@@ -6,4 +7,4 @@ using CloudShopping.Domain.Enums;
 using MediatR;
 using System.Text.Json;
 namespace CloudShopping.Application.Features.Storefront.Queries.GetStoreAddresses;
-public sealed record GetStoreAddressesQuery(int CustomerId) : IRequest<IReadOnlyList<StoreAddressView>>;
+public sealed record GetStoreAddressesQuery(int CustomerId) : IRequest<Result<IReadOnlyList<StoreAddressView>>>;

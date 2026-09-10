@@ -1,3 +1,4 @@
+using CloudShopping.Domain.Primitives.Results;
 using MediatR;
 namespace CloudShopping.Application.Features.OrderState.Commands.UpdateOrderStatus
 {
@@ -5,5 +6,5 @@ namespace CloudShopping.Application.Features.OrderState.Commands.UpdateOrderStat
             int Id,
             int OrderSectorId,
             string Name
-        ) : IRequest; // Retorna Unit (void)
+        ) : IRequest<Result<Unit>>;
 }

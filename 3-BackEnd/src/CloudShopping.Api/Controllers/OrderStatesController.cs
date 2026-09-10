@@ -41,7 +41,7 @@ namespace CloudShopping.Api.Controllers
         public async Task<IActionResult> Create([FromBody] CreateOrderStatusCommand command, CancellationToken cancellationToken)
         {
             var statusId = await _mediator.Send(command, cancellationToken);
-            return CreatedAtAction(nameof(Create), new { id = statusId }, new { id = statusId });
+            return CommandResults.Respond(statusId, value => CreatedAtAction(nameof(Create), new { id = value }, new { id = value }));
         }
 
         [HttpPut("{id:int}")]
@@ -51,9 +51,8 @@ namespace CloudShopping.Api.Controllers
         public async Task<IActionResult> Update(int id, [FromBody] UpdateOrderStatusCommand command, CancellationToken cancellationToken)
         {
             var cmd = command with { Id = id };
-            await _mediator.Send(cmd, cancellationToken);
-
-            return NoContent();
+            var result = await _mediator.Send(cmd, cancellationToken);
+            return CommandResults.Respond(result, _ => NoContent());
         }
 
         // Endpoint adicionado seguindo o mesmo padrão do OrderSectorsController.ToggleStatus,

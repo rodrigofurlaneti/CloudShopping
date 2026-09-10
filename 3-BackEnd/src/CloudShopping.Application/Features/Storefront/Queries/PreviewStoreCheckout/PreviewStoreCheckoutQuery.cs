@@ -1,3 +1,4 @@
+using CloudShopping.Domain.Primitives.Results;
 using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Application.Abstractions.Services;
 using CloudShopping.Application.Features.Storefront.Contracts;
@@ -6,4 +7,4 @@ using CloudShopping.Domain.Enums;
 using MediatR;
 using System.Text.Json;
 namespace CloudShopping.Application.Features.Storefront.Queries.PreviewStoreCheckout;
-public sealed record PreviewStoreCheckoutQuery(int CustomerId, int AddressId, int ShippingId, string? CouponCode) : IRequest<CheckoutPreview>;
+public sealed record PreviewStoreCheckoutQuery(int CustomerId, int AddressId, int ShippingId, string? CouponCode) : IRequest<Result<CheckoutPreview>>;

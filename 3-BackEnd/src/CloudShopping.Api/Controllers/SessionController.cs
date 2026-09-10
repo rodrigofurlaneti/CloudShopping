@@ -22,13 +22,18 @@ public sealed class SessionController(ISender sender, ITenantProvider tenant, IA
         User.Identity?.IsAuthenticated == true ? User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value : null, User.FindFirst("sid")?.Value);
 
     [HttpGet, AllowAnonymous]
-    public async Task<IActionResult> Current(CancellationToken ct) => Ok(new {
+    public async Task<IActionResult> Current(CancellationToken ct)
+    {
+        var permissions = await sender.Send(new GetSessionPermissionsQuery(Caller), ct);
+        if (permissions.IsFailure) return CommandResults.Respond(permissions, _ => NoContent());
+        return Ok(new {
         csrfToken = csrf.GetAndStoreTokens(HttpContext).RequestToken,
         user = User.Identity?.IsAuthenticated == true ? new {
             id = Caller.Id, name = User.Identity.Name, role = Caller.Role, tenantId = tenant.GetTenantId(),
-            isGuest = User.FindFirst("guest")?.Value == "true", permissions = await sender.Send(new GetSessionPermissionsQuery(Caller),ct)
+            isGuest = User.FindFirst("guest")?.Value == "true", permissions = permissions.Value
         } : null
     });
+    }
 
     [HttpPost("admin/login"), AllowAnonymous]
     public async Task<IActionResult> AdminLogin(LoginInput input, CancellationToken ct)

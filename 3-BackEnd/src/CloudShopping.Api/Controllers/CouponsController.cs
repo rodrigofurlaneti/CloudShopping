@@ -11,7 +11,7 @@ public sealed class CouponsController(ISender sender) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> List(int page = 1, CancellationToken ct = default) =>
-        Ok(await sender.Send(new GetCouponsQuery(page), ct));
+        CommandResults.Respond(await sender.Send(new GetCouponsQuery(page), ct), value => Ok(value));
 
     [HttpPost]
     public async Task<IActionResult> Create(CreateCouponCommand input, CancellationToken ct) =>
