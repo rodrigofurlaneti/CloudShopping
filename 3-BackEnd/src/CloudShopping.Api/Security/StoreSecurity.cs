@@ -31,9 +31,7 @@ public static class StoreSecurity
             var employee = await db.Set<EmployeeUser>().SingleOrDefaultAsync(x => x.Id == session.SubjectId);
             active = employee?.IsActive == true && await db.Set<Employee>().AnyAsync(x => x.Id == employee.EmployeeId && x.IsActive);
             credential = employee?.PasswordHash;
-            active &= await (from pu in db.Set<ProfileUser>() join p in db.Set<Profile>() on pu.ProfileId equals p.Id
-                where pu.EmployeeUserId == session.SubjectId && pu.IsActive && p.IsActive && p.Name == "Administrador Geral"
-                select pu.Id).AnyAsync();
+            active &= (await new CloudShopping.Infrastructure.Services.StorePermissions(db).ForUser(session.SubjectId)).Length > 0;
         }
         else
         {

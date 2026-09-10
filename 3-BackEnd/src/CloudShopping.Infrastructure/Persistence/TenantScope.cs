@@ -50,7 +50,7 @@ public sealed partial class AppDbContext
         var entries = ChangeTracker.Entries().Where(x => x.State is EntityState.Added or EntityState.Modified or EntityState.Deleted).ToList();
         foreach (var e in entries)
         {
-            if (e.Entity is CloudShopping.Infrastructure.Operations.OperationEvent or CloudShopping.Infrastructure.Operations.ReviewDecision or CloudShopping.Infrastructure.Operations.SupportMessage && e.State != EntityState.Added)
+            if (e.Entity is CloudShopping.Infrastructure.Services.AccessChange or CloudShopping.Infrastructure.Operations.OperationEvent or CloudShopping.Infrastructure.Operations.ReviewDecision or CloudShopping.Infrastructure.Operations.SupportMessage && e.State != EntityState.Added)
                 throw new InvalidOperationException("Eventos operacionais são imutáveis; registre uma nova nota.");
             if (e.Metadata.FindProperty("Version") != null && e.State == EntityState.Modified)
                 e.Property("Version").CurrentValue = checked((int)e.Property("Version").OriginalValue! + 1);

@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, type ReactNode } from 'react';
 import { request, post, resetCsrf } from '../services/http';
 import type { Session, SessionUser } from '../services/storeService';
 import { Navigate, useLocation } from 'react-router-dom';
+import { can, pagePermission } from '../services/permissions';
 
 import { SessionContext, useSession } from '../services/sessionContext';
 export function SessionProvider({ children }: { children: ReactNode }) {
@@ -34,6 +35,8 @@ export function AdminOnly({ children }: { children: ReactNode }) {
     if (loading) return <p className="p-8" role="status">Verificando sessão…</p>;
     if (error) return <div className="p-8" role="alert">{error} <button onClick={() => void refresh()}>Tentar novamente</button></div>;
     if (user?.role !== 'Administrator') return <Navigate to="/admin/login" state={{ from: location.pathname }} replace />;
+    const permission = pagePermission(location.pathname);
+    if (permission && !can(user, permission)) return <Navigate to="/admin/security" replace />;
     return <>{children}</>;
 }
 

@@ -6,7 +6,7 @@ Estado atual: **72 parciais e 26 planejados**. Critérios detalhados continuam n
 
 ## Sequência restante de implementação
 
-1. Fechar fundamentos pendentes: permissões granulares, recuperação/verificação de acesso, dados cadastrais/endereço, invariantes e migração/restauração do legado.
+1. Fechar fundamentos pendentes: gestão completa de funcionários/vínculos e ações visuais por permissão, recuperação/verificação de acesso, dados cadastrais/endereço, invariantes e migração/restauração do legado. Permissões por operação, sessões e troca de senha avançaram na [entrega 4](10-entrega-acesso-e-permissoes.md).
 2. Completar operação: prova fiscal, etiqueta/transportadora, conferência de separação, devolução/troca e reembolso parcial; homologar os dois modos Asaas.
 3. Completar comunicação, políticas/consentimentos, configuração de loja, SEO, promoções segmentadas, relatórios líquidos e critérios restantes dos módulos já iniciados.
 4. Implementar planos/assinaturas SaaS, onboarding/KYC/repasse, preços e orçamentos B2B e adaptador ERP.
@@ -30,12 +30,12 @@ Estado atual: **72 parciais e 26 planejados**. Critérios detalhados continuam n
 | [DB-01 — Estabelecer baseline e migrações compatíveis com o dump](cartoes/DB-01.md) | Parcial | [06](06-entrega-base-catalogo-checkout.md) | Implementação parcial; concluir e homologar todos os critérios do cartão. |
 | [BE-01 — Alinhar persistência, contratos de erro e configuração](cartoes/BE-01.md) | Parcial | [06](06-entrega-base-catalogo-checkout.md) | Implementação parcial; concluir e homologar todos os critérios do cartão. |
 | [FE-01 — Centralizar configuração e consumo da API](cartoes/FE-01.md) | Parcial | [06](06-entrega-base-catalogo-checkout.md) | Implementação parcial; concluir e homologar todos os critérios do cartão. |
-| [DB-02 — Persistir sessões e recuperação de acesso](cartoes/DB-02.md) | Parcial | [06](06-entrega-base-catalogo-checkout.md) | Implementação parcial; concluir e homologar todos os critérios do cartão. |
-| [BE-02 — Implementar autenticação real do administrador e consumidor](cartoes/BE-02.md) | Parcial | [06](06-entrega-base-catalogo-checkout.md) | Implementação parcial; concluir e homologar todos os critérios do cartão. |
-| [FE-02 — Conectar login, recuperação e área autenticada](cartoes/FE-02.md) | Parcial | [06](06-entrega-base-catalogo-checkout.md) | Implementação parcial; concluir e homologar todos os critérios do cartão. |
-| [DB-03 — Reforçar integridade de tenant e permissões](cartoes/DB-03.md) | Parcial | [06](06-entrega-base-catalogo-checkout.md) | Implementação parcial; concluir e homologar todos os critérios do cartão. |
-| [BE-03 — Resolver loja e autorizar cada operação](cartoes/BE-03.md) | Parcial | [06](06-entrega-base-catalogo-checkout.md) | Implementação parcial; concluir e homologar todos os critérios do cartão. |
-| [FE-03 — Aplicar contexto de loja e telas de usuários/perfis](cartoes/FE-03.md) | Parcial | [06](06-entrega-base-catalogo-checkout.md) | Implementação parcial; concluir e homologar todos os critérios do cartão. |
+| [DB-02 — Persistir sessões e recuperação de acesso](cartoes/DB-02.md) | Parcial | [10](10-entrega-acesso-e-permissoes.md) | Permissões, sessões e senha implementadas; recuperação/e-mail, funcionários/vínculos e aceite ampliado pendentes. |
+| [BE-02 — Implementar autenticação real do administrador e consumidor](cartoes/BE-02.md) | Parcial | [10](10-entrega-acesso-e-permissoes.md) | Permissões, sessões e senha implementadas; recuperação/e-mail, funcionários/vínculos e aceite ampliado pendentes. |
+| [FE-02 — Conectar login, recuperação e área autenticada](cartoes/FE-02.md) | Parcial | [10](10-entrega-acesso-e-permissoes.md) | Permissões, sessões e senha implementadas; recuperação/e-mail, funcionários/vínculos e aceite ampliado pendentes. |
+| [DB-03 — Reforçar integridade de tenant e permissões](cartoes/DB-03.md) | Parcial | [10](10-entrega-acesso-e-permissoes.md) | Permissões, sessões e senha implementadas; recuperação/e-mail, funcionários/vínculos e aceite ampliado pendentes. |
+| [BE-03 — Resolver loja e autorizar cada operação](cartoes/BE-03.md) | Parcial | [10](10-entrega-acesso-e-permissoes.md) | Permissões, sessões e senha implementadas; recuperação/e-mail, funcionários/vínculos e aceite ampliado pendentes. |
+| [FE-03 — Aplicar contexto de loja e telas de usuários/perfis](cartoes/FE-03.md) | Parcial | [10](10-entrega-acesso-e-permissoes.md) | Permissões, sessões e senha implementadas; recuperação/e-mail, funcionários/vínculos e aceite ampliado pendentes. |
 | [DB-04 — Completar catálogo comercial e SKUs vendáveis](cartoes/DB-04.md) | Parcial | [08](08-entrega-operacao-e-modulos.md) | Ficha comercial, slug, atributos e família de SKUs; ciclo amplo de imagens/filtros pendente. |
 | [BE-04 — Publicar API de catálogo e completar gestão de produtos](cartoes/BE-04.md) | Parcial | [08](08-entrega-operacao-e-modulos.md) | Ficha comercial, slug, atributos e família de SKUs; ciclo amplo de imagens/filtros pendente. |
 | [FE-04 — Substituir vitrine simulada por catálogo real](cartoes/FE-04.md) | Parcial | [08](08-entrega-operacao-e-modulos.md) | Ficha comercial, slug, atributos e família de SKUs; ciclo amplo de imagens/filtros pendente. |

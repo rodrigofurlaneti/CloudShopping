@@ -1,0 +1,25 @@
+{
+  "date": "2026-09-09",
+  "backendBuild": "passed",
+  "frontendBuild": "passed",
+  "changedFilesLint": "passed",
+  "tests": {
+    "passed": 53,
+    "mysql": 46,
+    "unit": 7,
+    "trx": ".local/test-results/AMD_ISS_2026-09-09_22_35_39_net9.0.trx"
+  },
+  "httpSmoke": "passed",
+  "accessHttpSmoke": "passed",
+  "browserInspection": [
+    "sessions and password form",
+    "profile selection and permission controls",
+    "desktop layout corrected"
+  ],
+  "migrations": [
+    "011_profile_permissions.sql"
+  ],
+  "allMappedScopeComplete": false,
+  "productionReady": false,
+  "externalHomologation": false
+}

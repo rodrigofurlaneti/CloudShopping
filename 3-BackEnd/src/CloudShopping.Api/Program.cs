@@ -18,12 +18,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 Directory.CreateDirectory(Path.Combine(builder.Environment.ContentRootPath, "wwwroot"));
-builder.Services.AddControllers(o => o.Filters.Add<RequestGuards>())
+builder.Services.AddControllers(o => o.Filters.Add<RequestGuards>(-3000))
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter()));
 builder.Services.AddScoped<RequestGuards>();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped<StoreCommerceService>();
+builder.Services.AddScoped<AccountSecurity>();
 builder.Services.AddHostedService<ReservationExpiryWorker>();
 builder.Services.AddHttpClient<IAsaasGateway,AsaasGateway>().RedactLoggedHeaders(_=>true).ConfigurePrimaryHttpMessageHandler(()=>new HttpClientHandler {AllowAutoRedirect=false});
 builder.Services.AddScoped<AsaasAccounts>();

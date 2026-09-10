@@ -55,3 +55,5 @@ Todos os módulos privados preservam tenant e titular. Nenhuma tela deve confiar
 
 O escopo base é ecommerce brasileiro de produtos físicos, multiempresa, com cadastro PF/PJ, coerente com o projeto. Split, assinatura SaaS e condições comerciais B2B estão condicionados a decisão; não presumimos marketplace de múltiplos vendedores no mesmo pedido. Assinatura de produtos, programa de fidelidade, vale-presente e múltiplos centros de distribuição são extensões possíveis fora da baseline estimável aqui; exigem refinamento próprio se forem parte do negócio.
 
+
+Entrega mais recente: [permissões por perfil e segurança da conta](10-entrega-acesso-e-permissoes.md), com 53 testes aprovados. O escopo amplo permanece parcial.

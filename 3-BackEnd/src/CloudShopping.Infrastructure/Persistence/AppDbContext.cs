@@ -64,6 +64,7 @@ namespace CloudShopping.Infrastructure.Persistence
             ConfigureOutbox(modelBuilder);
             ConfigureCoupons(modelBuilder);
             ConfigureImports(modelBuilder);
+            ConfigureAccess(modelBuilder);
 
             // Isolamento multi-tenant + soft delete via filtros globais de consulta
             modelBuilder.Entity<Customer>().HasQueryFilter(c => c.IsActive && c.TenantId == _currentTenantId);

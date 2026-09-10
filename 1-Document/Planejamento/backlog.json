@@ -212,7 +212,9 @@
         "BE-02",
         "DB-03"
       ],
-      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md",
+      "accessDeliveryEvidence": "10-entrega-acesso-e-permissoes.md",
+      "accessDeliveryNote": "Permissões por perfil, autorização por operação, sessões e troca de senha implementadas; recuperação/verificação por e-mail e gestão completa de funcionários/vínculos pendentes."
     },
     {
       "id": "BE-02",
@@ -245,7 +247,9 @@
         "BE-06",
         "BE-16"
       ],
-      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md",
+      "accessDeliveryEvidence": "10-entrega-acesso-e-permissoes.md",
+      "accessDeliveryNote": "Permissões por perfil, autorização por operação, sessões e troca de senha implementadas; recuperação/verificação por e-mail e gestão completa de funcionários/vínculos pendentes."
     },
     {
       "id": "FE-02",
@@ -277,7 +281,9 @@
         "FE-06",
         "FE-25"
       ],
-      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md",
+      "accessDeliveryEvidence": "10-entrega-acesso-e-permissoes.md",
+      "accessDeliveryNote": "Permissões por perfil, autorização por operação, sessões e troca de senha implementadas; recuperação/verificação por e-mail e gestão completa de funcionários/vínculos pendentes."
     },
     {
       "id": "DB-03",
@@ -312,7 +318,9 @@
         "DB-19",
         "DB-24"
       ],
-      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md",
+      "accessDeliveryEvidence": "10-entrega-acesso-e-permissoes.md",
+      "accessDeliveryNote": "Permissões por perfil, autorização por operação, sessões e troca de senha implementadas; recuperação/verificação por e-mail e gestão completa de funcionários/vínculos pendentes."
     },
     {
       "id": "BE-03",
@@ -348,7 +356,9 @@
         "BE-19",
         "BE-25"
       ],
-      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md",
+      "accessDeliveryEvidence": "10-entrega-acesso-e-permissoes.md",
+      "accessDeliveryNote": "Permissões por perfil, autorização por operação, sessões e troca de senha implementadas; recuperação/verificação por e-mail e gestão completa de funcionários/vínculos pendentes."
     },
     {
       "id": "FE-03",
@@ -385,7 +395,9 @@
         "FE-19",
         "FE-21"
       ],
-      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md"
+      "deliveryEvidence": "06-entrega-base-catalogo-checkout.md",
+      "accessDeliveryEvidence": "10-entrega-acesso-e-permissoes.md",
+      "accessDeliveryNote": "Permissões por perfil, autorização por operação, sessões e troca de senha implementadas; recuperação/verificação por e-mail e gestão completa de funcionários/vínculos pendentes."
     },
     {
       "id": "DB-04",

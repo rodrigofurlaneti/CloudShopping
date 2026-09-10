@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AccountSecurityPanel } from '../components/AccountSecurityPanel';
 import { Link, useNavigate } from 'react-router-dom';
 import { StoreLayout } from '../layouts/StoreLayout';
 import { post, resetCsrf } from '../services/http';
@@ -8,7 +9,7 @@ export function AccountPage() {
     const [error,setError]=useState('');const [busy,setBusy]=useState(false); const navigate=useNavigate();
     return <StoreLayout><div className="form-card"><h1>Minha conta</h1>
         {user && !user.isGuest ? <><p>Sessão de {user.name}</p><p>Loja {user.tenantId}</p><Link to="/orders">Ver meus pedidos</Link><button onClick={()=>void logout().catch(e=>setError(e.message))}>Sair desta conta</button>
-        {user.name==='Visitante'&&<p className="muted">Você pode continuar como visitante ou sair para entrar em uma conta existente. Seu carrinho permanece associado à sessão atual.</p>}</> :
+        <AccountSecurityPanel /></> :
         <form onSubmit={async e=>{e.preventDefault();setBusy(true);setError('');const data=new FormData(e.currentTarget);try{
             const email=String(data.get('email'));const password=String(data.get('password'));
             await post('/v1/session/'+(register?'register':'login'),register?{email,password}:{username:email,password});resetCsrf();await refresh();navigate('/cart');

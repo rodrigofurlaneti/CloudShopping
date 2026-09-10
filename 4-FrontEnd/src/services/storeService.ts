@@ -1,5 +1,5 @@
 import { post, request, resetCsrf } from './http';
-export interface SessionUser { id: number; name: string; role: 'Customer' | 'Administrator'; tenantId: number; isGuest: boolean }
+export interface SessionUser { id: number; name: string; role: 'Customer' | 'Administrator'; tenantId: number; isGuest: boolean; permissions?: string[] }
 export interface Session { user: SessionUser | null; csrfToken: string }
 export interface Product { slug?: string; description?: string; brand?: string; variantLabel?: string; attributes?: Record<string,string>; variants?: {id:number;slug:string;variantLabel:string;price:number;availableStock:number}[]; id: number; name: string; sku: string; price: number; departmentId: number; availableStock: number; image?: string; images?: string[] }
 export interface Page<T> { items: T[]; page: number; totalCount: number; totalPages: number }

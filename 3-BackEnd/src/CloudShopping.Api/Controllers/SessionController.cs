@@ -15,11 +15,11 @@ namespace CloudShopping.Api.Controllers;
 public sealed class SessionController(AppDbContext db, IPasswordHasher hasher, IAntiforgery csrf) : ControllerBase
 {
     [HttpGet, AllowAnonymous]
-    public IActionResult Current() => Ok(new {
+    public async Task<IActionResult> Current() => Ok(new {
         csrfToken = csrf.GetAndStoreTokens(HttpContext).RequestToken,
         user = User.Identity?.IsAuthenticated == true ? new {
             id = StoreSecurity.Subject(User), name = User.Identity.Name,
-            role = User.IsInRole("Administrator") ? "Administrator" : "Customer", tenantId = db.CurrentTenantId, isGuest = User.FindFirst("guest")?.Value == "true"
+            role = User.IsInRole("Administrator") ? "Administrator" : "Customer", tenantId = db.CurrentTenantId, isGuest = User.FindFirst("guest")?.Value == "true", permissions = User.IsInRole("Administrator") ? await new CloudShopping.Infrastructure.Services.StorePermissions(db).ForUser(StoreSecurity.Subject(User)) : Array.Empty<string>()
         } : null
     });
 
@@ -30,8 +30,7 @@ public sealed class SessionController(AppDbContext db, IPasswordHasher hasher, I
         var employee = await db.Set<EmployeeUser>().SingleOrDefaultAsync(x => x.Username == username && x.IsActive, ct);
         if (employee == null || !hasher.Verify(input.Password, employee.PasswordHash)) return Unauthorized(new { message = "Credenciais inválidas." });
         if (!await db.Set<Employee>().AnyAsync(x => x.Id == employee.EmployeeId && x.IsActive, ct)) return Forbid();
-        var permitted = await (from pu in db.Set<ProfileUser>() join p in db.Set<Profile>() on pu.ProfileId equals p.Id
-            where pu.EmployeeUserId == employee.Id && pu.IsActive && p.IsActive && p.Name == "Administrador Geral" select pu.Id).AnyAsync(ct);
+        var permitted = (await new CloudShopping.Infrastructure.Services.StorePermissions(db).ForUser(employee.Id, ct)).Length > 0;
         if (!permitted) return Forbid();
         await RevokeCurrent(ct);
         await StoreSecurity.SignIn(HttpContext, db, employee.Id, "Administrator", employee.Username, employee.PasswordHash);

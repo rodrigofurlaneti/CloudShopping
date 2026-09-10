@@ -1,4 +1,6 @@
 import { AsaasSettings } from './pages/admin/AsaasSettings';
+import { SecurityPage } from './pages/admin/SecurityPage';
+import { AccessPage } from './pages/admin/AccessPage';
 import { FinancePayments } from './pages/admin/FinancePayments';
 import { SupportPage } from './pages/SupportPage';
 import { FavoritesPage } from './pages/FavoritesPage';
@@ -30,6 +32,8 @@ function App() {
     return (
         <BrowserRouter>
             <SessionProvider><Routes>
+                <Route path="/admin/access" element={<AdminOnly><AccessPage/></AdminOnly>}/>
+                <Route path="/admin/security" element={<AdminOnly><SecurityPage/></AdminOnly>}/>
                 <Route path="/support" element={<SupportPage/>}/>
                 <Route path="/favorites" element={<FavoritesPage/>}/>
                 <Route path="/notifications" element={<NotificationsPage/>}/>
