@@ -23,12 +23,12 @@ O gravador deverá ser implementado na infraestrutura através de contrato da ap
 Os scripts foram preparados no repositório; não foram executados no banco remoto.
 
 
-## Captura no TenantsController
+## Captura global nos controllers
 
-O TenantsController agora utiliza ProcessingLogFilter (resource filter), que delega a ProcessingLogRecorder em Application e IProcessingLogWriter em Infrastructure. Registra resultado HTTP, duração, TraceId e tipo/nomes dos métodos da exceção. Não serializa parâmetros, respostas, mensagens brutas de exceção ou caminhos de arquivos.
+Todos os controllers MVC utilizam ProcessingLogFilter (resource filter), registrado globalmente em AddControllers no Program.cs, que delega a ProcessingLogRecorder em Application e IProcessingLogWriter em Infrastructure. Registra resultado HTTP, duração, TraceId e tipo/nomes dos métodos da exceção. Não serializa parâmetros, respostas, mensagens brutas de exceção ou caminhos de arquivos.
 
 A gravação usa conexão independente com AutoEnlist=false e timeout de dois segundos, sem salvar a unidade de trabalho de negócio. Falha de persistência gera aviso no ILogger e preserva o resultado original. A tabela precisa existir com o schema 012. Sem empresa resolvida o registro tem TenantId nulo e deve ser consultado por operação administrativa de plataforma/SQL, não pela listagem de uma loja.
 
-A captura cobre somente requisições que alcançam o filtro de TenantsController. Bloqueios anteriores por autenticação, middleware ou resolução de empresa e outros controllers/workers não estão abrangidos. O status de uma exceção ainda não tratada é registrado como 500 (ou 499 para RequestAborted); um middleware externo pode depois transformar o status HTTP.
+A captura cobre requisições de todos os controllers MVC que alcançam o resource filter. Não adicione ServiceFilter individualmente: isso duplicaria os registros. Controllers futuros também são abrangidos. Bloqueios anteriores por autenticação, middleware ou resolução de empresa e workers não estão abrangidos. O status de uma exceção ainda não tratada é registrado como 500 (ou 499 para RequestAborted); um middleware externo pode depois transformar o status HTTP.
 
 Build e testes unitários verificados. A gravação real no banco remoto ainda não foi executada nesta alteração.

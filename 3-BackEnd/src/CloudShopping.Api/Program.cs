@@ -19,10 +19,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 Directory.CreateDirectory(Path.Combine(builder.Environment.ContentRootPath, "wwwroot"));
-builder.Services.AddControllers(o => o.Filters.Add<RequestGuards>(-3000))
+builder.Services.AddControllers(o =>
+    {
+        o.Filters.Add<ProcessingLogFilter>(int.MinValue);
+        o.Filters.Add<RequestGuards>(-3000);
+    })
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter()));
 builder.Services.AddScoped<RequestGuards>();
 builder.Services.AddScoped<ProcessingLogFilter>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<CloudShopping.Application.Abstractions.Data.IProcessingLogContext, HttpProcessingLogContext>();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 

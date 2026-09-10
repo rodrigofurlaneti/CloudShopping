@@ -21,6 +21,7 @@ namespace CloudShopping.Application
 
             services.AddValidatorsFromAssembly(assembly);
 
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ProcessingLogBehavior<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
             return services;

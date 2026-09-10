@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 namespace CloudShopping.Api.Controllers
 {
     [ApiController]
-    [ServiceFilter(typeof(CloudShopping.Api.Security.ProcessingLogFilter))]
     [Route("api/v1/tenants")]
     public sealed class TenantsController : ControllerBase
     {
