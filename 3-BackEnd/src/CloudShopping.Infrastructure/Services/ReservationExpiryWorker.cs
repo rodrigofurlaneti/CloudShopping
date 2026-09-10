@@ -14,15 +14,19 @@ public sealed class ReservationExpiryWorker(IServiceProvider services, IConfigur
     protected override async Task ExecuteAsync(CancellationToken ct)
     {
         using var timer = new PeriodicTimer(TimeSpan.FromSeconds(30));
-        while (await timer.WaitForNextTickAsync(ct))
+        try
         {
-            try
+            while (await timer.WaitForNextTickAsync(ct))
             {
-                await RunOnce(ct);
+                try
+                {
+                    await RunOnce(ct);
+                }
+                catch (OperationCanceledException) when (ct.IsCancellationRequested) { return; }
+                catch (Exception ex) { log.LogError(ex, "Falha ao expirar reservas; será repetido no próximo ciclo."); }
             }
-            catch (OperationCanceledException) when (ct.IsCancellationRequested) { return; }
-            catch (Exception ex) { log.LogError(ex, "Falha ao expirar reservas; será repetido no próximo ciclo."); }
         }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested) { }
     }
     public async Task RunOnce(CancellationToken ct)
     {

@@ -16,9 +16,14 @@ public sealed class AsaasWorker(IServiceProvider services,IConfiguration config,
     protected override async Task ExecuteAsync(CancellationToken ct)
     {
         using var timer=new PeriodicTimer(TimeSpan.FromSeconds(15));
-        while(await timer.WaitForNextTickAsync(ct))
-            try {await RunOnce(ct);}catch(OperationCanceledException)when(ct.IsCancellationRequested){return;}
-            catch(Exception){log.LogWarning("Conciliação Asaas será repetida no próximo ciclo.");}
+        try
+        {
+            while(await timer.WaitForNextTickAsync(ct))
+                try {await RunOnce(ct);}
+                catch(OperationCanceledException)when(ct.IsCancellationRequested){return;}
+                catch(Exception){log.LogWarning("Conciliação Asaas será repetida no próximo ciclo.");}
+        }
+        catch(OperationCanceledException)when(ct.IsCancellationRequested) { }
     }
     public async Task RunOnce(CancellationToken ct)
     {
