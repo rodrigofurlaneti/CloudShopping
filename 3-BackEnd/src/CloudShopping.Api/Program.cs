@@ -79,6 +79,7 @@ app.UseExceptionHandler(error => error.Run(async ctx => {
     await Results.Problem(statusCode: status, title: message,
         extensions: new Dictionary<string,object?> { ["message"] = message, ["traceId"] = ctx.TraceIdentifier }).ExecuteAsync(ctx);
 }));
+app.UseMiddleware<RequestCancellationMiddleware>();
 // Product and banner images are public; administrative upload endpoints remain authorized.
 app.UseStaticFiles();
 app.UseRouting();
