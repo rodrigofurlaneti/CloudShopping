@@ -2,6 +2,7 @@ using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Application.Abstractions.Services;
 using CloudShopping.Infrastructure.Persistence;
 using CloudShopping.Infrastructure.Repositories;
+using CloudShopping.Infrastructure.Payments;
 using CloudShopping.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -25,6 +26,22 @@ public static class DependencyInjection
         services.AddScoped<ITenantProvider, TenantProvider>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IAccountSecurityRepository, AccountSecurityRepository>();
+        services.AddScoped<IStorefrontRepository, StorefrontRepository>();
+        services.AddScoped<IOrderReadRepository, OrderReadRepository>();
+        services.AddScoped<IOrderWorkflowReadRepository, OrderWorkflowReadRepository>();
+        services.AddScoped<ICouponRepository, CouponRepository>();
+        services.AddScoped<ICouponRedemptionRepository, CouponRedemptionRepository>();
+        services.AddScoped<IReportRepository, ReportRepository>();
+        services.AddScoped<INotificationRepository, NotificationRepository>();
+        services.AddScoped<StoreCommerceService>();
+        services.AddScoped<IStoreCommerce>(sp => sp.GetRequiredService<StoreCommerceService>());
+        services.AddScoped<ICustomerPaymentCancellation, CustomerPaymentCancellation>();
+        services.AddHttpClient<IAsaasGateway, AsaasGateway>()
+            .RedactLoggedHeaders(_ => true)
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
+        services.AddScoped<AsaasAccounts>();
+        services.AddScoped<AsaasPayments>();
         services.AddScoped<IAccessRepository, AccessRepository>();
         services.AddScoped<ISessionStore, SessionStore>();
         services.AddScoped<ISessionAccounts, SessionAccounts>();

@@ -24,12 +24,8 @@ builder.Services.AddControllers(o => o.Filters.Add<RequestGuards>(-3000))
 builder.Services.AddScoped<RequestGuards>();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddScoped<StoreCommerceService>();
 
 builder.Services.AddHostedService<ReservationExpiryWorker>();
-builder.Services.AddHttpClient<IAsaasGateway,AsaasGateway>().RedactLoggedHeaders(_=>true).ConfigurePrimaryHttpMessageHandler(()=>new HttpClientHandler {AllowAutoRedirect=false});
-builder.Services.AddScoped<AsaasAccounts>();
-builder.Services.AddScoped<AsaasPayments>();
 builder.Services.AddScoped<CloudShopping.Infrastructure.Operations.OrderOperations>();
 builder.Services.AddScoped<CloudShopping.Infrastructure.Operations.CustomerEngagement>();
 

@@ -12,6 +12,7 @@ namespace CloudShopping.Application
         {
             var assembly = Assembly.GetExecutingAssembly();
             services.AddSingleton(TimeProvider.System);
+            services.AddScoped<Features.AccountSecurity.AccountSecurity>();
             services.AddScoped<Features.Sessions.SessionLifecycle>();
             services.AddScoped<Features.Sessions.SessionUseCases>();
 
