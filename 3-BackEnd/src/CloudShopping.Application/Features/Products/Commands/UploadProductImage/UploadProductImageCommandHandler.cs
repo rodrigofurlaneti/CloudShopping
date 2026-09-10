@@ -62,7 +62,7 @@ namespace CloudShopping.Application.Features.Products.Commands.UploadProductImag
                 _logger.LogInformation("Imagem enviada com sucesso para o produto {ProductId}. Caminho: {Path}", product.Id, relativePath);
                 return Result.Success(relativePath);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 _logger.LogError(ex, "Erro ao fazer upload de imagem para o produto {ProductId}.", request.ProductId);
                 return Result.Failure<string>(new Error("Product.ImageUploadFailed", ex.Message));

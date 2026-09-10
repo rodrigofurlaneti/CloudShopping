@@ -1,10 +1,10 @@
-using CloudShopping.Application.Abstractions.Data;
+﻿using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Domain.Primitives.Results;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CloudShopping.Application.Features.Carts.Commands
+namespace CloudShopping.Application.Features.Carts.Commands.AddCartItem
 {
     public sealed class AddCartItemCommandHandler : IRequestHandler<AddCartItemCommand, Result>
     {

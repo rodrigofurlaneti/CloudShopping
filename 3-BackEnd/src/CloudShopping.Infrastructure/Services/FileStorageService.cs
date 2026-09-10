@@ -3,7 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
+using CloudShopping.Application.Abstractions.Files;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Formats.Jpeg;
@@ -18,9 +18,9 @@ namespace CloudShopping.Infrastructure.Services
         {
             _env = env;
         }
-        public async Task<string> SaveProductImageAsync(int tenantId, int productId, IFormFile file, CancellationToken cancellationToken)
+        public async Task<string> SaveProductImageAsync(int tenantId, int productId, UploadFile file, CancellationToken cancellationToken)
         {
-            if (file == null || file.Length == 0)
+            if (file == null || file.Length <= 0 || file.Content == null || !file.Content.CanRead)
                 throw new ArgumentException("O arquivo de imagem é inválido.");
             var relativeFolder = Path.Combine("uploads", tenantId.ToString(), "products", productId.ToString());
             var absoluteFolder = Path.Combine(_env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"), relativeFolder);
@@ -30,9 +30,9 @@ namespace CloudShopping.Infrastructure.Services
             }
             var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileNameWithoutExtension(file.FileName).Replace(" ", "_")}.jpg";
             var absolutePath = Path.Combine(absoluteFolder, uniqueFileName);
-            using (var inputStream = file.OpenReadStream())
+            if (file.Content.CanRead)
             {
-                using (var image = await Image.LoadAsync(inputStream, cancellationToken))
+                using (var image = await Image.LoadAsync(file.Content, cancellationToken))
                 {
                     int maxWidth = 1200;
                     if (image.Width > maxWidth)

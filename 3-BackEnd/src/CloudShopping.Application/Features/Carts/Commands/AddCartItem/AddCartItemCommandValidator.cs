@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace CloudShopping.Application.Features.Carts.Commands
+namespace CloudShopping.Application.Features.Carts.Commands.AddCartItem
 {
     public sealed class AddCartItemCommandValidator : AbstractValidator<AddCartItemCommand>
     {

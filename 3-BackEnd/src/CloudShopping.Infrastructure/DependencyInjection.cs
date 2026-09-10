@@ -19,7 +19,8 @@ public static class DependencyInjection
         var connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("Configure ConnectionStrings__DefaultConnection.");
         services.AddDbContext<AppDbContext>(options =>
-            options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 43))));
+            options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 43)))
+                .EnableDetailedErrors());
         services.AddScoped<IDbConnection>(sp => new MySqlConnection(connectionString));
         services.AddScoped<ISqlConnectionFactory>(sp => new SqlConnectionFactory(connectionString));
         services.AddHttpContextAccessor();

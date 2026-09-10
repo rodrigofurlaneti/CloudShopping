@@ -12,8 +12,8 @@ public abstract class BrowserTest : IDisposable
     protected WebDriverWait Wait { get; }
     private readonly Uri baseUrl;
     protected string Unique => "E2E-" + Guid.NewGuid().ToString("N")[..12];
-    protected static string Required(string name) => Environment.GetEnvironmentVariable(name) is { Length: >0 } value
-        ? value : throw new InvalidOperationException($"Configure {name} para o ambiente local de homologação. Consulte README.md.");
+    protected static string Required(string name) => E2eSettings.Get(name) is { Length: >0 } value
+        ? value : throw new InvalidOperationException($"Configure {name} em e2e.local.json ou nas variáveis de ambiente. Copie e2e.example.json e preencha os dados reais de homologação; consulte README.md.");
 
     protected BrowserTest()
     {
@@ -23,11 +23,11 @@ public abstract class BrowserTest : IDisposable
         if(Required("E2E_ENVIRONMENT")!="Homologacao")
             throw new InvalidOperationException("E2E_ENVIRONMENT deve ser Homologacao; confira a conexão do backend antes de executar.");
         var options=new ChromeOptions();
-        if(Environment.GetEnvironmentVariable("E2E_HEADLESS")!="false")options.AddArgument("--headless=new");
+        if(E2eSettings.Get("E2E_HEADLESS")!="false")options.AddArgument("--headless=new");
         options.AddArgument("--window-size=1440,1000");
         options.AddArgument("--lang=pt-BR");
-        if(Environment.GetEnvironmentVariable("E2E_CHROME_BINARY") is { Length: >0 } binary)options.BinaryLocation=binary;
-        var driverPath=Environment.GetEnvironmentVariable("E2E_DRIVER_DIRECTORY");
+        if(E2eSettings.Get("E2E_CHROME_BINARY") is { Length: >0 } binary)options.BinaryLocation=binary;
+        var driverPath=E2eSettings.Get("E2E_DRIVER_DIRECTORY");
         var service=string.IsNullOrWhiteSpace(driverPath)?ChromeDriverService.CreateDefaultService():ChromeDriverService.CreateDefaultService(driverPath);
         service.HideCommandPromptWindow=true;
         Browser=new ChromeDriver(service,options,TimeSpan.FromSeconds(60));
@@ -69,7 +69,7 @@ public abstract class BrowserTest : IDisposable
     protected void Scenario(Action action)
     {
         try{action();}catch{
-            if(Environment.GetEnvironmentVariable("E2E_CAPTURE_FAILURES")=="true")
+            if(E2eSettings.Get("E2E_CAPTURE_FAILURES")=="true")
             {try{var folder=Path.Combine(AppContext.BaseDirectory,"TestResults","screenshots");Directory.CreateDirectory(folder);
                 ((ITakesScreenshot)Browser).GetScreenshot().SaveAsFile(Path.Combine(folder,Guid.NewGuid()+".png"));}catch{/* Preserve original failure. */}}
             throw;

@@ -1,5 +1,5 @@
-using CloudShopping.Application.Behaviors;
-using CloudShopping.Application.Features.Carts.Commands;
+﻿using CloudShopping.Application.Behaviors;
+using CloudShopping.Application.Features.Carts.Commands.AddCartItem;
 using CloudShopping.Domain.Primitives.Results;
 using FluentAssertions;
 using FluentValidation;

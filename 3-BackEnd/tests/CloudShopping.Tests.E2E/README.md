@@ -8,6 +8,12 @@ Compilação e descoberta de testes verificadas. **Fluxos ainda não executados 
 
 ## Preparação local
 
+### Configuração pelo Visual Studio
+
+Copie `e2e.example.json` para `e2e.local.json` nesta pasta e preencha URL, usuário, senha e ID de produto reais do ambiente de homologação. O arquivo local é ignorado pelo Git e copiado para a saída na compilação. Isso permite usar o Test Explorer sem reiniciar o Visual Studio ou configurar variáveis globais do Windows. Variáveis de ambiente, quando existentes, têm prioridade sobre o JSON.
+
+O exemplo deixa a URL e as credenciais vazias de propósito: ainda não foi confirmado qual frontend está ligado ao banco de homologação. Não preencha credenciais no arquivo de exemplo versionado. A configuração não muda a conexão SQL do backend.
+
 1. Inicie uma instância dedicada do backend com `ConnectionStrings__DefaultConnection` apontando para o banco de homologação correto, com schema e dados de teste preparados. Não reutilize automaticamente a conexão de desenvolvimento. Este projeto não troca a connection string, não executa migrations e não apaga bancos.
 2. Inicie o frontend com API/proxy direcionado exclusivamente a essa instância. No modo Vite de desenvolvimento, confira `VITE_DEV_TENANT_ID` para a empresa de teste. Reinicie o Vite após alterar variáveis. O Selenium usa a mesma resolução de empresa do navegador.
 3. Prepare administrador dessa empresa, produto de teste com estoque disponível >= 3 e entrega ativa que atenda ao CEP 01001000. O checkout reserva estoque e depois cancela o próprio pedido; se falhar antes do cancelamento, pode deixar a reserva para inspeção/expiração.

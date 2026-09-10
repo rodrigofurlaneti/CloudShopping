@@ -6,10 +6,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <!-- Necessário para IFormFile (IFileStorageService) sem depender do SDK Web -->
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="12.1.1" />

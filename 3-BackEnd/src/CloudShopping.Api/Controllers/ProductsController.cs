@@ -1,4 +1,4 @@
-using CloudShopping.Application.Features.Products.Commands.AddProductStock;
+﻿using CloudShopping.Application.Features.Products.Commands.AddProductStock;
 using CloudShopping.Application.Features.Products.Commands.AdjustInventory;
 using CloudShopping.Application.Features.Products.Commands.CreateProduct;
 using CloudShopping.Application.Features.Products.Commands.DeleteProduct;
@@ -169,7 +169,7 @@ namespace CloudShopping.Api.Controllers
 
         #region Imagens
 
-        // Upload multipart/form-data — o command já existia (IFormFile) mas sem rota.
+        // HTTP owns the stream for the duration of the application command.
         [HttpPost("{id:int}/images")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -181,7 +181,9 @@ namespace CloudShopping.Api.Controllers
             [FromForm] int displayOrder,
             CancellationToken cancellationToken)
         {
-            var command = new UploadProductImageCommand(id, file, isPrimary, displayOrder);
+            await using var content = file.OpenReadStream();
+            var upload = new CloudShopping.Application.Abstractions.Files.UploadFile(file.FileName, file.Length, content);
+            var command = new UploadProductImageCommand(id, upload, isPrimary, displayOrder);
             var result = await _mediator.Send(command, cancellationToken);
             if (!result.IsSuccess) return BadRequest(new { message = result.Error.Message });
 
