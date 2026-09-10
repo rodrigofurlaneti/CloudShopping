@@ -26,6 +26,12 @@ namespace CloudShopping.Api.Controllers;
 [ApiController, Route("api/v1/store")]
 public sealed class StorefrontController(ISender sender) : ControllerBase
 {
+    [HttpGet("postal-address/{zipCode}"), Authorize(Roles = "Customer")]
+    public async Task<IActionResult> PostalAddress(string zipCode, CancellationToken ct)
+    {
+        var address = await sender.Send(new CloudShopping.Application.Features.Storefront.Queries.GetPostalAddress.GetPostalAddressQuery(zipCode), ct);
+        return address == null ? NotFound(new { message = "CEP não encontrado. Preencha o endereço manualmente." }) : Ok(address);
+    }
     private int CustomerId => StoreSecurity.Subject(User);
     [HttpGet("context"), AllowAnonymous]
     public async Task<IActionResult> Context(CancellationToken ct) => Ok(await sender.Send(new GetStoreContextQuery(), ct));

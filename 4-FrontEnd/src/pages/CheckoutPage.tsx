@@ -1,10 +1,32 @@
 import { useResource } from '../services/useResource';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { StoreLayout } from '../layouts/StoreLayout';
 import { request, post, ApiError } from '../services/http';
 import { type Address, type Profile, type Shipping, type Preview, type Order, ensureCustomer, money } from '../services/storeService';
 export function CheckoutPage() {
+    const [zipCode, setZipCode] = useState('');
+    const [postalMessage, setPostalMessage] = useState('');
+    const [postalBusy, setPostalBusy] = useState(false);
+    const postalVersion = useRef(0);
+    const addressForm = useRef<HTMLFormElement>(null);
+    useEffect(() => () => { postalVersion.current++; }, []);
+    const lookupPostal = async () => {
+        if (zipCode.length !== 8) { setPostalMessage('Informe os 8 números do CEP.'); return; }
+        const version = ++postalVersion.current;
+        setPostalBusy(true); setPostalMessage('Consultando CEP…');
+        try {
+            const data = await request<{street:string;neighborhood:string;city:string;state:string}>('/v1/store/postal-address/' + zipCode);
+            if (version !== postalVersion.current) return;
+            for (const field of ['street','neighborhood','city','state'] as const) {
+                const input = addressForm.current?.elements.namedItem(field) as HTMLInputElement | null;
+                if (input) input.value = data[field];
+            }
+            setPostalMessage('Endereço preenchido. Confira os dados e informe o número.');
+        } catch {
+            if (version === postalVersion.current) setPostalMessage('CEP não encontrado ou consulta indisponível. Preencha o endereço manualmente.');
+        } finally { if (version === postalVersion.current) setPostalBusy(false); }
+    };
     const [profile,setProfile]=useState<Profile>({email:'',name:'',type:'B2C',taxId:''});
     const [addresses,setAddresses]=useState<Address[]>([]);const [addressId,setAddressId]=useState(0);
     const [selectedShippingId,setShippingId]=useState(0);
@@ -15,7 +37,18 @@ export function CheckoutPage() {
     const [busy,setBusy]=useState(false);const [ready,setReady]=useState(false);
     const [pending,setPending]=useState<{key:string;token:string}|null>(()=>{try{return JSON.parse(sessionStorage.getItem('checkout:pending')||'null');}catch{return null;}});
     const navigate=useNavigate();
-    useEffect(()=>{ensureCustomer().then(()=>Promise.all([request<Profile>('/v1/store/profile'),request<Address[]>('/v1/store/addresses')])).then(([p,a])=>{setProfile({...p,email:p.email||''});setAddresses(a);setAddressId(a[0]?.id||0);setReady(true);}).catch(e=>setError(e.message));},[]);
+    useEffect(() => {
+        let active = true;
+        void Promise.resolve().then(async () => {
+            if (!active) return;
+            await ensureCustomer();
+            if (!active) return;
+            const [p,a] = await Promise.all([request<Profile>('/v1/store/profile'), request<Address[]>('/v1/store/addresses')]);
+            if (!active) return;
+            setProfile({...p,email:p.email||''}); setAddresses(a); setAddressId(a[0]?.id||0); setReady(true);
+        }).catch(e => { if (active) setError(e.message); });
+        return () => { active = false; };
+    }, []);
     const run=async(action:()=>Promise<void>)=>{setBusy(true);setError('');setStatus('');try{await action();}catch(e){setError((e as Error).message);}finally{setBusy(false);}};
     const confirm=async(attempt:{key:string;token:string})=>{
         sessionStorage.setItem('checkout:pending',JSON.stringify(attempt));setPending(attempt);
@@ -42,11 +75,14 @@ export function CheckoutPage() {
             </form></section>
             <section className="form-card"><h2>2. Endereço de entrega</h2>
                 {addresses.length>0&&<label>Endereço cadastrado<select value={addressId} onChange={e=>{setAddressId(Number(e.target.value));setShippingId(0);setPreview(undefined);}}>{addresses.map(a=><option key={a.id} value={a.id}>{a.street}, {a.number} — {a.city}/{a.state}</option>)}</select></label>}
-                <details open={!addresses.length}><summary>Adicionar endereço</summary><form onSubmit={e=>{e.preventDefault();const f=new FormData(e.currentTarget);const form=e.currentTarget;void run(async()=>{const result=await post<{id:number}>('/v1/store/addresses',Object.fromEntries(f));setAddresses(await request<Address[]>('/v1/store/addresses'));setAddressId(result.id);setShippingId(0);setPreview(undefined);form.reset();setStatus('Endereço salvo.');});}}>
-                    <label>CEP<input name="zipCode" required inputMode="numeric" pattern="[0-9]{8}" maxLength={8} placeholder="Somente 8 números" /></label>
+                <details open={!addresses.length}><summary>Adicionar endereço</summary><form ref={addressForm} onSubmit={e=>{e.preventDefault();const f=new FormData(e.currentTarget);const form=e.currentTarget;void run(async()=>{const result=await post<{id:number}>('/v1/store/addresses',Object.fromEntries(f));setAddresses(await request<Address[]>('/v1/store/addresses'));setAddressId(result.id);setShippingId(0);setPreview(undefined);form.reset();setZipCode('');setPostalMessage('');postalVersion.current++;setStatus('Endereço salvo.');});}}>
+                    <label>CEP<input name="zipCode" required inputMode="numeric" pattern="[0-9]{8}" maxLength={9} placeholder="00000-000" value={zipCode} onChange={e=>{postalVersion.current++;setPostalBusy(false);setPostalMessage('');setZipCode(e.target.value.replace(/\D/g,'').slice(0,8));}} onBlur={()=>{if(zipCode.length===8) void lookupPostal();}} /></label>
+                    <button type="button" disabled={postalBusy || zipCode.length!==8} onClick={()=>void lookupPostal()}>Consultar CEP</button>
+                    <p role="status" aria-live="polite">{postalMessage}</p>
+                    <fieldset disabled={postalBusy} style={{border:0,padding:0,margin:0}}>
                     <label>Rua<input name="street" required maxLength={150}/></label><label>Número<input name="number" required maxLength={10}/></label>
                     <label>Bairro<input name="neighborhood" maxLength={50}/></label><label>Cidade<input name="city" required maxLength={50}/></label><label>UF<input name="state" required pattern="[A-Za-z]{2}" maxLength={2}/></label>
-                    <button disabled={busy}>Salvar endereço</button>
+                    </fieldset><button disabled={busy||postalBusy}>Salvar endereço</button>
                 </form></details>
             </section>
             <section className="form-card"><h2>3. Entrega</h2>{shippingResource.loading?<p>Consultando entrega…</p>:shippingResource.error?<p role="alert">{shippingResource.error}</p>:addressId&&!shipping.length?<p>Nenhuma opção disponível para este CEP. A loja precisa configurar a entrega.</p>:shipping.map(s=><label className="radio-option" key={s.id}><input type="radio" name="shipping" checked={shippingId===s.id} onChange={()=>{setShippingId(s.id);setPreview(undefined);}}/>{s.name} · {money(s.amount)} · até {s.estimatedDays} dia(s)</label>)}

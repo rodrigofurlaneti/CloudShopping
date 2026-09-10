@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, type ReactNode } from 'react';
+import { useEffect, useState, useCallback, useRef, type ReactNode } from 'react';
 import { request, post, resetCsrf } from '../services/http';
 import type { Session, SessionUser } from '../services/storeService';
 import { Navigate, useLocation } from 'react-router-dom';
@@ -9,20 +9,30 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<SessionUser | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const refreshVersion = useRef(0);
+    const invalidateRefresh = useCallback(() => { refreshVersion.current++; }, []);
     const refresh = useCallback(async () => {
-        try { const data = await request<Session>('/v1/session'); setUser(data.user); setError(''); }
-        catch (e) { setUser(null); setError((e as Error).message); }
-        finally { setLoading(false); }
+        const version = ++refreshVersion.current;
+        try {
+            const data = await request<Session>('/v1/session');
+            if (version !== refreshVersion.current) return;
+            setUser(data.user); setError('');
+        } catch (e) {
+            if (version !== refreshVersion.current) return;
+            setUser(null); setError((e as Error).message);
+        } finally { if (version === refreshVersion.current) setLoading(false); }
     }, []);
     useEffect(() => {
         const changed = () => { resetCsrf(); void refresh(); };
-        const expired = () => { setUser(null); resetCsrf(); };
-        request<Session>('/v1/session').then(data => { setUser(data.user); setError(''); }).catch(e => setError(e.message)).finally(() => setLoading(false));
+        const expired = () => { refreshVersion.current++; setUser(null); setLoading(false); resetCsrf(); };
+        let active = true;
+        void Promise.resolve().then(() => { if (active) return refresh(); });
         window.addEventListener('session:changed', changed);
         window.addEventListener('session:expired', expired);
-        return () => { window.removeEventListener('session:changed', changed); window.removeEventListener('session:expired', expired); };
-    }, [refresh]);
+        return () => { active = false; invalidateRefresh(); window.removeEventListener('session:changed', changed); window.removeEventListener('session:expired', expired); };
+    }, [refresh, invalidateRefresh]);
     const logout = async () => {
+        refreshVersion.current++;
         await post('/v1/session/logout'); resetCsrf(); setUser(null);
         sessionStorage.removeItem('checkout:pending'); window.dispatchEvent(new Event('cart:changed'));
         await refresh();
@@ -39,4 +49,5 @@ export function AdminOnly({ children }: { children: ReactNode }) {
     if (permission && !can(user, permission)) return <Navigate to="/admin/security" replace />;
     return <>{children}</>;
 }
+
 

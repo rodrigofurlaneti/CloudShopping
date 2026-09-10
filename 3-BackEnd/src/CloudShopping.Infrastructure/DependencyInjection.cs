@@ -1,4 +1,4 @@
-﻿using CloudShopping.Application.Abstractions.Data;
+using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Application.Abstractions.Services;
 using CloudShopping.Infrastructure.Persistence;
 using CloudShopping.Infrastructure.Repositories;
@@ -40,6 +40,11 @@ public static class DependencyInjection
         services.AddScoped<StoreCommerceService>();
         services.AddScoped<IStoreCommerce>(sp => sp.GetRequiredService<StoreCommerceService>());
         services.AddScoped<ICustomerPaymentCancellation, CustomerPaymentCancellation>();
+        services.AddHttpClient<CloudShopping.Application.Abstractions.Services.IPostalCodeLookup, CloudShopping.Infrastructure.Services.ViaCepLookup>(client =>
+        {
+            client.BaseAddress = new Uri("https://viacep.com.br/");
+            client.Timeout = TimeSpan.FromSeconds(5);
+        });
         services.AddHttpClient<IAsaasGateway, AsaasGateway>()
             .RedactLoggedHeaders(_ => true)
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
