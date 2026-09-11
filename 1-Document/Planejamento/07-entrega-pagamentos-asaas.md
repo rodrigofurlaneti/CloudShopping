@@ -1,5 +1,7 @@
 # Entrega 2 — pagamentos Asaas
 
+Revisão posterior: [auditoria de contratos e correções de 11/09/2026](14-auditoria-integracao-asaas.md). Os números e comportamentos abaixo registram a entrega original.
+
 Implementação em 09/09/2026. Atende à escolha do usuário de oferecer **ambas as soluções**: recebimento direto pelo lojista e recebimento pela plataforma com split. Cada loja seleciona um modo; cada tentativa preserva a conta emissora e a distribuição usadas na criação. A integração foi testada localmente com MySQL real e respostas simuladas do Asaas. **Ainda não foi homologada no sandbox externo nem ativada em produção.**
 
 ## Comportamento entregue

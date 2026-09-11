@@ -66,6 +66,13 @@ namespace CloudShopping.Domain.Entities.Orders
         {
             FinancialState="Review"; FulfillmentBlocked=true; AddHistory(reason);UpdateTimestamp();
         }
+        public void HoldFulfillmentForRefund()
+        {
+            if (FulfillmentBlocked) return;
+            FulfillmentBlocked=true;
+            AddHistory("Estorno solicitado ou em processamento: expedição bloqueada até conciliação financeira.");
+            UpdateTimestamp();
+        }
         public void ConfigureCheckout(string key, string hash, decimal shipping, string method, DateTime expires)
         {
             if (shipping < 0) throw new ArgumentException("Frete inválido.");

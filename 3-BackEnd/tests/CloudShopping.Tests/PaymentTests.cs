@@ -226,7 +226,9 @@ public sealed partial class CommerceTests
 public sealed class FakeAsaas:IAsaasGateway
 {
     public int PaymentCreates,CheckoutCreates,RefundRequests;
-    public bool LoseCreationResponse,HidePayments,Deleted,RejectCreation,LoseCancelResponse;
+    public bool LoseCreationResponse,HidePayments,Deleted,RejectCreation,LoseCancelResponse,EmptyCancelResponse,RefundHasMore,OmitCheckoutSession,FailRefundLookup;
+    public JsonElement? OverrideSplits,OverrideRefunds;
+    public string? OverrideReference;
     public decimal? OverrideAmount;
     public string Status="PENDING";
     public JsonElement LastPaymentBody,LastCheckoutBody;
@@ -239,8 +241,8 @@ public sealed class FakeAsaas:IAsaasGateway
             externalReference=LastCheckoutBody.Text("externalReference"),split=LastCheckoutBody.GetProperty("splits")});hasPayment=true;
     }
     private JsonElement Payment()=>Json(new{id="pay_test",customer=LastPaymentBody.Text("customer"),billingType=LastPaymentBody.Text("billingType"),value=OverrideAmount??LastPaymentBody.Money("value"),
-        externalReference=LastPaymentBody.Text("externalReference"),checkoutSession=CheckoutCreates>0?"checkout_test":null,status=Status,deleted=Deleted,
-        split=LastPaymentBody.GetProperty("split"),invoiceUrl="https://sandbox.asaas.com/i/test",bankSlipUrl="https://sandbox.asaas.com/b/pdf/test"});
+        externalReference=OverrideReference??LastPaymentBody.Text("externalReference"),checkoutSession=CheckoutCreates>0&&!OmitCheckoutSession?"checkout_test":null,status=Status,deleted=Deleted,
+        split=OverrideSplits??LastPaymentBody.GetProperty("split"),refunds=OverrideRefunds??Json(Array.Empty<object>()),invoiceUrl="https://sandbox.asaas.com/i/test",bankSlipUrl="https://sandbox.asaas.com/b/pdf/test"});
     public Task<JsonElement> Send(AsaasConnection account,HttpMethod method,string path,object? body,CancellationToken ct)
     {
         if(path=="wallets/")return Task.FromResult(Json(new{data=new[]{new{id="11111111-1111-4111-8111-111111111111"}}}));
@@ -258,11 +260,14 @@ public sealed class FakeAsaas:IAsaasGateway
         if(path.StartsWith("payments?")&&method==HttpMethod.Get)return Task.FromResult(Json(new{data=hasPayment&&!HidePayments?new[]{Payment()}:Array.Empty<JsonElement>()}));
         if(path=="payments/pay_test"&&method==HttpMethod.Get)return Task.FromResult(Payment());
         if(path=="payments/pay_test/pixQrCode")return Task.FromResult(Json(new{payload="synthetic-pix-code",encodedImage=""}));
-        if(path=="payments/pay_test/refunds")return Task.FromResult(Json(new{data=RefundRequests==0?Array.Empty<object>():new object[]{new {id="ref_test",status=Status=="REFUNDED"?"DONE":"PENDING",value=LastPaymentBody.Money("value"),requestUrl="https://sandbox.asaas.com/refund/test"}}}));
+        if(path=="payments/pay_test/refunds"){
+            if(FailRefundLookup)throw new HttpRequestException("Synthetic refund lookup failure");
+            return Task.FromResult(Json(new{hasMore=RefundHasMore,data=OverrideRefunds??Json(RefundRequests==0?Array.Empty<object>():new object[]{new {id="ref_test",status=Status=="REFUNDED"?"DONE":"PENDING",value=LastPaymentBody.Money("value"),requestUrl="https://sandbox.asaas.com/refund/test"}})}));
+        }
         if(path=="payments/pay_test/bankSlip/refund"){RefundRequests++;return Task.FromResult(Json(new{requestUrl="https://sandbox.asaas.com/refund/test"}));}
         if(path=="payments/pay_test/refund"){RefundRequests++;Status="REFUND_REQUESTED";return Task.FromResult(Payment());}
         if(path=="payments/pay_test"&&method==HttpMethod.Delete){Deleted=true;return Task.FromResult(Json(new{deleted=true}));}
-        if(path=="checkouts/checkout_test/cancel"){if(LoseCancelResponse)throw new HttpRequestException("Synthetic cancel response lost");return Task.FromResult(Json(new{}));}
+        if(path=="checkouts/checkout_test/cancel"){if(LoseCancelResponse)throw new HttpRequestException("Synthetic cancel response lost");return Task.FromResult(EmptyCancelResponse?Json(new{}):Json(new{id="checkout_test",status="CANCELED"}));}
         throw new InvalidOperationException("Unexpected fake Asaas route: "+method+" "+path);
     }
 }

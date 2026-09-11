@@ -36,8 +36,8 @@ public sealed class AsaasGateway(HttpClient http, IDataProtectionProvider protec
 public static class JsonFields
 {
     public static string? Text(this JsonElement j,string key)=>j.ValueKind==JsonValueKind.Object && j.TryGetProperty(key,out var v) && v.ValueKind==JsonValueKind.String ? v.GetString():null;
-    public static decimal Money(this JsonElement j,string key)=>j.TryGetProperty(key,out var v)&&v.TryGetDecimal(out var d)?d:0;
-    public static JsonElement[] Rows(this JsonElement j)=>j.ValueKind==JsonValueKind.Array?j.EnumerateArray().ToArray():j.TryGetProperty("data",out var v)&&v.ValueKind==JsonValueKind.Array?v.EnumerateArray().ToArray():[];
+    public static decimal Money(this JsonElement j,string key)=>j.ValueKind==JsonValueKind.Object&&j.TryGetProperty(key,out var v)&&v.ValueKind==JsonValueKind.Number&&v.TryGetDecimal(out var d)?d:0;
+    public static JsonElement[] Rows(this JsonElement j)=>j.ValueKind==JsonValueKind.Array?j.EnumerateArray().ToArray():j.ValueKind==JsonValueKind.Object&&j.TryGetProperty("data",out var v)&&v.ValueKind==JsonValueKind.Array?v.EnumerateArray().ToArray():throw new InvalidOperationException("Lista Asaas sem dados; operação requer conciliação.");
     public static string Id(this JsonElement j)=>j.Text("id")??throw new InvalidOperationException("Resposta Asaas sem identificador; operação requer conciliação.");
     public static string Hash(string value)=>Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(value)));
     public static bool Verify(string value,string hash)=>hash.Length==64 && CryptographicOperations.FixedTimeEquals(Encoding.ASCII.GetBytes(Hash(value)),Encoding.ASCII.GetBytes(hash));

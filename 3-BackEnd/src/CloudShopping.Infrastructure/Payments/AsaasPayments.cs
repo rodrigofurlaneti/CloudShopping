@@ -54,7 +54,7 @@ public sealed class AsaasPayments(AppDbContext db,IAsaasGateway gateway,AsaasAcc
         {
             if(a.State=="Refunded")return await View(orderId,customer,ct);
             if(a.State is not("Paid" or "PaidReview" or "RefundPending" or "Review"))throw new CommerceConflictException("Concilie um pagamento confirmado antes de solicitar estorno.");
-            if(!a.RefundRequested)Audit(a,"Refund",actor);a.RefundRequested=true;await db.SaveChangesAsync(ct);
+            if(!a.RefundRequested)Audit(a,"Refund",actor);a.RefundRequested=true;order.HoldFulfillmentForRefund();await db.SaveChangesAsync(ct);
         }
         await PumpSafely(a,ct);return await View(orderId,customer,ct);
     }
@@ -154,11 +154,12 @@ public sealed class AsaasPayments(AppDbContext db,IAsaasGateway gateway,AsaasAcc
             }
             else
             {
-                var response=await gateway.Send(account,HttpMethod.Post,"payments",new {
-                    customer=a.RemoteCustomerId,billingType=a.Method,value=a.Amount,dueDate=a.DueDate.ToString("yyyy-MM-dd"),
-                    description="Pedido #"+a.OrderId,externalReference=JsonFields.Reference(a),split,
-                    daysAfterDueDateToRegistrationCancellation=0,postalService=false
-                },ct);
+                var body=new Dictionary<string,object?> {
+                    ["customer"]=a.RemoteCustomerId,["billingType"]=a.Method,["value"]=a.Amount,["dueDate"]=a.DueDate.ToString("yyyy-MM-dd"),
+                    ["description"]="Pedido #"+a.OrderId,["externalReference"]=JsonFields.Reference(a),["split"]=split
+                };
+                if(a.Method=="BOLETO") {body["daysAfterDueDateToRegistrationCancellation"]=0;body["postalService"]=false;}
+                var response=await gateway.Send(account,HttpMethod.Post,"payments",body,ct);
                 a.RemotePaymentId=response.Id();
             }
             } catch(AsaasApiException ex)when(ex.Status is 400 or 401 or 403 or 422)
@@ -181,21 +182,33 @@ public sealed class AsaasPayments(AppDbContext db,IAsaasGateway gateway,AsaasAcc
             catch(AsaasApiException ex)when(ex.Status==404){a.ProviderStatus="NOT_FOUND";if(a.State!="Cancelled"){a.State="Unknown";a.LastError="Cobrança ausente no Asaas; aguardando confirmação de cancelamento.";}return;}
             var p=canonical.Value;
             if(p.Id()!=a.RemotePaymentId||p.Money("value")!=a.Amount||p.Text("customer")!=a.RemoteCustomerId||p.Text("billingType")!=a.Method||
-                (p.Text("externalReference")!=JsonFields.Reference(a) && !(a.Method=="CREDIT_CARD"&&p.Text("checkoutSession")==a.RemoteCheckoutId)))
+                (p.Text("externalReference")!=JsonFields.Reference(a) && !(a.Method=="CREDIT_CARD"&&a.RemoteCheckoutId!=null&&p.Text("checkoutSession")==a.RemoteCheckoutId)))
             {await Review(a,order,"Identidade, valor ou cliente da cobrança divergente.",ct);return;}
             a.ProviderStatus=p.Text("status")??"UNKNOWN";
+            if(!order.FulfillmentBlocked && a.ProviderStatus is ("REFUNDED" or "REFUND_REQUESTED" or "REFUND_IN_PROGRESS"))
+            {order.HoldFulfillmentForRefund();await db.SaveChangesAsync(ct);}
             a.PaymentUrl=a.Method=="CREDIT_CARD"&&a.RemoteCheckoutId!=null?a.PaymentUrl??JsonFields.CheckoutUrl(account.Environment,a.RemoteCheckoutId):JsonFields.SafeUrl(p.Text("invoiceUrl"),account.Environment);
             a.BankSlipUrl=JsonFields.SafeUrl(p.Text("bankSlipUrl"),account.Environment);
             var refundPending=false;
             if(a.RefundRequested||a.RefundObserved||a.ProviderStatus=="REFUNDED"||(p.TryGetProperty("refunds",out var embedded)&&embedded.ValueKind==JsonValueKind.Array&&embedded.GetArrayLength()>0))
             {
-                var refunds=(await gateway.Send(account,HttpMethod.Get,"payments/"+Uri.EscapeDataString(a.RemotePaymentId)+"/refunds",null,ct)).Rows();
+                var refundResponse=await gateway.Send(account,HttpMethod.Get,"payments/"+Uri.EscapeDataString(a.RemotePaymentId)+"/refunds",null,ct);
+                // The reference exposes hasMore but does not document pagination parameters here.
+                // Never settle from a partial refund history.
+                if(refundResponse.TryGetProperty("hasMore",out var more)&&more.ValueKind==JsonValueKind.True)
+                {await Review(a,order,"Histórico de estornos incompleto; requer conciliação financeira.",ct);return;}
+                var refunds=refundResponse.Rows();
                 var returned=refunds.Where(r=>r.Text("status")=="DONE").Sum(r=>r.Money("value"));
-                if(returned==a.Amount){await ApplyRefund(a,order,ct);return;}
+                if(returned==a.Amount){
+                    if(refunds.Where(r=>r.Text("status")=="DONE").Any(r=>r.TryGetProperty("refundedSplits",out var rs)&&rs.ValueKind==JsonValueKind.Array&&rs.EnumerateArray().Any(s=>!s.TryGetProperty("done",out var done)||done.ValueKind!=JsonValueKind.True)))
+                    {await Review(a,order,"Estorno do split ainda não concluído; requer conciliação financeira.",ct);return;}
+                    await ApplyRefund(a,order,ct);return;
+                }
                 if(returned>0){await Review(a,order,"Estorno parcial/divergente requer análise financeira.",ct);return;}
                 if(refunds.Any(r=>r.Text("status") is "DENIED" or "CANCELLED")){await Review(a,order,"Estorno não concluído pelo provedor. Consulte o financeiro.",ct);return;}
                 a.RefundRequestUrl??=refunds.Select(r=>JsonFields.SafeUrl(r.Text("requestUrl"),account.Environment)).FirstOrDefault(x=>x!=null);
                 refundPending=refunds.Length>0||a.RefundObserved;
+                if(refundPending)order.HoldFulfillmentForRefund();
                 if(a.ProviderStatus=="REFUNDED"){a.State="RefundPending";a.LastError="Aguardando registro de estorno integral concluído no Asaas.";return;}
             }
             if(a.ProviderStatus is "CHARGEBACK_REQUESTED" or "CHARGEBACK_DISPUTE" or "AWAITING_CHARGEBACK_REVERSAL" or "PARTIALLY_REFUNDED")
@@ -205,11 +218,11 @@ public sealed class AsaasPayments(AppDbContext db,IAsaasGateway gateway,AsaasAcc
             {
                 var expected=JsonSerializer.Deserialize<JsonElement[]>(a.SplitJson)!;
                 var actual=p.TryGetProperty("split",out var splits)&&splits.ValueKind==JsonValueKind.Array?splits.EnumerateArray().ToArray():[];
-                if(expected.Length!=actual.Length || expected.Any(e=>!actual.Any(s=>s.Text("walletId")==e.Text("walletId")&&s.Money("percentualValue")==e.Money("percentualValue"))) || actual.Any(s=>s.Text("status") is "REFUSED" or "CANCELLED" or "CANCELED"))
+                if(expected.Length!=actual.Length || actual.Select(s=>s.Text("walletId")).Distinct().Count()!=actual.Length || expected.Any(e=>!actual.Any(s=>s.Text("walletId")==e.Text("walletId")&&s.Money("percentualValue")==e.Money("percentualValue")&&s.Money("fixedValue")==0)) || actual.Any(s=>s.Text("status") is "REFUSED" or "CANCELLED" or "CANCELED" or "BLOCKED_BY_VALUE_DIVERGENCE" or "PROCESSING_REFUND" or "REFUNDED"))
                 {await Review(a,order,"Split divergente ou recusado pelo Asaas. Confira os recebedores antes de expedir.",ct);return;}
                 await ApplyPaid(a,order,ct);
                 if(a.CancelRequested&&!a.RefundRequested)a.LastError="Pagamento já confirmado. O cancelamento exige solicitação de estorno pela loja.";
-                if(a.RefundRequested && !a.RefundSent)
+                if(a.RefundRequested && !a.RefundSent && !refundPending)
                 {
                     a.RefundSent=true;a.State="RefundPending";await db.SaveChangesAsync(ct);
                     var refund=await gateway.Send(account,HttpMethod.Post,"payments/"+Uri.EscapeDataString(a.RemotePaymentId)+(a.Method=="BOLETO"?"/bankSlip/refund":"/refund"),a.Method=="BOLETO"?null:new {value=a.Amount},ct);
@@ -218,9 +231,9 @@ public sealed class AsaasPayments(AppDbContext db,IAsaasGateway gateway,AsaasAcc
                 if(a.RefundRequested||refundPending)a.State="RefundPending";
                 return;
             }
+            if(a.ProviderStatus is "REFUND_REQUESTED" or "REFUND_IN_PROGRESS"){order.HoldFulfillmentForRefund();a.State="RefundPending";return;}
             if(order.FinancialState is "Paid" or "PaidReview" or "Refunded")
             {await Review(a,order,"Estado financeiro divergente após confirmação; expedição bloqueada.",ct);return;}
-            if(a.ProviderStatus is "REFUND_REQUESTED" or "REFUND_IN_PROGRESS"){a.State="RefundPending";return;}
             if(p.TryGetProperty("deleted",out var deleted)&&deleted.ValueKind==JsonValueKind.True){await CancelLocal(a,ct);return;}
             if(a.Method=="PIX"&&a.PixPayload==null && !a.CancelRequested)
             {
@@ -236,7 +249,9 @@ public sealed class AsaasPayments(AppDbContext db,IAsaasGateway gateway,AsaasAcc
             {
                 if(a.CancelSent){a.LastError="Cancelamento do checkout aguardando confirmação do Asaas.";return;}
                 a.CancelSent=true;await db.SaveChangesAsync(ct);
-                await gateway.Send(account,HttpMethod.Post,"checkouts/"+Uri.EscapeDataString(a.RemoteCheckoutId)+"/cancel",null,ct);
+                var cancelled=await gateway.Send(account,HttpMethod.Post,"checkouts/"+Uri.EscapeDataString(a.RemoteCheckoutId)+"/cancel",new {},ct);
+                if(cancelled.Text("id")!=a.RemoteCheckoutId||cancelled.Text("status")!="CANCELED")
+                    throw new InvalidOperationException("Cancelamento do checkout sem confirmação; aguardando webhook.");
             }
             else if(a.RemotePaymentId!=null)
             {
@@ -249,7 +264,7 @@ public sealed class AsaasPayments(AppDbContext db,IAsaasGateway gateway,AsaasAcc
         a.State="AwaitingPayment";a.LastError=null;
     }
     private async Task Review(PaymentAttempt a,Order order,string reason,CancellationToken ct)
-    {a.State="Review";a.LastError=reason;if(!order.FulfillmentBlocked)order.HoldFinancialReview(reason);await db.SaveChangesAsync(ct);}
+    {a.State="Review";a.LastError=reason;if(order.FinancialState!="Review")order.HoldFinancialReview(reason);await db.SaveChangesAsync(ct);}
     private async Task ApplyPaid(PaymentAttempt a,Order order,CancellationToken ct)
     {
         var key=a.AccountKey+":"+a.RemotePaymentId;
