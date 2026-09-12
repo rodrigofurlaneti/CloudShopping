@@ -1,4 +1,5 @@
-﻿using CloudShopping.Application.Abstractions.Data;
+using CloudShopping.Application.Abstractions.Caching;
+using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Domain.Primitives.Results;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -11,15 +12,18 @@ namespace CloudShopping.Application.Features.Store.Commands.DeleteStoreBanner
     {
         private readonly IStoreBannerRepository _bannerRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICacheService _cache;
         private readonly ILogger<DeleteStoreBannerCommandHandler> _logger;
 
         public DeleteStoreBannerCommandHandler(
             IStoreBannerRepository bannerRepository,
             IUnitOfWork unitOfWork,
+            ICacheService cache,
             ILogger<DeleteStoreBannerCommandHandler> logger)
         {
             _bannerRepository = bannerRepository;
             _unitOfWork = unitOfWork;
+            _cache = cache;
             _logger = logger;
         }
         public async Task<Result> Handle(DeleteStoreBannerCommand request, CancellationToken cancellationToken)
@@ -29,6 +33,10 @@ namespace CloudShopping.Application.Features.Store.Commands.DeleteStoreBanner
                 return Result.Failure(new Error("StoreBanner.NotFound", "Banner não encontrado."));
             _bannerRepository.Remove(banner);
             await _unitOfWork.CommitAsync(cancellationToken);
+
+            if (banner.TenantId is { } tenantId)
+                await _cache.RemoveAsync(CacheKeys.TenantList(tenantId, CacheKeys.StoreBanners), cancellationToken);
+
             _logger.LogInformation("Banner removido com sucesso. ID: {BannerId}", banner.Id);
             return Result.Success();
         }

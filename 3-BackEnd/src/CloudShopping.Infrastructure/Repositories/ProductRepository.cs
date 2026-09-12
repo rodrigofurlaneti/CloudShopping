@@ -71,6 +71,21 @@ namespace CloudShopping.Infrastructure.Repositories
                 .FirstOrDefaultAsync(p => p.Sku == sku && p.TenantId == tenantId, cancellationToken);
         }
 
+        // Projeção enxuta (2 colunas, sem tracking, sem Include de imagens) para a
+        // tarefa de cache Redis: o estoque é sempre lido ao vivo, nunca cacheado, então
+        // este método é chamado em toda leitura de ficha de produto (id ou SKU), esteja
+        // o restante do produto vindo do cache ou não.
+        public async Task<(int PhysicalStock, int ReservedStock)?> GetStockAsync(int id, CancellationToken cancellationToken = default)
+        {
+            var tenantId = _tenantProvider.GetTenantId();
+            var row = await _context.Products.AsNoTracking()
+                .Where(p => p.Id == id && p.TenantId == tenantId)
+                .Select(p => new { p.PhysicalStock, p.ReservedStock })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            return row is null ? null : (row.PhysicalStock, row.ReservedStock);
+        }
+
         public async Task<(IEnumerable<Product> Items, int TotalCount)> GetPaginatedAsync(
             int tenantId, int page, int pageSize, string? searchTerm, CancellationToken cancellationToken = default)
         {
@@ -87,6 +102,14 @@ namespace CloudShopping.Infrastructure.Repositories
             // p.Images para resolver a foto principal da listagem — sem o Include,
             // a coleção sempre viria vazia e a listagem mostraria "sem imagem" para
             // todo produto, mesmo com fotos já enviadas.
+            //
+            // Esta listagem paginada NÃO passa pelo cache Redis: cada página/termo de
+            // busca gera uma combinação diferente de chave e já inclui o estoque
+            // (PhysicalStock/ReservedStock/AvailableStock) por item, que a tarefa de
+            // cache proíbe cachear — cachear só os campos fixos aqui exigiria uma
+            // segunda consulta de estoque por item da página, o que anula o ganho.
+            // A ficha de produto (GetProductById/GetProductBySku, o caminho mais
+            // repetido) é quem usa o cache — ver GetProductByIdQueryHandler.
             var items = await query
                 .Include(p => p.Images)
                 .OrderBy(p => p.Name)

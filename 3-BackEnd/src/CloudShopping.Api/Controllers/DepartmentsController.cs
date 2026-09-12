@@ -1,4 +1,5 @@
-﻿using CloudShopping.Application.Features.Departments.Commands.CreateDepartment;
+using CloudShopping.Api.Filters;
+using CloudShopping.Application.Features.Departments.Commands.CreateDepartment;
 using CloudShopping.Application.Features.Departments.Commands.DeleteDepartment;
 using CloudShopping.Application.Features.Departments.Commands.UpdateDepartment;
 using CloudShopping.Application.Features.Departments.Queries.GetTenantDepartments;
@@ -18,7 +19,10 @@ namespace CloudShopping.Api.Controllers
             _sender = sender;
         }
 
+        // ETag/Cache-Control (tarefa de cache full-stack): departments muda raramente,
+        // então o 304 aqui costuma poupar quase toda a banda dessa listagem.
         [HttpGet]
+        [ETagCatalog]
         public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
         {
             var query = new GetTenantDepartmentsQuery();

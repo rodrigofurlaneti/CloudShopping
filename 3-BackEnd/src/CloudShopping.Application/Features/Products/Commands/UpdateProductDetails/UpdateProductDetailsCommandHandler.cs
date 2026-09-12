@@ -1,4 +1,5 @@
-﻿using CloudShopping.Application.Abstractions.Data;
+using CloudShopping.Application.Abstractions.Caching;
+using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Application.Abstractions.Services;
 using CloudShopping.Domain.Primitives.Results;
 using MediatR;
@@ -16,17 +17,20 @@ namespace CloudShopping.Application.Features.Products.Commands.UpdateProductDeta
         private readonly IProductRepository _productRepository;
         private readonly ITenantProvider _tenantProvider;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICacheService _cache;
         private readonly ILogger<UpdateProductDetailsCommandHandler> _logger;
 
         public UpdateProductDetailsCommandHandler(
             IProductRepository productRepository,
             ITenantProvider tenantProvider,
             IUnitOfWork unitOfWork,
+            ICacheService cache,
             ILogger<UpdateProductDetailsCommandHandler> logger)
         {
             _productRepository = productRepository;
             _tenantProvider = tenantProvider;
             _unitOfWork = unitOfWork;
+            _cache = cache;
             _logger = logger;
         }
 
@@ -59,6 +63,14 @@ namespace CloudShopping.Application.Features.Products.Commands.UpdateProductDeta
 
             _productRepository.Update(product);
             await _unitOfWork.CommitAsync(cancellationToken);
+
+            // Invalida o cache Redis (tarefa de cache full-stack): Nome/Preço fazem parte
+            // dos campos estáticos cacheados na ficha do produto (por Id e por SKU).
+            await _cache.RemoveManyAsync(new[]
+            {
+                CacheKeys.TenantEntity(product.TenantId, CacheKeys.Products, product.Id),
+                CacheKeys.ProductBySku(product.TenantId, product.Sku)
+            }, cancellationToken);
 
             _logger.LogInformation("Detalhes do produto {ProductId} atualizados com sucesso.", request.ProductId);
             return Result.Success();

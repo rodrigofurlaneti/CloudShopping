@@ -15,6 +15,8 @@
 		<PackageReference Include="SixLabors.ImageSharp" Version="4.1.1" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
 		<PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
+		<!-- Cache Redis (tarefa de cache full-stack): cliente oficial do Redis para .NET. -->
+		<PackageReference Include="StackExchange.Redis" Version="3.1.31" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\CloudShopping.Application\CloudShopping.Application.csproj" />

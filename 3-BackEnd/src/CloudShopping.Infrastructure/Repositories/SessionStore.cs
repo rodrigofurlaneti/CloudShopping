@@ -1,4 +1,5 @@
 using CloudShopping.Domain.Entities.Security;
+using CloudShopping.Application.Abstractions.Caching;
 using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Domain.Entities.Backoffice;
 using CloudShopping.Infrastructure.Persistence;
@@ -6,13 +7,33 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CloudShopping.Infrastructure.Repositories;
 
-public sealed class SessionStore(AppDbContext db) : ISessionStore
+public sealed class SessionStore(AppDbContext db, ICacheService cache) : ISessionStore
 {
     public Task<bool> TenantExists(int tenantId, CancellationToken ct) => db.Tenants.IgnoreQueryFilters().AnyAsync(x => x.Id == tenantId && x.IsActive, ct);
 
-    public Task<StoredSession?> Find(int tenantId, string sessionId, CancellationToken ct) => db.Set<AuthSession>().AsNoTracking()
-        .Where(x => x.Id == sessionId && x.TenantId == tenantId)
-        .Select(x => new StoredSession(x.Id, x.TenantId, x.SubjectId, x.Kind, x.CredentialStamp, x.ExpiresAt, x.RevokedAt)).SingleOrDefaultAsync(ct);
+    // Cache de Sessão (authsessions, tarefa de cache Redis): StoreSecurity.Validate chama
+    // este método a CADA requisição autenticada (OnValidatePrincipal do cookie), então é
+    // o ponto de maior ganho de performance do cache — evita ida ao MySQL em praticamente
+    // todo request autenticado. O TTL é exatamente o tempo restante até ExpiresAt (nunca
+    // um valor fixo), então o Redis nunca serve uma sessão além do seu prazo real; uma
+    // revogação manual (ver Revoke) limpa a chave imediatamente, sem esperar o TTL.
+    public async Task<StoredSession?> Find(int tenantId, string sessionId, CancellationToken ct)
+    {
+        var cacheKey = CacheKeys.SessionKey(tenantId, sessionId);
+        var cached = await cache.GetAsync<StoredSession>(cacheKey, ct);
+        if (cached != null) return cached;
+
+        var session = await db.Set<AuthSession>().AsNoTracking()
+            .Where(x => x.Id == sessionId && x.TenantId == tenantId)
+            .Select(x => new StoredSession(x.Id, x.TenantId, x.SubjectId, x.Kind, x.CredentialStamp, x.ExpiresAt, x.RevokedAt)).SingleOrDefaultAsync(ct);
+
+        if (session is { RevokedAt: null })
+        {
+            var ttl = session.ExpiresAt - DateTime.UtcNow;
+            if (ttl > TimeSpan.Zero) await cache.SetAsync(cacheKey, session, ttl, ct);
+        }
+        return session;
+    }
 
     public async Task<SessionIdentity?> Identity(int tenantId, int subjectId, string kind, CancellationToken ct)
     {
@@ -47,5 +68,9 @@ public sealed class SessionStore(AppDbContext db) : ISessionStore
         if (session == null || session.RevokedAt != null) return;
         session.Revoke();
         await db.SaveChangesAsync(ct);
+
+        // Limpa o cache imediatamente: sem isso, uma sessão revogada continuaria válida
+        // no Redis até o TTL (ExpiresAt) natural expirar.
+        await cache.RemoveAsync(CacheKeys.SessionKey(tenantId, sessionId), ct);
     }
 }

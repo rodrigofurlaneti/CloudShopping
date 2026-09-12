@@ -1,5 +1,7 @@
+using CloudShopping.Application.Abstractions.Caching;
 using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Application.Abstractions.Services;
+using CloudShopping.Infrastructure.Caching;
 using CloudShopping.Infrastructure.Persistence;
 using CloudShopping.Infrastructure.Repositories;
 using CloudShopping.Infrastructure.Payments;
@@ -7,7 +9,9 @@ using CloudShopping.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MySqlConnector;
+using StackExchange.Redis;
 using System.Data;
 
 namespace CloudShopping.Infrastructure;
@@ -25,6 +29,37 @@ public static class DependencyInjection
         services.AddScoped<ISqlConnectionFactory>(sp => new SqlConnectionFactory(connectionString));
         services.AddHttpContextAccessor();
         services.AddScoped<ITenantProvider, TenantProvider>();
+
+        // Cache Redis (tarefa de cache full-stack): ConnectionStrings:Redis é opcional de
+        // propósito — sem ela (ou se a conexão inicial falhar), a aplicação sobe normalmente
+        // usando NullCacheService (no-op), sem cache mas também sem quebrar nada.
+        // Configure ConnectionStrings__Redis (env var) em produção; em desenvolvimento o
+        // padrão é localhost:6379 (ver appsettings.Development.json).
+        var redisConnectionString = configuration.GetConnectionString("Redis");
+        var redisInstanceName = configuration["Redis:InstanceName"] ?? "cloudshopping:";
+        services.AddSingleton<ICacheService>(sp =>
+        {
+            var startupLogger = sp.GetRequiredService<ILoggerFactory>().CreateLogger("CloudShopping.Infrastructure.Caching.Redis");
+            if (string.IsNullOrWhiteSpace(redisConnectionString))
+            {
+                startupLogger.LogWarning("ConnectionStrings:Redis não configurada. Cache desabilitado (NullCacheService).");
+                return new NullCacheService();
+            }
+            try
+            {
+                var options = ConfigurationOptions.Parse(redisConnectionString);
+                options.AbortOnConnectFail = false;
+                options.ConnectTimeout = 3000;
+                var multiplexer = ConnectionMultiplexer.Connect(options);
+                TryEnableAllKeysLru(multiplexer, startupLogger);
+                return new RedisCacheService(multiplexer, redisInstanceName, sp.GetRequiredService<ILogger<RedisCacheService>>());
+            }
+            catch (Exception ex)
+            {
+                startupLogger.LogWarning(ex, "Não foi possível conectar ao Redis ({ConnectionString}). Cache desabilitado (NullCacheService); a aplicação segue funcionando normalmente.", redisConnectionString);
+                return new NullCacheService();
+            }
+        });
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ILogTrackerRepository, LogTrackerRepository>();
@@ -72,5 +107,26 @@ public static class DependencyInjection
         services.AddScoped<IProfileRepository, ProfileRepository>();
         services.AddScoped<IProfileUserRepository, ProfileUserRepository>();
         return services;
+    }
+
+    // Best-effort: define a política de despejo allkeys-lru exigida pelo DoD da tarefa de
+    // cache. Um Redis gerenciado (ex.: Azure Cache Basic/Standard) costuma recusar
+    // CONFIG SET — nesse caso a política deve ser ajustada manualmente no provedor; a
+    // falha aqui nunca deve impedir a aplicação de subir.
+    private static void TryEnableAllKeysLru(IConnectionMultiplexer multiplexer, ILogger logger)
+    {
+        try
+        {
+            foreach (var endpoint in multiplexer.GetEndPoints())
+            {
+                var server = multiplexer.GetServer(endpoint);
+                if (server.IsReplica) continue;
+                server.ConfigSet("maxmemory-policy", "allkeys-lru");
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogInformation(ex, "Não foi possível definir maxmemory-policy=allkeys-lru via CONFIG SET (comum em Redis gerenciado). Configure manualmente no provedor se necessário.");
+        }
     }
 }

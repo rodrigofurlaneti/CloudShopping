@@ -1,4 +1,5 @@
-﻿using CloudShopping.Application.Features.Store.Commands.CreateStoreBanner;
+using CloudShopping.Api.Filters;
+using CloudShopping.Application.Features.Store.Commands.CreateStoreBanner;
 using CloudShopping.Application.Features.Store.Commands.DeleteStoreBanner;
 using CloudShopping.Application.Features.Store.Commands.UpdateStoreBanner;
 using CloudShopping.Application.Features.Store.Queries.GetStoreBanners;
@@ -22,6 +23,7 @@ namespace CloudShopping.Api.Controllers
         }
 
         [HttpGet]
+        [ETagCatalog]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
         {

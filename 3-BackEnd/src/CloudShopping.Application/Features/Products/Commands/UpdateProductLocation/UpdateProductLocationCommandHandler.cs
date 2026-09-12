@@ -1,4 +1,5 @@
-﻿using CloudShopping.Application.Abstractions.Data;
+using CloudShopping.Application.Abstractions.Caching;
+using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Application.Abstractions.Services;
 using CloudShopping.Domain.Entities.Products;
 using CloudShopping.Domain.Primitives.Results;
@@ -17,17 +18,20 @@ namespace CloudShopping.Application.Features.Products.Commands.UpdateProductLoca
         private readonly IProductRepository _productRepository;
         private readonly ITenantProvider _tenantProvider;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICacheService _cache;
         private readonly ILogger<UpdateProductLocationCommandHandler> _logger;
 
         public UpdateProductLocationCommandHandler(
             IProductRepository productRepository,
             ITenantProvider tenantProvider,
             IUnitOfWork unitOfWork,
+            ICacheService cache,
             ILogger<UpdateProductLocationCommandHandler> logger)
         {
             _productRepository = productRepository;
             _tenantProvider = tenantProvider;
             _unitOfWork = unitOfWork;
+            _cache = cache;
             _logger = logger;
         }
 
@@ -49,6 +53,15 @@ namespace CloudShopping.Application.Features.Products.Commands.UpdateProductLoca
             }
             _productRepository.Update(product);
             await _unitOfWork.CommitAsync(cancellationToken);
+
+            // Invalida o cache Redis: o endereçamento logístico (Aisle/Rack/Level/Position)
+            // faz parte dos campos estáticos cacheados na ficha do produto.
+            await _cache.RemoveManyAsync(new[]
+            {
+                CacheKeys.TenantEntity(product.TenantId, CacheKeys.Products, product.Id),
+                CacheKeys.ProductBySku(product.TenantId, product.Sku)
+            }, cancellationToken);
+
             _logger.LogInformation("Localização do produto {ProductId} atualizada com sucesso.", request.ProductId);
             return Result.Success();
         }

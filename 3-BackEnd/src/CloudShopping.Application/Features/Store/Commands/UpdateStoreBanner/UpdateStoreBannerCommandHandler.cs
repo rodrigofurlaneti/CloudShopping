@@ -1,4 +1,5 @@
-﻿using CloudShopping.Application.Abstractions.Data;
+using CloudShopping.Application.Abstractions.Caching;
+using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Domain.Primitives.Results;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -11,15 +12,18 @@ namespace CloudShopping.Application.Features.Store.Commands.UpdateStoreBanner
     {
         private readonly IStoreBannerRepository _bannerRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICacheService _cache;
         private readonly ILogger<UpdateStoreBannerCommandHandler> _logger;
 
         public UpdateStoreBannerCommandHandler(
             IStoreBannerRepository bannerRepository,
             IUnitOfWork unitOfWork,
+            ICacheService cache,
             ILogger<UpdateStoreBannerCommandHandler> logger)
         {
             _bannerRepository = bannerRepository;
             _unitOfWork = unitOfWork;
+            _cache = cache;
             _logger = logger;
         }
 
@@ -43,6 +47,12 @@ namespace CloudShopping.Application.Features.Store.Commands.UpdateStoreBanner
 
             _bannerRepository.Update(banner);
             await _unitOfWork.CommitAsync(cancellationToken);
+
+            // banner.TenantId é nulo apenas para os banners padrão globais do sistema;
+            // ver nota em GetStoreBannersQueryHandler sobre a janela de defasagem desse
+            // caso (mitigada com TTL Médio em vez de Longo).
+            if (banner.TenantId is { } tenantId)
+                await _cache.RemoveAsync(CacheKeys.TenantList(tenantId, CacheKeys.StoreBanners), cancellationToken);
 
             _logger.LogInformation("Banner atualizado com sucesso. ID: {BannerId}", banner.Id);
             return Result.Success();

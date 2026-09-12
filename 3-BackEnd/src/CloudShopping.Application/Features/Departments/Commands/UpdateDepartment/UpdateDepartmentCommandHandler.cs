@@ -1,4 +1,5 @@
-﻿using CloudShopping.Application.Abstractions.Data;
+using CloudShopping.Application.Abstractions.Caching;
+using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Application.Abstractions.Services;
 using CloudShopping.Domain.Primitives.Results;
 using MediatR;
@@ -15,14 +16,18 @@ namespace CloudShopping.Application.Features.Departments.Commands.UpdateDepartme
         private readonly IDepartmentRepository _departmentRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ITenantProvider _tenantProvider;
+        private readonly ICacheService _cache;
+
         public UpdateDepartmentCommandHandler(
             IDepartmentRepository departmentRepository,
             IUnitOfWork unitOfWork,
-            ITenantProvider tenantProvider)
+            ITenantProvider tenantProvider,
+            ICacheService cache)
         {
             _departmentRepository = departmentRepository;
             _unitOfWork = unitOfWork;
             _tenantProvider = tenantProvider;
+            _cache = cache;
         }
 
         public async Task<Result> Handle(UpdateDepartmentCommand request, CancellationToken cancellationToken)
@@ -38,6 +43,9 @@ namespace CloudShopping.Application.Features.Departments.Commands.UpdateDepartme
             department.Update(request.Name, request.Slug);
             _departmentRepository.Update(department);
             await _unitOfWork.CommitAsync(cancellationToken);
+
+            await _cache.RemoveAsync(CacheKeys.TenantList(tenantId, CacheKeys.Departments), cancellationToken);
+
             return Result.Success();
         }
     }

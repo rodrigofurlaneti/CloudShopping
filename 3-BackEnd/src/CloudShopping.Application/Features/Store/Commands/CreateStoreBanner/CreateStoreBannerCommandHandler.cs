@@ -1,4 +1,5 @@
-﻿using CloudShopping.Application.Abstractions.Data;
+using CloudShopping.Application.Abstractions.Caching;
+using CloudShopping.Application.Abstractions.Data;
 using CloudShopping.Application.Abstractions.Services;
 using CloudShopping.Domain.Entities.Store;
 using CloudShopping.Domain.Primitives.Results;
@@ -17,17 +18,20 @@ namespace CloudShopping.Application.Features.Store.Commands.CreateStoreBanner
         private readonly IStoreBannerRepository _bannerRepository;
         private readonly ITenantProvider _tenantProvider;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICacheService _cache;
         private readonly ILogger<CreateStoreBannerCommandHandler> _logger;
 
         public CreateStoreBannerCommandHandler(
             IStoreBannerRepository bannerRepository,
             ITenantProvider tenantProvider,
             IUnitOfWork unitOfWork,
+            ICacheService cache,
             ILogger<CreateStoreBannerCommandHandler> logger)
         {
             _bannerRepository = bannerRepository;
             _tenantProvider = tenantProvider;
             _unitOfWork = unitOfWork;
+            _cache = cache;
             _logger = logger;
         }
 
@@ -48,6 +52,8 @@ namespace CloudShopping.Application.Features.Store.Commands.CreateStoreBanner
 
             await _bannerRepository.AddAsync(banner, cancellationToken);
             await _unitOfWork.CommitAsync(cancellationToken);
+
+            await _cache.RemoveAsync(CacheKeys.TenantList(tenantId, CacheKeys.StoreBanners), cancellationToken);
 
             _logger.LogInformation("Banner criado com sucesso. ID: {BannerId}, Tenant: {TenantId}", banner.Id, tenantId);
             return Result.Success(banner.Id);

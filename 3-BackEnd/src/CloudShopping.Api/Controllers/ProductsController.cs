@@ -1,3 +1,4 @@
+using CloudShopping.Api.Filters;
 using CloudShopping.Application.Features.Products.Commands.AddProductStock;
 using CloudShopping.Application.Features.Products.Commands.AdjustInventory;
 using CloudShopping.Application.Features.Products.Commands.CreateProduct;
@@ -32,7 +33,10 @@ namespace CloudShopping.Api.Controllers
         // GET /api/v1/products?page=&pageSize=&searchTerm=
         // Reaproveita IProductRepository.GetPaginatedAsync, que já existia mas não estava
         // exposto por nenhuma Query/endpoint (mesmo padrão de gap-fill de Customers/OrderSectors).
+        // ETag/Cache-Control (tarefa de cache full-stack): o cliente pode reenviar
+        // If-None-Match e poupar banda com 304 quando a página não mudou.
         [HttpGet]
+        [ETagCatalog]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll(
             [FromQuery] int page = 1,
@@ -50,6 +54,7 @@ namespace CloudShopping.Api.Controllers
         }
 
         [HttpGet("{id:int}")]
+        [ETagCatalog]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
@@ -61,6 +66,7 @@ namespace CloudShopping.Api.Controllers
         }
 
         [HttpGet("sku/{sku}")]
+        [ETagCatalog]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetBySku(string sku, CancellationToken cancellationToken)

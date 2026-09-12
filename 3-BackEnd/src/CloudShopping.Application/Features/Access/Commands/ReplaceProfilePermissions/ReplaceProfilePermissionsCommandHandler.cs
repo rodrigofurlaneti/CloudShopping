@@ -1,11 +1,13 @@
 using CloudShopping.Domain.Primitives.Results;
 using CloudShopping.Application.Behaviors;
+using CloudShopping.Application.Abstractions.Caching;
 using CloudShopping.Application.Abstractions.Data;
+using CloudShopping.Application.Abstractions.Services;
 using CloudShopping.Domain.Entities.Backoffice;
 using MediatR;
 using CloudShopping.Application.Features.Access.Commands;
 namespace CloudShopping.Application.Features.Access.Commands.ReplaceProfilePermissions;
-public sealed class ReplaceProfilePermissionsCommandHandler(IAccessRepository repository) : IRequestHandler<ReplaceProfilePermissionsCommand, Result<Unit>>
+public sealed class ReplaceProfilePermissionsCommandHandler(IAccessRepository repository, ITenantProvider tenantProvider, ICacheService cache) : IRequestHandler<ReplaceProfilePermissionsCommand, Result<Unit>>
 {
     public Task<Result<Unit>> Handle(ReplaceProfilePermissionsCommand request, CancellationToken ct)
         => CommandExecution.Run<Unit>(async () =>
@@ -20,7 +22,11 @@ public sealed class ReplaceProfilePermissionsCommandHandler(IAccessRepository re
         if (!before.SequenceEqual(request.Expected.Distinct().Order())) throw new InvalidOperationException("Permissões alteradas por outro administrador. Atualize a tela.");
         if (!before.SequenceEqual(normalized)) await repository.SavePermissions(request.ActorId, request.ProfileId, before, normalized, ct);
         await edit.Commit(ct);
-    
+
+        // Invalida o cache Médio de ACL (tarefa de cache Redis): a lista de
+        // perfis/permissões acabou de mudar para este tenant.
+        await cache.RemoveAsync(CacheKeys.TenantList(tenantProvider.GetTenantId(), CacheKeys.AccessProfiles), ct);
+
         return Unit.Value;
 
     });
